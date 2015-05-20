@@ -6,6 +6,7 @@ require 'json'
 require 'rest-client'
 require 'addressable/uri'
 require './lib/issue'
+require './lib/jira'
 
 opts = Slop.parse do |o|
   # Connection settings
@@ -29,13 +30,6 @@ opts = Slop.parse do |o|
     exit
   end
 end
-
-options = { username: opts[:username],
-            password: opts[:password],
-            site:     opts[:site],
-            context_path: opts[:contextpath],
-            auth_type: :basic
-          }
 
 def git_repo(url, name, opts)
   begin
@@ -63,7 +57,7 @@ def git_repo(url, name, opts)
   git_repo
 end
 
-client = JIRA::Client.new(options)
+client = jira_connect(opts)
 
 issues = client.Issue.jql('(project = Accounting AND status = Passed OR '\
   'status in ("Merge ready", "In Release")) AND project not in ("Servers & Services", Hotels) ORDER BY priority DESC, issuekey DESC')

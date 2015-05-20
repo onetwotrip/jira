@@ -1,6 +1,7 @@
 require 'jira'
 require 'slop'
 require './lib/issue'
+require './lib/jira'
 
 opts = Slop.parse do |o|
   # Connection settings
@@ -14,16 +15,6 @@ opts = Slop.parse do |o|
     puts o
     exit
   end
-end
-
-def jira_connect(opts)
-  options = { username: opts[:username],
-              password: opts[:password],
-              site:     opts[:site],
-              context_path: opts[:contextpath],
-              auth_type: :basic
-            }
-  JIRA::Client.new(options)
 end
 
 client = jira_connect(opts)
