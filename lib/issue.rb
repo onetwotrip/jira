@@ -67,6 +67,10 @@ module JIRA
         endpoint.password = opts[:password]
         endpoint
       end
+
+      def deploys
+        client.Issue.jql(%(issue in linkedIssues(#{key},"deployes")))
+      end
     end
   end
 end

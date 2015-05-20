@@ -5,7 +5,7 @@ require 'slop'
 require 'json'
 require 'rest-client'
 require 'addressable/uri'
-require './releasemaker/issue'
+require './lib/issue'
 
 opts = Slop.parse do |o|
   # Connection settings
@@ -30,6 +30,13 @@ opts = Slop.parse do |o|
   end
 end
 
+options = { username: opts[:username],
+            password: opts[:password],
+            site:     opts[:site],
+            context_path: opts[:contextpath],
+            auth_type: :basic
+          }
+
 def git_repo(url, name, opts)
   begin
     git_repo = Git.open(name)
@@ -51,24 +58,15 @@ def git_repo(url, name, opts)
     end
   end
   git_repo.branch("#{opts[:release]}-#{opts[:postfix]}").checkout
-  git_repo.merge(opts[:source], "CI: merge source branch #{opts[:source]} to release #{opts[:release]}-#{opts[:postfix]} ")
+  git_repo.merge(opts[:source],
+                 "CI: merge source branch #{opts[:source]} to release #{opts[:release]}-#{opts[:postfix]} ")
   git_repo
 end
 
-def pullrequest_link
-  # TODO
-end
-
-options = { username: opts[:username],
-            password: opts[:password],
-            site:     opts[:site],
-            context_path: opts[:contextpath],
-            auth_type: :basic
-          }
-
 client = JIRA::Client.new(options)
 
-issues = client.Issue.jql('(project = Accounting AND status = Passed OR status in ("Merge ready", "In Release")) AND project not in ("Servers & Services", Hotels) ORDER BY priority DESC, issuekey DESC')
+issues = client.Issue.jql('(project = Accounting AND status = Passed OR '\
+  'status in ("Merge ready", "In Release")) AND project not in ("Servers & Services", Hotels) ORDER BY priority DESC, issuekey DESC')
 badissues = []
 repos = {}
 
