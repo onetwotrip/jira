@@ -1,0 +1,7 @@
+source 'https://rubygems.org'
+gem 'jira-ruby'
+gem 'json'
+gem 'rest-client'
+gem 'slop', '4.1.0'
+gem 'git'
+gem 'addressable'
