@@ -22,5 +22,5 @@ issue = client.Issue.find(opts[:release])
 issue.deploys.each do |deployed_issue|
   puts deployed_issue.key
   # Transition to DONE
-  issue.transition 'To master'
+  issue.transition 'Code is merged'
 end
