@@ -11,6 +11,8 @@ opts = Slop.parse do |o|
   o.string '--contextpath', 'context path', default: ''
   o.string '--release', 'release', default: 'OTT-4487'
 
+  o.bool '--dryrun', 'post comments to Jira', default: false
+
   o.on '--help', 'print the help' do
     puts o
     exit
