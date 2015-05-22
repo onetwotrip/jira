@@ -2,7 +2,6 @@ require 'jira'
 require 'slop'
 require './lib/issue'
 require './lib/connector'
-require 'io/console'
 
 opts = Slop.parse do |o|
   # Connection settings
@@ -20,11 +19,12 @@ opts = Slop.parse do |o|
   end
 end
 
+STDOUT.sync = true
+
 client = Connector.connect(opts)
 issue = client.Issue.find(opts[:release])
 issue.opts_setter opts
 issue.deploys.each do |deployed_issue|
-  $stdout.ioflush
   puts deployed_issue.key
   # Transition to DONE
   deployed_issue.opts_setter opts
