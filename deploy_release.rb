@@ -1,7 +1,8 @@
 require 'jira'
 require 'slop'
-require './lib/issue'
+require 'pp'
 require './lib/connector'
+require './lib/issue'
 
 opts = Slop.parse do |o|
   # Connection settings
@@ -19,8 +20,10 @@ end
 
 client = Connector.connect(opts)
 issue = client.Issue.find(opts[:release])
-issue.deploys.each do |deployed_issue|
-  puts deployed_issue.key
-  # Transition to DONE
-  issue.transition 'To master'
+issue.opts_setter opts
+issue.related['branches'].each do |branch|
+  puts branch['name']
+  puts branch['repository']['name']
+  ENV["#{branch['repository']['name'].upcase}_DEPLOY"] = 'true'
+  ENV["#{branch['repository']['name'].upcase}_BRANCH"] = branch['name']
 end

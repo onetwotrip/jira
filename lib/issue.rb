@@ -49,6 +49,7 @@ module JIRA
       end
 
       def related
+        return @related if @related
         endpoint = create_endpoint 'rest/dev-status/1.0/issue/detail'
         params = {
           issueId: id,
@@ -56,8 +57,8 @@ module JIRA
           dataType: 'pullrequest'
         }
         response = RestClient.get endpoint.to_s, params: params
-        related = JSON.parse(response)['detail']
-        related
+        @related = JSON.parse(response)['detail'].first
+        @related
       end
 
       def create_endpoint(path)

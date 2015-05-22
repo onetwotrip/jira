@@ -6,7 +6,7 @@ require 'json'
 require 'rest-client'
 require 'addressable/uri'
 require './lib/issue'
-require './lib/jira'
+require './lib/connector'
 
 opts = Slop.parse do |o|
   # Connection settings
@@ -57,10 +57,12 @@ def git_repo(url, name, opts)
   git_repo
 end
 
-client = jira_connect(opts)
+client = Connector.connect(opts)
 
 issues = client.Issue.jql('(project = Accounting AND status = Passed OR '\
-  'status in ("Merge ready", "In Release")) AND project not in ("Servers & Services", Hotels) ORDER BY priority DESC, issuekey DESC')
+  'status in ("Merge ready", "In Release")) AND project not in '\
+  '("Servers & Services", Hotels) ORDER BY priority DESC, issuekey DESC')
+
 badissues = []
 repos = {}
 
@@ -69,68 +71,61 @@ issues.each do |issue|
   goodissue = false
   badissue = false
   issue.opts_setter opts
-  issue.related.each do |related_data|
-    if related_data['pullRequests'].empty?
-      badissues.push(key: issue.key, errorcode: :absent)
-      issue.post_comment "CI: [~#{issue.assignee.key}] No pullrequest here"
-      badissue = true
-    else
-      related_data['pullRequests'].each do |pullrequest|
-        if pullrequest['status'] != 'OPEN'
-          puts "Not processing not OPEN PR #{pullrequest['url']}"
-          next
-        end
-        # if pullrequest['reviewers'].empty?
-        #   puts "Not processing unapproved PR #{pullrequest['url']}"
-        #   issue.post_comment "CI: [~#{issue.assignee.key}] Pullrequest #{pullrequest['url']} must be approved by teamlead"
-        #   badissue = true
-        #   next
-        # end
-        if pullrequest['source']['branch'].match "^#{issue.key}"
-          related_data['branches'].each do |branch|
-            if branch['url'] == pullrequest['source']['url']
+  if issue.related['pullRequests'].empty?
+    badissues.push(key: issue.key, errorcode: :absent)
+    issue.post_comment "CI: [~#{issue.assignee.key}] No pullrequest here"
+    badissue = true
+  else
+    issue.related['pullRequests'].each do |pullrequest|
+      if pullrequest['status'] != 'OPEN'
+        puts "Not processing not OPEN PR #{pullrequest['url']}"
+        next
+      end
+      if pullrequest['source']['branch'].match "^#{issue.key}"
+        issue.related['branches'].each do |branch|
+          if branch['url'] == pullrequest['source']['url']
 
-              repo_name = branch['repository']['name']
-              repo_url = branch['repository']['url']
-              repos[repo_name] ||= { url: repo_url, branches: [] }
-              repos[repo_name][:repo_base] ||= git_repo(repo_url, repo_name, opts)
-              repos[repo_name][:branches].push(issue: issue,
-                                               pullrequest: pullrequest,
-                                               branch: branch)
-              repo_path = repos[repo_name][:repo_base]
-              begin
-                repo_path.merge("origin/#{branch['name']}", "CI: merge branch #{branch['name']} to release #{opts[:release]}. PR: ##{pullrequest['id']} ")
-                puts "#{branch['name']} merged"
-                goodissue = true
-              rescue Git::GitExecuteError => e
-                body = <<-BODY
-                CI: Error while merging to release #{opts[:release]}
-                [~#{issue.assignee.key}]
-                Repo: #{repo_name}
-                Author: #{pullrequest['author']['name']}
-                PR: #{pullrequest['url']}
-                {noformat:title=Ошибка}
-                Error #{e}
-                {noformat}
-                BODY
-                issue.post_comment body if opts[:push]
-                badissues.push(key: issue.key, body: body, errorcode: :unmerged)
-                repo_path.reset_hard
-                badissue = true
-                puts "\n"
-              end
+            repo_name = branch['repository']['name']
+            repo_url = branch['repository']['url']
+            repos[repo_name] ||= { url: repo_url, branches: [] }
+            repos[repo_name][:repo_base] ||= git_repo(repo_url, repo_name, opts)
+            repos[repo_name][:branches].push(issue: issue,
+                                             pullrequest: pullrequest,
+                                             branch: branch)
+            repo_path = repos[repo_name][:repo_base]
+            begin
+              repo_path.merge("origin/#{branch['name']}", "CI: merge branch #{branch['name']} to release #{opts[:release]}. PR: ##{pullrequest['id']} ")
+              puts "#{branch['name']} merged"
+              goodissue = true
+            rescue Git::GitExecuteError => e
+              body = <<-BODY
+              CI: Error while merging to release #{opts[:release]}
+              [~#{issue.assignee.key}]
+              Repo: #{repo_name}
+              Author: #{pullrequest['author']['name']}
+              PR: #{pullrequest['url']}
+              {noformat:title=Ошибка}
+              Error #{e}
+              {noformat}
+              BODY
+              issue.post_comment body if opts[:push]
+              badissues.push(key: issue.key, body: body, errorcode: :unmerged)
+              repo_path.reset_hard
+              badissue = true
+              puts "\n"
             end
           end
-        else
-          body = "CI: [~#{issue.assignee.key}] PR: #{pullrequest['id']} #{pullrequest['source']['branch']} не соответствует имени задачи #{issue.key}"
-          issue.post_comment body
-          badissues.push(key: issue.key, body: body, errorcode: :badname)
-          badissue = true
-          # TODO: Notify Jira, Notify Slack
         end
+      else
+        body = "CI: [~#{issue.assignee.key}] PR: #{pullrequest['id']} #{pullrequest['source']['branch']} не соответствует имени задачи #{issue.key}"
+        issue.post_comment body
+        badissues.push(key: issue.key, body: body, errorcode: :badname)
+        badissue = true
+        # TODO: Notify Jira, Notify Slack
       end
     end
   end
+
   issue.link
   if !badissue || issue.status == 'In Release'
     issue.transition 'Merge to release'
