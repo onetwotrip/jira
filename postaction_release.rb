@@ -21,6 +21,7 @@ end
 
 client = Connector.connect(opts)
 issue = client.Issue.find(opts[:release])
+issue.opts_setter opts
 issue.deploys.each do |deployed_issue|
   puts deployed_issue.key
   # Transition to DONE
