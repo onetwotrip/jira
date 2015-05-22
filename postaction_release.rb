@@ -25,5 +25,6 @@ issue.opts_setter opts
 issue.deploys.each do |deployed_issue|
   puts deployed_issue.key
   # Transition to DONE
-  issue.transition 'Code is merged'
+  deployed_issue.opts_setter opts
+  deployed_issue.transition 'To master'
 end
