@@ -6,9 +6,6 @@ require 'json'
 module JIRA
   module Resource
     class Issue < JIRA::Base # :nodoc:
-      attr_reader :opts
-      attr_writer :opts
-
       def link
         endpoint = create_endpoint 'rest/api/2/issueLink'
         params = {
@@ -29,21 +26,21 @@ module JIRA
         nil
       end
 
-      def opts_setter(options)
-        @opts = options
+      def opts
+        @opts ||= client.options
       end
 
       def transition(status)
         transition = get_transition_by_name status
         return unless transition
-        puts transition.name
+        puts "#{key} changed status to #{transition.name}"
         return if opts[:dryrun]
         action = transitions.build
         action.save!('transition' => { id: transition.id })
       end
 
       def post_comment(body)
-        return if opts[:dryrun] || status == 'In Release'
+        return if opts[:dryrun] || status.name == 'In Release'
         comment = comments.build
         comment.save(body: body)
       end
@@ -62,7 +59,7 @@ module JIRA
       end
 
       def create_endpoint(path)
-        uri = "#{opts[:site]}#{opts[:contextpath]}/#{path}"
+        uri = "#{opts[:site]}#{opts[:context_path]}/#{path}"
         endpoint = Addressable::URI.parse(uri)
         endpoint.user = opts[:username]
         endpoint.password = opts[:password]
