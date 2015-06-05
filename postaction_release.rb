@@ -21,12 +21,11 @@ end
 
 STDOUT.sync = true
 
-client = Connector.connect(opts)
+options = { auth_type: :basic }.merge(opts.to_hash)
+client = JIRA::Client.new(options)
 issue = client.Issue.find(opts[:release])
-issue.opts_setter opts
 issue.deploys.each do |deployed_issue|
   puts deployed_issue.key
   # Transition to DONE
-  deployed_issue.opts_setter opts
   deployed_issue.transition 'To master'
 end
