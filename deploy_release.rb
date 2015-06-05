@@ -1,7 +1,6 @@
 require 'jira'
 require 'slop'
 require 'pp'
-require './lib/connector'
 require './lib/issue'
 
 opts = Slop.parse do |o|
@@ -18,7 +17,9 @@ opts = Slop.parse do |o|
   end
 end
 
-client = Connector.connect(opts)
+options = { auth_type: :basic }.merge(opts.to_hash)
+client = JIRA::Client.new(options)
+
 issue = client.Issue.find(opts[:release])
 issue.opts_setter opts
 issue.related['branches'].each do |branch|
