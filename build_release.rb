@@ -32,9 +32,9 @@ opts = Slop.parse do |o|
 end
 
 def git_repo(url, name, opts)
-  begin
+  if File.writable?(name)
     git_repo = Git.open(name)
-  rescue ArgumentError
+  else
     uri = Addressable::URI.parse("#{url}.git")
     uri.user = opts[:gitusername]
     uri.password = opts[:gitpassword]
@@ -67,9 +67,11 @@ if release.deploys.any? && !opts[:ignorelinks]
   issues = release.deploys
 else
   puts 'fresh'
-  issues = client.Issue.jql('(project = Accounting AND status = Passed OR '\
-    'status in ("Merge ready", "In Release")) AND project not in '\
-    '("Servers & Services", Hotels) ORDER BY priority DESC, issuekey DESC')
+  issues = client.Issue.jql(%[(project = Accounting AND status = Passed OR
+    status in ("Merge ready") OR (status in ( "In Release")
+    AND issue in linkedIssues(#{release.key},"deployes")))
+    AND project not in ("Servers & Services", Hotels)
+    ORDER BY priority DESC, issuekey DESC])
   issues.each do |issue|
     puts issue.key
     issue.link
