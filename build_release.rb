@@ -126,6 +126,7 @@ issues.each do |issue|
               {noformat:title=Ошибка}
               Error #{e}
               {noformat}
+              Замержите ветку #{branch['name']} в ветку релиза #{opts[:release]}-#{opts[:postfix]}. После этого сообщите своему тимлиду, чтобы он перевёл задачу в статус in Release
               BODY
               if opts[:push]
                 issue.post_comment body
