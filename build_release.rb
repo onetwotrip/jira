@@ -6,6 +6,7 @@ require 'json'
 require 'rest-client'
 require 'addressable/uri'
 require './lib/issue'
+require_relative 'lib/repo'
 
 opts = Slop.parse do |o|
   # Connection settings
@@ -29,32 +30,6 @@ opts = Slop.parse do |o|
     puts o
     exit
   end
-end
-
-def git_repo(url, name, opts)
-  if File.writable?(name)
-    git_repo = Git.open(name)
-  else
-    uri = Addressable::URI.parse("#{url}.git")
-    uri.user = opts[:gitusername]
-    uri.password = opts[:gitpassword]
-    git_repo = Git.clone(uri, name)
-  end
-  git_repo.reset_hard
-  git_repo.fetch
-  git_repo.branch("#{opts[:release]}-#{opts[:postfix]}").checkout
-  git_repo.branch(opts[:source]).checkout
-  git_repo.pull
-  if opts[:clean]
-    git_repo.branch("#{opts[:release]}-#{opts[:postfix]}").delete
-    git_repo.chdir do
-      `git push origin :#{opts[:release]}-#{opts[:postfix]}`
-    end
-  end
-  git_repo.branch("#{opts[:release]}-#{opts[:postfix]}").checkout
-  git_repo.merge(opts[:source],
-                 "CI: merge source branch #{opts[:source]} to release #{opts[:release]}-#{opts[:postfix]} ")
-  git_repo
 end
 
 options = { auth_type: :basic }.merge(opts.to_hash)
@@ -81,17 +56,20 @@ end
 badissues = {}
 repos = {}
 
+release_branch = "#{opts[:release]}-#{opts[:postfix]}"
+source = opts[:source]
+
 puts issues.size
 issues.each do |issue|
   puts issue.key
-  goodissue = false
-  badissue = false
+  has_merges = false
+  merge_fail = false
   if issue.related['pullRequests'].empty?
     body = "CI: [~#{issue.assignee.key}] No pullrequest here"
     badissues[:absent] = [] unless badissues.key?(:absent)
     badissues[:absent].push(key: issue.key, body: body)
     issue.post_comment body
-    badissue = true
+    merge_fail = true
   else
     issue.related['pullRequests'].each do |pullrequest|
       if pullrequest['status'] != 'OPEN'
@@ -110,12 +88,13 @@ issues.each do |issue|
                                              pullrequest: pullrequest,
                                              branch: branch)
             repo_path = repos[repo_name][:repo_base]
+            prepare_branch(repo_path, source, release_branch, opts[:clean])
             begin
               merge_message = "CI: merge branch #{branch['name']} to release "\
                               " #{opts[:release]}.  (pull request #{pullrequest['id']}) "
               repo_path.merge("origin/#{branch['name']}", merge_message)
               puts "#{branch['name']} merged"
-              goodissue = true
+              has_merges = true
             rescue Git::GitExecuteError => e
               body = <<-BODY
               CI: Error while merging to release #{opts[:release]}
@@ -126,11 +105,12 @@ issues.each do |issue|
               {noformat:title=Ошибка}
               Error #{e}
               {noformat}
-              Замержите ветку #{branch['name']} в ветку релиза #{opts[:release]}-#{opts[:postfix]}. После этого сообщите своему тимлиду, чтобы он перевёл задачу в статус in Release
+              Замержите ветку #{branch['name']} в ветку релиза #{release_branch}.
+              После этого сообщите своему тимлиду, чтобы он перевёл задачу в статус in Release
               BODY
               if opts[:push]
                 issue.post_comment body
-                badissue = true
+                merge_fail = true
               end
               badissues[:unmerged] = [] unless badissues.key?(:unmerged)
               badissues[:unmerged].push(key: issue.key, body: body)
@@ -149,9 +129,9 @@ issues.each do |issue|
     end
   end
 
-  if !badissue && issue.status.name != 'In Release' && goodissue
+  if !merge_fail && issue.status.name != 'In Release' && has_merges
     issue.transition 'Merge to release'
-  elsif badissue
+  elsif merge_fail
     issue.transition 'Merge Fail'
   end
 end
@@ -161,7 +141,7 @@ repos.each do |name, repo|
   puts name
   if opts[:push]
     local_repo = repo[:repo_base]
-    local_repo.push('origin', "#{opts[:release]}-#{opts[:postfix]}")
+    local_repo.push('origin', release_branch)
   end
 end
 
