@@ -3,6 +3,7 @@ require 'slop'
 require 'pp'
 require 'git'
 require './lib/issue'
+require_relative 'lib/repo'
 
 opts = Slop.parse do |o|
   # Connection settings
@@ -23,24 +24,9 @@ opts = Slop.parse do |o|
   end
 end
 
-def git_repo(url, name, opts)
-  if File.writable?(name)
-    git_repo = Git.open(name)
-  else
-    uri = Addressable::URI.parse("#{url}.git")
-    uri.user = opts[:gitusername]
-    uri.password = opts[:gitpassword]
-    git_repo = Git.clone(uri, name)
-  end
-  git_repo.reset_hard
-  git_repo
-end
-
-def clean_branch(repo, branch)
-  repo.branch(branch).delete
-  repo.chdir do
-    `git push origin :#{branch}`
-  end
+def with(instance, &block)
+  instance.instance_eval(&block)
+  instance
 end
 
 options = { auth_type: :basic }.merge(opts.to_hash)
@@ -48,19 +34,25 @@ client = JIRA::Client.new(options)
 
 release = client.Issue.find(opts[:release])
 release.related['branches'].each do |branch|
-  if branch['name'].match "^#{release.key}-release"
+  if branch['name'].match "^#{release.key}-pre"
     puts branch['repository']['name']
-    puts branch['repository']['url']
-    repo_path = git_repo(branch['repository']['url'],
-                         branch['repository']['name'], opts)
     today = Time.new.strftime('%d.%m.%Y')
     old_branch = branch['name']
-    repo_path.fetch
-    repo_path.checkout(old_branch)
     new_branch = "#{release.key}-release-#{today}"
-    repo_path.branch(new_branch).checkout
-    repo_path.merge("origin/#{old_branch}")
-    puts repo_path.diff(old_branch, new_branch).size
+
+    repo_path = git_repo(branch['repository']['url'],
+                         branch['repository']['name'],
+                         opts)
+    with repo_path do
+      fetch
+      checkout(old_branch)
+      pull
+      branch(new_branch)
+      branch(new_branch).delete
+      branch(new_branch).checkout
+      puts diff(old_branch, new_branch).size
+    end
+
     if opts[:force]
       puts "Pushing #{new_branch} and deleting #{old_branch} branch"
       repo_path.push
