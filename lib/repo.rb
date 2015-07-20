@@ -15,7 +15,7 @@ def clean_branch(repo, branch)
   return if branch == 'master'
   repo.branch(branch).delete
   repo.chdir do
-    `git push origin :#{branch} 1>/dev/null`
+    `git push -q origin :#{branch}`
   end
 end
 
