@@ -47,7 +47,8 @@ release.related['branches'].each do |branch|
       fetch
       checkout(old_branch)
       pull
-      branch(new_branch)
+      branch(new_branch).checkout
+      checkout(old_branch)
       branch(new_branch).delete
       branch(new_branch).checkout
       puts diff(old_branch, new_branch).size
