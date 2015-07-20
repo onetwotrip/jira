@@ -56,7 +56,7 @@ release.related['branches'].each do |branch|
 
     if opts[:force]
       puts "Pushing #{new_branch} and deleting #{old_branch} branch"
-      repo_path.push
+      repo_path.push(repo_path.remote('origin'), new_branch)
       clean_branch(repo_path, old_branch)
     end
   end
