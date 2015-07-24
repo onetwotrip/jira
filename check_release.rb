@@ -47,9 +47,10 @@ print "Will be emailed to #{email_to}\n"
 mail = SendGrid::Mail.new do |m|
   m.to = 'vadzay@onetwotrip.com'
   m.from = EMAIL_FROM
-  m.subject = "JSCS/JSHint: commit to #{payload['repository']['full_name']}"
-  m.html = "Dear <a href=\"#{email_to}\">#{author_name}</a>!<br />
-Your commit #{new_commit} to #{repo_name} has some issues with code check.<br /><pre>#{res_text}</pre>"
+  m.subject = "JSCS/JSHint: проблемы с комитом в  #{payload['repository']['full_name']}"
+  m.html = "Привет <a href=\"mailto:#{email_to}\">#{author_name}</a>!<br />
+Ты коммитнул #{new_commit} в #{repo_name}.<br />
+А вот что имеют тебе сказать JSCS и JSHint:<pre>#{res_text}</pre>"
 end
 
 SendGrid::Client.new(api_user: SG_USER, api_key: SG_KEY).send mail
