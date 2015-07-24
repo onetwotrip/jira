@@ -1,12 +1,15 @@
-def git_repo(url, name, opts)
+require 'addressable/uri'
+
+def git_repo(url, name, opts={})
   if File.writable?(name)
     git_repo = Git.open(name)
   else
     uri = Addressable::URI.parse("#{url}.git")
-    uri.user = opts[:gitusername]
-    uri.password = opts[:gitpassword]
-    git_repo = Git.clone(uri, name)
+    uri.user ||= opts[:gitusername]
+    uri.password ||= opts[:gitpassword]
+    git_repo = Git.clone(uri, name, opts)
   end
+  git_repo.fetch
   git_repo.reset_hard
   git_repo
 end
