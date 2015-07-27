@@ -26,32 +26,36 @@ jira = JIRA::Client.new username: JIRA_USERNAME, password: JIRA_PASSWORD, site: 
                         context_path: ''
 issue = jira.Issue.jql("key = #{triggered_issue}")
 
-# Checkout repo
-print "Working with #{repo_name}\n"
-g_rep = nil
-Dir.chdir WORKDIR do
-  print 'Cloning... '
-  g_rep = git_repo BASEURL + payload['repository']['full_name'], repo_name
-  print "done.\n"
-end
-
 errors = []
 
 branches = issue.related['branches']
 branches.each do |branch|
+  branch_name = branch['name']
+  repo_name = branch['repository']['name']
+  repo_url = branch['repository']['url']
+  # Checkout repo
+  print "Working with #{repo_name}\n"
+  g_rep = nil
+  Dir.chdir WORKDIR do
+    print 'Cloning... '
+    g_rep = git_repo repo_url, repo_name
+    print "done.\n"
+  end
+
+
   # Checkout branch
-  g_rep.checkout branch
+  g_rep.checkout branch_name
   # Try to merge master to branch
   begin
     g_rep.merge 'master'
   rescue Git::GitExecuteError => e
-    errors << "Failed to merge master to branch #{branch}.\nGit had this to say: #{e.message}"
+    errors << "Failed to merge master to branch #{branch_name}.\nGit had this to say: #{e.message}"
   end
 
   # JSCS; JSHint
   res_text = check_diff g_rep, 'branch'
   unless res_text.empty?
-    errors << "Checking branch #{branch}: #{res_text}"
+    errors << "Checking branch #{branch_name}: #{res_text}"
   end
 
   # NPM test
@@ -63,7 +67,7 @@ branches.each do |branch|
   end
   t.join
   if exit_code > 0
-    errors << "Testing branch #{branch} failed:\n\n#{out}"
+    errors << "Testing branch #{branch_name} failed:\n\n#{out}"
   end
 end
 

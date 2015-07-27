@@ -1,8 +1,8 @@
 require 'open3'
 
-def check_diff(g, new_commit, old_commit=nil)
+def check_diff(git_repo, new_commit, old_commit=nil)
   res_text = ''
-  prj_dir = Dir.new g.dir.path
+  prj_dir = Dir.new git_repo.dir.path
   has_jscs = prj_dir.each.to_a.include? '.jscsrc'
   has_jshint = prj_dir.each.to_a.include? '.jshintrc'
 
@@ -12,13 +12,13 @@ def check_diff(g, new_commit, old_commit=nil)
   end
 
   unless old_commit
-    old_commit = g.merge_base new_commit, 'master'
+    old_commit = git_repo.merge_base new_commit, 'master'
   end
 
   print "Will use JSCS\n" if has_jscs
   print "Will use JSHint\n" if has_jshint
 
-  diff = g.diff old_commit, new_commit
+  diff = git_repo.diff old_commit, new_commit
 
   if diff.to_a.empty?
     print "check_diff: Empty diff\n"
