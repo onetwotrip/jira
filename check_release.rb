@@ -20,8 +20,6 @@ payload = JSON.parse ENV['payload']
 repo_name = payload['repository']['name']
 print "Working with #{repo_name}\n"
 
-new_commit = payload['push']['changes'][0]['new']['target']['hash']
-old_commit = payload['push']['changes'][0]['old']['target']['hash']
 
 # get latest
 Dir.mkdir WORKDIR unless Dir.exist? WORKDIR
@@ -32,6 +30,14 @@ Dir.chdir WORKDIR do
   g_rep = git_repo BASEURL + payload['repository']['full_name'], repo_name
   print "done.\n"
 end
+
+new_commit = payload['push']['changes'][0]['new']['target']['hash']
+if payload['push']['changes'][0]['old']
+  old_commit = payload['push']['changes'][0]['old']['target']['hash']
+else
+  old_commit = g_rep.merge_base 'master', new_commit
+end
+
 
 res_text = check_diff(g_rep, new_commit, old_commit)
 
