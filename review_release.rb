@@ -50,6 +50,9 @@ branches.each do |branch|
 
   # Checkout branch
   g_rep.checkout branch_name
+  puts 'Merging new version'
+  g_rep.merge "origin/#{branch_name}"
+
   # Try to merge master to branch
   begin
     g_rep.merge 'master'
@@ -69,7 +72,7 @@ branches.each do |branch|
     exit_code = 0
     t = Thread.new do
       puts 'NPM install'
-      out = `npm install 2>&1`
+      puts `npm install 2>&1`
       puts 'NPM test'
       out += `npm test 2>&1`
       exit_code = $?
