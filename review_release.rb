@@ -17,7 +17,7 @@ Dir.mkdir WORKDIR unless Dir.exist? WORKDIR
 
 # Workflow
 # Collect data about release and Issue
-unless (triggered_issue = ENV['issue'])
+unless (triggered_issue = ENV['ISSUE'])
   print "No issue - no cry!\n"
   exit 2
 end
