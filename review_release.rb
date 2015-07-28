@@ -37,7 +37,7 @@ branches = issue.related['branches']
 branches.each do |branch|
   branch_name = branch['name']
   repo_name = branch['repository']['name']
-  repo_url = branch['repository']['url']
+  repo_url = "#{BASEURL}/OneTwoTrip/#{repo_name}"
   # Checkout repo
   print "Working with #{repo_name}\n"
   g_rep = nil
