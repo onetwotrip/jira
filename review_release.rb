@@ -75,7 +75,7 @@ end
 unless errors.empty?
   # Comment with errors
   comment = issue.comments.build
-  comment.save({body: errors.join "\n"})
+  comment.save({body: errors.join("\n")})
   # return issue to "In Progress"
   issue.transition 'In Progress'
 end
