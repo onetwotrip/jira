@@ -25,6 +25,11 @@ end
 jira = JIRA::Client.new username: JIRA_USERNAME, password: JIRA_PASSWORD, site: JIRA_SITE, auth_type: :basic,
                         context_path: ''
 issue = jira.Issue.jql("key = #{triggered_issue}")
+if issue.is_a? Array and issue.length > 1
+  fail "WTF??? Issue search returned #{issue.length} elements!"
+elsif issue.is_a? Array
+  issue = issue[0]
+end
 
 errors = []
 
@@ -53,21 +58,26 @@ branches.each do |branch|
   end
 
   # JSCS; JSHint
-  res_text = check_diff g_rep, 'branch'
+  res_text = check_diff g_rep, branch_name
   unless res_text.empty?
     errors << "Checking branch #{branch_name}: #{res_text}"
   end
 
   # NPM test
-  out = ''
-  exit_code = 0
-  t = Thread.new do
-    out = `npm test`
-    exit_code = $?
-  end
-  t.join
-  if exit_code > 0
-    errors << "Testing branch #{branch_name} failed:\n\n#{out}"
+  Dir.chdir "#{WORKDIR}/#{repo_name}" do
+    out = ''
+    exit_code = 0
+    t = Thread.new do
+      puts 'NPM install'
+      out = `npm install 2>&1`
+      puts 'NPM test'
+      out += `npm test 2>&1`
+      exit_code = $?
+    end
+    t.join
+    if exit_code.to_i > 0
+      errors << "Testing branch #{branch_name} failed:\n\n#{out}"
+    end
   end
 end
 
@@ -75,7 +85,8 @@ end
 unless errors.empty?
   # Comment with errors
   comment = issue.comments.build
-  comment.save({body: errors.join("\n")})
+  puts errors.join("\n")
+  #comment.save({body:w errors.join("\n")})
   # return issue to "In Progress"
-  issue.transition 'In Progress'
+  #issue.transition 'In Progress'
 end
