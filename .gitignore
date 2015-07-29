@@ -6,3 +6,4 @@ seo_pages
 .properties
 .idea
 npm-debug.log
+coverage/

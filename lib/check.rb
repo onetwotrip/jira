@@ -1,6 +1,6 @@
 require 'open3'
 
-def check_diff(git_repo, new_commit, old_commit=nil)
+def check_diff(git_repo, new_commit, old_commit = nil)
   res_text = ''
   prj_dir = Dir.new git_repo.dir.path
   has_jscs = prj_dir.each.to_a.include? '.jscsrc'
@@ -11,12 +11,14 @@ def check_diff(git_repo, new_commit, old_commit=nil)
     return ''
   end
 
-  unless old_commit
-    old_commit = git_repo.merge_base new_commit, 'master'
-  end
+  old_commit = git_repo.merge_base new_commit, 'master' unless old_commit
 
   print "Will use JSCS\n" if has_jscs
   print "Will use JSHint\n" if has_jshint
+
+  puts "Diff #{old_commit} with #{new_commit}"
+  puts 'Commits:'
+  puts git_repo.log.between(old_commit, new_commit).collect {|commit| "#{commit.sha}: #{commit.message}\n"}
 
   diff = git_repo.diff old_commit, new_commit
 
@@ -32,7 +34,7 @@ def check_diff(git_repo, new_commit, old_commit=nil)
   done_count = 0
   diff.each do |file|
     done_count += 1
-    print "%.2f %% complete\r" % (done_count * 100.0 / files_count)
+    print format "%.2f %% complete\r", (done_count * 100.0 / files_count)
     next unless File.extname(file.path) == '.js'
     # Find changed lines
     ranges = []

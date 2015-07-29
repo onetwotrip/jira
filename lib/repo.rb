@@ -1,6 +1,215 @@
 require 'addressable/uri'
+require 'open3'
 
-def git_repo(url, name, opts={})
+class GitRepo
+
+  attr_reader :git
+
+  def initialize(url, name, opts={})
+    # Checkout or open repo
+    Dir.chdir (opts[:workdir] or './') do
+      if File.writable? name
+        @git = Git.open(name)
+      else
+        uri = Addressable::URI.parse("#{url}.git")
+        uri.user ||= opts[:gitusername]
+        uri.password ||= opts[:gitpassword]
+        @git = Git.clone(uri, name, opts)
+      end
+    end
+    # Fetch and clean repo
+    @git.fetch
+    @git.checkout 'master'
+    @git.pull
+    @git.reset_hard
+
+    @has_jscs = nil
+    @has_jshint = nil
+  end
+
+  def delete_branch!(branch)
+    fail ArgumentError, 'Can not remove branch master' if branch == 'master'
+    @git.branch(branch).delete
+    @git.chdir do
+      out = `git push -q origin :#{branch}`
+      p $CHILD_STATUS
+      p out
+    end
+  end
+
+  def prepare_branch(source, dest, clean = false)
+    @git.fetch
+    @git.branch(source).checkout
+    @git.pull
+    if clean
+      @git.branch(dest)
+      delete_branch! dest
+      @git.branch(dest).checkout
+    else
+      @git.branch(dest).checkout
+      @git.merge(source,
+                 "CI: merge source branch #{source} to release #{destination}")
+    end
+  end
+
+  def jscs?
+    @has_jscs = File.readable? @git.dir.to_s + '/.jscsrc' if @has_jscs.nil?
+    @has_jscs
+  end
+  alias_method :has_jscs?, :jscs?
+
+  def jshint?
+    @has_jshint = File.readable? @git.dir.to_s + '/.jshintrc' if @has_jshint.nil?
+    @has_jshint
+  end
+  alias_method :has_jshint?, :jshint?
+
+  def checkout(commit = nil)
+    unless commit
+      yield self if block_given?
+      return
+    end
+    current = @git.revparse 'HEAD'
+    if block_given?
+      @git.checkout commit
+      yield self
+      @git.checkout current
+    else
+      @git.checkout commit
+    end
+  end
+
+  def commits_between(commit1, commit2)
+    @git.log.between(commit1, commit2)
+  end
+
+  def check_jscs(filename, ranges = [])
+    return '' unless has_jscs?
+    run_check "jscs -c '#{@git.dir.to_s}/.jscsrc' -r inline #{@git.dir.to_s}/#{filename}", filename, ranges # rubocop:disable Lint/StringConversionInInterpolation
+  end
+
+  def check_jshint(filename, ranges = [])
+    return '' unless has_jshint?
+    run_check "jshint -c '#{@git.dir.to_s}/.jshintrc' #{@git.dir.to_s}/#{filename}", filename, ranges # rubocop:disable Lint/StringConversionInInterpolation
+  end
+
+  def check_diff(new_commit, old_commit = nil)
+    old_commit = @git.merge_base new_commit, 'master' unless old_commit
+    diff = @git.diff old_commit, new_commit
+    puts "#{diff.each.to_a.length} files to check"
+    out = []
+    checkout new_commit do
+      diff.each do |file|
+        ranges = diffed_lines file.patch
+        this_out = ''
+        next unless File.extname(file.path) == '.js'
+        this_out += check_jscs file.path, ranges
+        this_out += check_jshint file.path, ranges
+        out << this_out unless this_out.empty?
+      end
+    end
+    out.join "\n"
+  end
+
+  def current_commit
+    @git.revparse 'HEAD'
+  end
+
+  def merge!(source = 'master', dest = nil)
+    checkout dest if dest
+    @git.merge source
+  end
+
+  def abort_merge!
+    mergehead = @git.revparse 'MERGE_HEAD' rescue Git::GitExecuteError # rubocop:disable Style/RescueModifier
+    return unless mergehead
+    @git.lib.send(:command, 'merge', '--abort') rescue Git::GitExecuteError # rubocop:disable Style/RescueModifier
+  end
+
+  def chdir(&block)
+    @git.chdir(&block)
+  end
+
+  def run_tests!
+    errors = ''
+    @git.chdir do
+      out = ''
+      exit_code = 0
+      t = Thread.new do
+        puts 'NPM install'
+        puts `npm install 2>&1`
+        puts 'NPM test'
+        out += `npm test 2>&1`
+        exit_code = $?.exitstatus
+      end
+      t.join
+      puts "NPM Test exit code: #{exit_code}"
+      errors << "Testing failed:\n\n#{out}" if exit_code.to_i > 0
+    end
+    errors
+  end
+
+  def method_missing(*args)
+    method_name = args.shift
+    super unless @git.respond_to? method_name
+    @git.send method_name, *args
+  end
+
+  private
+
+  def run_check(command, filename, ranges)
+    text = ''
+    run_command(command)[0].each_line do |line|
+      if (l_text = format_line line, ranges)
+        text << "#{filename}: line #{l_text}\n"
+      end
+    end
+    text
+  end
+
+  def format_line(line, ranges)
+    return nil unless (md = /\.js: line (\d+)(,?.*)$/.match(line))
+    return nil unless ranges.detect { |r| r.cover? md[1].to_i }
+    "#{md[1]}#{md[2]}\n"
+  end
+
+  def diffed_lines(diff)
+    ranges = []
+    diff.each_line do |l|
+      return [] if /^Binary files ([^ ]+) and ([^ ]+) differ$/.match(l)
+      return [0..1] if /@@ -0,0 +1 @@/.match(l)
+      next unless (md = /^@@ -\d+(?:,\d+)? \+(\d+),(\d+) @@/.match(l))
+      ranges << ((md[1].to_i)..(md[1].to_i + md[2].to_i))
+    end
+    if ranges.empty? and !diff.empty?
+      puts diff
+      puts 'Diff without marks or unknown marks!'
+    end
+    ranges
+  end
+
+  def run_command(command, commit = nil)
+    if command.nil? or command.empty?
+      fail ArgumentError.new, 'Empty or nil command!'
+    end
+    out = ''
+    if commit
+      checkout commit do |_|
+        out = Open3.capture2e(command)
+      end
+    else
+      out = Open3.capture2e(command)
+    end
+
+    if block_given?
+      out[0].split("\n").each { |line| yield line }
+      return out[1]
+    end
+    out
+  end
+end
+
+def git_repo(url, name, opts = {})
   if File.writable?(name)
     git_repo = Git.open(name)
   else
@@ -10,6 +219,8 @@ def git_repo(url, name, opts={})
     git_repo = Git.clone(uri, name, opts)
   end
   git_repo.fetch
+  git_repo.checkout 'master'
+  git_repo.pull
   git_repo.reset_hard
   git_repo
 end
