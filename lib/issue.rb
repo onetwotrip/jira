@@ -32,7 +32,7 @@ module JIRA
 
       def transition(status)
         transition = get_transition_by_name status
-        return unless transition
+        raise ArgumentError.new "Transition state #{status} not found!" unless transition
         puts "#{key} changed status to #{transition.name}"
         return if opts[:dryrun]
         action = transitions.build

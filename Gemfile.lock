@@ -1,5 +1,5 @@
 GIT
-  remote: git@github.com:onetwotrip/ruby-git.git
+  remote: https://github.com/onetwotrip/ruby-git.git
   revision: 43ed3408ba3e9c11a0686846e1919455a8085146
   branch: merge-base
   specs:
