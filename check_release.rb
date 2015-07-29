@@ -55,7 +55,7 @@ mail = SendGrid::Mail.new do |m|
   m.from = EMAIL_FROM
   m.subject = "JSCS/JSHint: проблемы с комитом в  #{payload['repository']['full_name']}"
   m.html = "Привет <a href=\"mailto:#{email_to}\">#{author_name}</a>!<br />
-Ты коммитнул #{new_commit} в #{repo_name}.<br />
+Ты <a href=\"https://bitbucket.org/#{payload['repository']['full_name']}/commits/#{new_commit}\">коммитнул</a>, молодец.<br />
 А вот что имеют тебе сказать JSCS и JSHint:<pre>#{res_text}</pre>"
 end
 
