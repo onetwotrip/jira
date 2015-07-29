@@ -91,5 +91,5 @@ unless errors.empty?
   puts errors.join("\n")
   #comment.save({body:w errors.join("\n")})
   # return issue to "In Progress"
-  #issue.transition 'In Progress'
+  issue.transition 'Back To Work'
 end
