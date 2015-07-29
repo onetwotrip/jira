@@ -41,7 +41,7 @@ def check_diff(git_repo, new_commit, old_commit)
     this_file_errors = ''
     if has_jscs
       # call jscs
-      cmd = "jscs -c '#{prj_dir.to_path}/.jscsrc' #{prj_dir.to_path}/#{filename}"
+      cmd = "jscs -c '#{prj_dir.to_path}/.jscsrc' -r inline #{prj_dir.to_path}/#{filename}"
       Open3.popen3(cmd) do |_stdin, stdout, _stderr|
         stdout.each_line do |line|
           next unless (md = /\.js: line (\d+)(,.*)$/.match(line))
