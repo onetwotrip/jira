@@ -1,8 +1,8 @@
 require 'open3'
 
-def check_diff(g, new_commit, old_commit)
+def check_diff(git_repo, new_commit, old_commit)
   res_text = ''
-  prj_dir = Dir.new g.dir.path
+  prj_dir = Dir.new git_repo.dir.path
   has_jscs = prj_dir.each.to_a.include? '.jscsrc'
   has_jshint = prj_dir.each.to_a.include? '.jshintrc'
 
@@ -13,13 +13,15 @@ def check_diff(g, new_commit, old_commit)
   print "Will use JSCS\n" if has_jscs
   print "Will use JSHint\n" if has_jshint
 
-  diff = g.diff old_commit, new_commit
+  diff = git_repo.diff old_commit, new_commit
 
   if diff.to_a.empty?
     print "check_diff: Empty diff\n"
     return ''
   end
 
+  current_commit = git_repo.revparse 'HEAD'
+  git_repo.checkout new_commit unless current_commit == new_commit
   files_count = diff.each.to_a.length
   print "We have #{files_count} files to check\n"
   done_count = 0
@@ -61,5 +63,6 @@ def check_diff(g, new_commit, old_commit)
     end
     res_text += "#{this_file_errors}\n" unless this_file_errors.empty?
   end
+  git_repo.checkout current_commit unless current_commit == new_commit
   res_text
 end
