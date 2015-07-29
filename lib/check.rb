@@ -20,6 +20,8 @@ def check_diff(g, new_commit, old_commit)
     return ''
   end
 
+  current_commit = g.revparse 'HEAD'
+  g.checkout new_commit unless current_commit == new_commit
   files_count = diff.each.to_a.length
   print "We have #{files_count} files to check\n"
   done_count = 0
@@ -61,5 +63,6 @@ def check_diff(g, new_commit, old_commit)
     end
     res_text += "#{this_file_errors}\n" unless this_file_errors.empty?
   end
+  g.checkout current_commit unless current_commit == new_commit
   res_text
 end
