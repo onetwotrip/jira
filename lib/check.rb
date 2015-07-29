@@ -25,6 +25,8 @@ def check_diff(git_repo, new_commit, old_commit=nil)
     return ''
   end
 
+  current_commit = git_repo.revparse 'HEAD'
+  git_repo.checkout new_commit unless current_commit == new_commit
   files_count = diff.each.to_a.length
   print "We have #{files_count} files to check\n"
   done_count = 0
@@ -44,7 +46,7 @@ def check_diff(git_repo, new_commit, old_commit=nil)
     this_file_errors = ''
     if has_jscs
       # call jscs
-      cmd = "jscs -c '#{prj_dir.to_path}/.jscsrc' #{prj_dir.to_path}/#{filename}"
+      cmd = "jscs -c '#{prj_dir.to_path}/.jscsrc' -r inline #{prj_dir.to_path}/#{filename}"
       Open3.popen3(cmd) do |_stdin, stdout, _stderr|
         stdout.each_line do |line|
           next unless (md = /\.js: line (\d+)(,.*)$/.match(line))
@@ -66,5 +68,6 @@ def check_diff(git_repo, new_commit, old_commit=nil)
     end
     res_text += "#{this_file_errors}\n" unless this_file_errors.empty?
   end
+  git_repo.checkout current_commit unless current_commit == new_commit
   res_text
 end
