@@ -22,9 +22,9 @@ STDOUT.sync = true
 
 options = { auth_type: :basic }.merge(opts.to_hash)
 client = JIRA::Client.new(options)
-issue = client.Issue.find(opts[:release])
-issue.deploys.each do |deployed_issue|
-  puts deployed_issue.key
+release = client.Issue.find(opts[:release])
+release.deploys.each do |issue|
+  puts issue.key
   # Transition to DONE
-  deployed_issue.transition 'To master'
+  issue.transition 'To master' if issue.get_transition_by_name 'To master'
 end
