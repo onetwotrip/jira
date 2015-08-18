@@ -75,11 +75,16 @@ unless crit_changed_files.empty?
     m.to = 'code-control@default.com'
     m.from = EMAIL_FROM
     m.subject = "Изменены критичные файлы в #{payload['repository']['full_name']}"
-    m.html = "Привет, Строгий Контроль!<br />
-Тут вот чего: <a href=\"mailto:#{email_to}\">#{author_name}</a> решил поменять кое-что критичное, а именно:<br />
+    # rubocop:disable Metrics/LineLength
+    m.html = <<MAIL
+Привет, Строгий Контроль!<br />
+Тут вот чего: <a href=\"mailto:#{email_to}\">#{author_name}</a> решил
+поменять кое-что критичное, а именно:<br />
 <pre>#{crit_changed_files.join("\n")}</pre><br />
-Вот <a href=\"https://bitbucket.org/#{payload['repository']['full_name']}/commits/#{new_commit}\">тут</a> подробности.
+Вот <a href=\"https://bitbucket.org/#{payload['repository']['full_name']}/branches/compare/#{new_commit}..#{old_commit}\">тут</a> подробности.
 <br />Удачи!"
+MAIL
+    # rubocop:enable Metrics/LineLength
   end
   SendGrid::Client.new(api_user: SG_USER, api_key: SG_KEY).send mail
 end
