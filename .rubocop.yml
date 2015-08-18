@@ -15,3 +15,5 @@ Metrics/MethodLength:
 # No offence.
 Style/AndOr:
   Enabled: false
+Style/Not:
+  Enabled: false

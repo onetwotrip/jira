@@ -5,9 +5,9 @@ class GitRepo
 
   attr_reader :git
 
-  def initialize(url, name, opts={})
+  def initialize(url, name, opts = {})
     # Checkout or open repo
-    Dir.chdir (opts[:workdir] or './') do
+    Dir.chdir((opts[:workdir] or './')) do
       if File.writable? name
         @git = Git.open(name)
       else
@@ -85,17 +85,30 @@ class GitRepo
 
   def check_jscs(filename, ranges = [])
     return '' unless has_jscs?
-    run_check "jscs -c '#{@git.dir.to_s}/.jscsrc' -r inline #{@git.dir.to_s}/#{filename}", filename, ranges # rubocop:disable Lint/StringConversionInInterpolation
+    # rubocop:disable Lint/StringConversionInInterpolation
+    run_check "jscs -c '#{@git.dir.to_s}/.jscsrc' -r inline #{@git.dir.to_s}/#{filename}", filename, ranges
+    # rubocop:enable Lint/StringConversionInInterpolation
   end
 
   def check_jshint(filename, ranges = [])
     return '' unless has_jshint?
-    run_check "jshint -c '#{@git.dir.to_s}/.jshintrc' #{@git.dir.to_s}/#{filename}", filename, ranges # rubocop:disable Lint/StringConversionInInterpolation
+    # rubocop:disable Lint/StringConversionInInterpolation
+    run_check "jshint -c '#{@git.dir.to_s}/.jshintrc' #{@git.dir.to_s}/#{filename}", filename, ranges
+    # rubocop:enable Lint/StringConversionInInterpolation
+  end
+
+  def get_diff(new_commit, old_commit = nil)
+    old_commit = @git.merge_base new_commit, 'master' unless old_commit
+    @git.diff old_commit, new_commit
+  end
+
+  def changed_files(new_commit, old_commit = nil)
+    diff = get_diff new_commit, old_commit
+    diff.map :path
   end
 
   def check_diff(new_commit, old_commit = nil)
-    old_commit = @git.merge_base new_commit, 'master' unless old_commit
-    diff = @git.diff old_commit, new_commit
+    diff = get_diff new_commit, old_commit
     puts "#{diff.each.to_a.length} files to check"
     out = []
     checkout new_commit do
@@ -140,7 +153,7 @@ class GitRepo
         puts `npm install 2>&1`
         puts 'NPM test'
         out += `npm test 2>&1`
-        exit_code = $?.exitstatus
+        exit_code = $?.exitstatus # rubocop:disable Style/SpecialGlobalVars
       end
       t.join
       puts "NPM Test exit code: #{exit_code}"
