@@ -1,3 +1,4 @@
+require 'jira'
 require 'jira/client'
 require 'rest-client'
 require 'addressable/uri'
@@ -18,6 +19,10 @@ module JIRA
                         content_type: :json, accept: :json
       end
 
+      def has_transition?(name)
+        !!get_transition_by_name(name)
+      end
+
       def get_transition_by_name(name)
         available_transitions = client.Transition.all(issue: self)
         available_transitions.each do |transition|
@@ -32,7 +37,7 @@ module JIRA
 
       def transition(status)
         transition = get_transition_by_name status
-        raise ArgumentError.new "Transition state #{status} not found!" unless transition
+        raise ArgumentError.new, "Transition state #{status} not found!" unless transition
         puts "#{key} changed status to #{transition.name}"
         return if opts[:dryrun]
         action = transitions.build

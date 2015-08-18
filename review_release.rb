@@ -12,6 +12,10 @@ JIRA_USERNAME = ENV.fetch('JIRA_USERNAME', 'default')
 JIRA_PASSWORD = ENV.fetch('JIRA_PASSWORD', 'bWx3h6wjHgHEyi')
 JIRA_SITE = ENV.fetch('JIRA_SITE', 'default')
 
+fail_on_jscs = ENV.fetch('FAIL_ON_JSCS', false)
+FAIL_ON_JSCS = fail_on_jscs ? !fail_on_jscs.empty? : false
+
+TRANSITION = 'Back To Work'
 
 Dir.mkdir WORKDIR unless Dir.exist? WORKDIR
 
@@ -22,8 +26,12 @@ unless (triggered_issue = ENV['ISSUE'])
   exit 2
 end
 
-jira = JIRA::Client.new username: JIRA_USERNAME, password: JIRA_PASSWORD, site: JIRA_SITE, auth_type: :basic,
+jira = JIRA::Client.new username: JIRA_USERNAME,
+                        password: JIRA_PASSWORD,
+                        site: JIRA_SITE,
+                        auth_type: :basic,
                         context_path: ''
+# noinspection RubyArgCount
 issue = jira.Issue.jql("key = #{triggered_issue}")
 if issue.is_a? Array and issue.length > 1
   fail "WTF??? Issue search returned #{issue.length} elements!"
@@ -33,63 +41,92 @@ end
 
 errors = []
 
+fail_release = false
+
 branches = issue.related['branches']
+
+exit 0 if branches.empty?
+
 branches.each do |branch|
   branch_name = branch['name']
   repo_name = branch['repository']['name']
   repo_url = "#{BASEURL}/OneTwoTrip/#{repo_name}"
   # Checkout repo
   print "Working with #{repo_name}\n"
-  g_rep = nil
-  Dir.chdir WORKDIR do
-    print 'Cloning... '
-    g_rep = git_repo repo_url, repo_name
-    print "done.\n"
+  g_rep = GitRepo.new repo_url, repo_name, workdir: WORKDIR
+
+  g_rep.checkout 'master'
+  g_rep.git.pull
+  g_rep.git.branch(branch_name).delete rescue Git::GitExecuteError # rubocop:disable Style/RescueModifier
+  begin
+    g_rep.git.checkout branch_name
+  rescue Git::GitExecuteError => e
+    puts "Branch #{branch_name} does not exist any more...\n#{e.message}"
+    next
   end
 
 
-  # Checkout branch
-  g_rep.checkout branch_name
+  # g_rep.checkout branch_name
   puts 'Merging new version'
-  g_rep.merge "origin/#{branch_name}"
+  g_rep.merge! "origin/#{branch_name}"
 
   # Try to merge master to branch
-  begin
-    g_rep.merge 'master'
-  rescue Git::GitExecuteError => e
-    errors << "Failed to merge master to branch #{branch_name}.\nGit had this to say: #{e.message}"
+  unless ENV['NO_MERGE']
+    begin
+      g_rep.merge! 'master'
+    rescue Git::GitExecuteError => e
+      errors << "Failed to merge master to branch #{branch_name}.
+Git had this to say: {noformat}#{e.message}{noformat}"
+      fail_release = true
+      g_rep.abort_merge!
+    end
+    g_rep.checkout branch_name
   end
+
+  puts 'JSCS/JSHint'
 
   # JSCS; JSHint
-  res_text = check_diff g_rep, branch_name
-  unless res_text.empty?
-    errors << "Checking branch #{branch_name}: #{res_text}"
+  unless ENV['NO_JSCS']
+    res_text = g_rep.check_diff 'HEAD'
+    unless res_text.empty?
+      errors << "Checking branch #{branch_name}:\n{noformat}#{res_text}{noformat}"
+      fail_release = true if FAIL_ON_JSCS
+    end
   end
 
+  puts 'NPM Test'
   # NPM test
-  Dir.chdir "#{WORKDIR}/#{repo_name}" do
-    out = ''
-    exit_code = 0
-    t = Thread.new do
-      puts 'NPM install'
-      puts `npm install 2>&1`
-      puts 'NPM test'
-      out += `npm test 2>&1`
-      exit_code = $?
-    end
-    t.join
-    if exit_code.to_i > 0
-      errors << "Testing branch #{branch_name} failed:\n\n#{out}"
-    end
+  test_out = ''
+  test_out = g_rep.run_tests! unless ENV['NO_TESTS']
+  unless test_out.empty?
+    fail_release = true
+    errors << "{noformat}#{test_out}{noformat}"
   end
 end
+
+comment_text = "Automatic code review complete.\n"
 
 # If something failed:
-unless errors.empty?
-  # Comment with errors
-  comment = issue.comments.build
-  puts errors.join("\n")
-  #comment.save({body:w errors.join("\n")})
+if fail_release
+  comment_text = "\nThere were some errors:\n#{errors.join("\n")}"
+
   # return issue to "In Progress"
-  issue.transition 'Back To Work'
+  if issue.has_transition? TRANSITION
+    puts 'TRANSITIONING DISABLED'
+    issue.transition TRANSITION
+  else
+    print "No transition #{TRANSITION} available."
+    comment_text = "Unable to transition issue to \"In Progress\" state.\n\n" + comment_text
+  end
+
+else
+  comment_text << "\nMerge master: #{ENV['NO_MERGE'] ? 'SKIPPED' : 'PASSED'}
+JSCS/JSHint: #{ENV['NO_JSCS'] ? 'SKIPPED' : 'PASSED'}
+npm test: #{ENV['NO_TEST'] ? 'SKIPPED' : 'PASSED'}\n"
+  unless errors.empty?
+    comment_text << "There were some errors:\n#{errors.join "\n"}"
+  end
 end
+
+puts comment_text
+issue.post_comment comment_text

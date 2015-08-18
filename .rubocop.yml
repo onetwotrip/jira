@@ -1,0 +1,19 @@
+# Show me at least one monitor 24x80
+Metrics/LineLength:
+  Max: 120
+
+# Rubocop fails to count this metric in any good way.
+Metrics/AbcSize:
+  Enabled: false
+
+# WTF? 10 lines? Is this a joke?!
+# We are not in Rails, remember?
+Metrics/MethodLength:
+  Enabled: false
+
+# Fuck it. Just fuck it.
+# No offence.
+Style/AndOr:
+  Enabled: false
+Style/Not:
+  Enabled: false
