@@ -104,7 +104,7 @@ class GitRepo
 
   def changed_files(new_commit, old_commit = nil)
     diff = get_diff new_commit, old_commit
-    diff.map :path
+    diff.map { |el| el.path }
   end
 
   def check_diff(new_commit, old_commit = nil)
