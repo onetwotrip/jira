@@ -57,6 +57,8 @@ puts "Old: #{old_commit}; new: #{new_commit}"
 author_name = g_rep.git.gcommit(new_commit).author.name
 email_to = g_rep.git.gcommit(new_commit).author.email
 
+exit 0 if email_to == 'services@onetwotrip.com' # Bot commits skipped by Zubkov's request
+
 res_text = g_rep.check_diff(new_commit, old_commit)
 
 # SRV-735
@@ -81,8 +83,8 @@ unless crit_changed_files.empty?
 Тут вот чего: <a href=\"mailto:#{email_to}\">#{author_name}</a> решил
 поменять кое-что критичное, а именно:<br />
 <pre>#{crit_changed_files.join("\n")}</pre><br />
-Вот <a href=\"https://bitbucket.org/#{payload['repository']['full_name']}/branches/compare/#{new_commit}..#{old_commit}\">тут</a> подробности.
-<br />Удачи!"
+Вот <a href=\"https://bitbucket.org/#{payload['repository']['full_name']}/branches/compare/#{new_commit}..#{old_commit}#diff\">тут</a> подробности.
+<br />Удачи!
 MAIL
     # rubocop:enable Metrics/LineLength
   end
