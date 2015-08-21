@@ -50,7 +50,8 @@ new_commit = payload['push']['changes'][0]['new']['target']['hash']
 if payload['push']['changes'][0]['old']
   old_commit = payload['push']['changes'][0]['old']['target']['hash']
 else
-  old_commit = g_rep.git.merge_base 'master', new_commit
+  # old_commit = g_rep.git.merge_base 'master', new_commit
+  old_commit = 'master'
 end
 
 puts "Old: #{old_commit}; new: #{new_commit}"

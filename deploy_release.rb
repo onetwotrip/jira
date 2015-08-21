@@ -31,7 +31,7 @@ prs.select! { |pr| /^#{opts[:release]}/.match pr['name'] and pr['status'] != 'DE
 
 if prs.empty?
   puts 'No pull requests for this task!'
-  exit 0
+  exit 1
 end
 
 puts prs.map { |pr| pr['name'] }
