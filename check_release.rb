@@ -60,11 +60,20 @@ email_to = g_rep.git.gcommit(new_commit).author.email
 
 exit 0 if email_to == 'services@onetwotrip.com' # Bot commits skipped by Zubkov's request
 
-res_text = g_rep.check_diff(new_commit, old_commit)
+begin
+  g_rep.checkout new_commit
+  g_rep.merge! 'master'
+rescue Git::GitExecuteError => e
+  errors << "Failed to merge master to branch #{branch_name}.
+Git had this to say: {noformat}#{e.message}{noformat}"
+  g_rep.abort_merge!
+end
+
+res_text = g_rep.check_diff('HEAD', old_commit)
 
 # SRV-735
 crit_changed_files = []
-g_rep.changed_files(new_commit, old_commit).each do |path|
+g_rep.changed_files('HEAD', old_commit).each do |path|
   NOTIFY_LIST.each do |el|
     crit_changed_files << path if File.fnmatch? el, path
   end
@@ -81,10 +90,9 @@ unless crit_changed_files.empty?
     # rubocop:disable Metrics/LineLength
     m.html = <<MAIL
 Привет, Строгий Контроль!<br />
-Тут вот чего: <a href=\"mailto:#{email_to}\">#{author_name}</a> решил
-поменять кое-что критичное, а именно:<br />
+Тут <a href=\"https://bitbucket.org/#{payload['repository']['full_name']}/branches/compare/#{new_commit}..#{old_commit}#diff\">
+вот чего</a>: <a href=\"mailto:#{email_to}\">#{author_name}</a> решил поменять кое-что критичное, а именно:<br />
 <pre>#{crit_changed_files.join("\n")}</pre><br />
-Вот <a href=\"https://bitbucket.org/#{payload['repository']['full_name']}/branches/compare/#{new_commit}..#{old_commit}#diff\">тут</a> подробности.
 <br />Удачи!
 MAIL
     # rubocop:enable Metrics/LineLength
