@@ -46,6 +46,11 @@ Dir.mkdir WORKDIR unless Dir.exist? WORKDIR
 
 g_rep = GitRepo.new BASEURL + payload['repository']['full_name'], repo_name, workdir: WORKDIR
 
+unless payload['push']['changes'][0]['new']
+  puts 'Branch was deleted, nothing to do'
+  exit 0
+end
+
 new_commit = payload['push']['changes'][0]['new']['target']['hash']
 if payload['push']['changes'][0]['old']
   old_commit = payload['push']['changes'][0]['old']['target']['hash']
@@ -60,16 +65,17 @@ email_to = g_rep.git.gcommit(new_commit).author.email
 
 exit 0 if email_to == 'services@onetwotrip.com' # Bot commits skipped by Zubkov's request
 
+res_text = ''
+
 begin
   g_rep.checkout new_commit
   g_rep.merge! 'master'
 rescue Git::GitExecuteError => e
-  errors << "Failed to merge master to branch #{branch_name}.
-Git had this to say: {noformat}#{e.message}{noformat}"
+  res_text << "Failed to merge master to commit #{new_commit}.\nGit had this to say:\n#{e.message}\n\n"
   g_rep.abort_merge!
 end
 
-res_text = g_rep.check_diff('HEAD', old_commit)
+res_text << g_rep.check_diff('HEAD', old_commit)
 
 # SRV-735
 crit_changed_files = []
