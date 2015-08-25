@@ -64,6 +64,7 @@ repos = {}
 release_branch = "#{opts[:release]}-#{opts[:postfix]}"
 source = opts[:source]
 
+issues = release.deploys
 puts issues.size
 issues.each do |issue|
   puts issue.key
