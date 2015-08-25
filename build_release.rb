@@ -40,6 +40,10 @@ release = client.Issue.find(opts[:release])
 if release.deploys.any? && !opts[:ignorelinks]
   puts 'linked'
   issues = release.deploys
+  issues.each do |issue|
+    puts issue.key
+    issue.transition 'Not merged' if issue.has_transition? 'Not merged'
+  end
 else
   puts 'fresh'
   issues = client.Issue.jql(%[(project = Accounting AND status = Passed OR
@@ -49,6 +53,7 @@ else
     ORDER BY priority DESC, issuekey DESC])
   issues.each do |issue|
     puts issue.key
+    issue.transition 'Not merged' if issue.has_transition? 'Not merged'
     issue.link
   end
 end
