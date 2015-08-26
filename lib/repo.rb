@@ -240,6 +240,7 @@ end
 
 def clean_branch(repo, branch)
   return if branch == 'master'
+  repo.branch('master').checkout
   repo.branch(branch).delete
   repo.chdir do
     `git push -q origin :#{branch}`
@@ -250,8 +251,11 @@ def prepare_branch(repo, source, destination, clean = false)
   repo.fetch
   repo.branch(source).checkout
   repo.pull
-  repo.branch(destination)
-  clean_branch(repo, destination) if clean
+  # destination branch should be checked out or has no effect on actual FS
+  if clean
+    repo.branch(destination).checkout
+    clean_branch(repo, destination)
+  end
   repo.branch(destination).checkout
   repo.merge(source,
              "CI: merge source branch #{source} to release #{destination}")
