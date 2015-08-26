@@ -189,8 +189,8 @@ class GitRepo
   def diffed_lines(diff)
     ranges = []
     diff.each_line do |l|
-      return [] if /^Binary files ([^ ]+) and ([^ ]+) differ$/.match(l)
-      return [0..1] if /@@ -0,0 +1 @@/.match(l)
+      return [] if /^Binary files ([^ ]+) and ([^ ]+) differ$/.match(l) # skip binary files
+      return [0..1] if /@@ -0,0 +\d+ @@/.match(l)                       # return [0..1] for a new file
       next unless (md = /^@@ -\d+(?:,\d+)? \+(\d+),(\d+) @@/.match(l))
       ranges << ((md[1].to_i)..(md[1].to_i + md[2].to_i))
     end
