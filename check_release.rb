@@ -122,11 +122,13 @@ mail = SendGrid::Mail.new do |m|
   m.to = 'vadzay@onetwotrip.com'
   m.from = EMAIL_FROM
   m.subject = "JSCS/JSHint: проблемы с комитом в #{payload['repository']['full_name']}"
-  m.html << "Привет <a href=\"mailto:#{email_to}\">#{author_name}</a>!<br />
+  msg = ''
+  msg << "Привет <a href=\"mailto:#{email_to}\">#{author_name}</a>!<br />
 Ты <a href=\"https://bitbucket.org/#{payload['repository']['full_name']}/commits/#{new_commit}\">коммитнул</a>,
  молодец.<br />"
-  m.html << "Только вот у тебя мастер не мержится в твою ветку.<br /><pre>#{merge_errors}</pre>" unless merge_errors.empty?
-  m.html << "А вот что имеют тебе сказать JSCS и JSHint:<pre>#{res_text}</pre>"
+  msg << "Только вот у тебя мастер не мержится в твою ветку.<br /><pre>#{merge_errors}</pre>" unless merge_errors.empty?
+  msg << "А вот что имеют тебе сказать JSCS и JSHint:<pre>#{res_text}</pre>"
+  m.html = msg
 end
 
 SendGrid::Client.new(api_user: SG_USER, api_key: SG_KEY).send mail
