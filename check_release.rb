@@ -30,6 +30,7 @@ NOTIFY_LIST = %w(
   conf/api/**
   lib/nodejs/*
 )
+SKIPPED_EMAILS = %w(services@onetwotrip.com default@default.com)
 
 if not ENV['payload'] or ENV['payload'].empty?
   print "No payload - no result\n"
@@ -63,7 +64,7 @@ puts "Old: #{old_commit}; new: #{new_commit}"
 author_name = g_rep.git.gcommit(new_commit).author.name
 email_to = g_rep.git.gcommit(new_commit).author.email
 
-exit 0 if email_to == 'services@onetwotrip.com' # Bot commits skipped by Zubkov's request
+exit 0 if SKIPPED_EMAILS.include? email_to # Bot commits skipped by Zubkov's request
 
 res_text = ''
 
@@ -94,10 +95,13 @@ unless crit_changed_files.empty?
     m.from = EMAIL_FROM
     m.subject = "Изменены критичные файлы в #{payload['repository']['full_name']}"
     # rubocop:disable Metrics/LineLength
+    diff_link = 'https://bitbucket.org/'+
+                "#{payload['repository']['full_name']}"+
+                "/branches/compare/#{new_commit}..#{old_commit}#diff"
     m.html = <<MAIL
 Привет, Строгий Контроль!<br />
-Тут <a href=\"https://bitbucket.org/#{payload['repository']['full_name']}/branches/compare/#{new_commit}..#{old_commit}#diff\">
-вот чего</a>: <a href=\"mailto:#{email_to}\">#{author_name}</a> решил поменять кое-что критичное, а именно:<br />
+Тут вот чего: <a href="mailto:#{email_to}">#{author_name}</a> взял и <a href="#{diff_link}">решил поменять</a>
+кое-что критичное, а именно:<br />
 <pre>#{crit_changed_files.join("\n")}</pre><br />
 <br />Удачи!
 MAIL
