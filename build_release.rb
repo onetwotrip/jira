@@ -11,7 +11,7 @@ require_relative 'lib/repo'
 opts = Slop.parse do |o|
   # Connection settings
   o.string '-u', '--username', 'username', default: 'default'
-  o.string '-p', '--password', 'password', default: 'bWx3h6wjHgHEyi'
+  o.string '-p', '--password', 'password', default: 'default'
   o.string '--site', 'site', default: 'default'
   o.string '--context_path', 'context path', default: ''
   o.string '--release', 'release', default: 'OTT-4749'
@@ -19,7 +19,7 @@ opts = Slop.parse do |o|
   o.string '--postfix', 'branch name postfix', default: 'pre'
 
   o.string '-gu', '--gitusername', 'username', default: 'jenkins_ott'
-  o.string '-gp', '--gitpassword', 'password', default: '9E=mCqM*'
+  o.string '-gp', '--gitpassword', 'password', default: 'default'
 
   o.bool '--push', 'push to remote', default: false
   o.bool '--clean', 'clean local and remote branches', default: false

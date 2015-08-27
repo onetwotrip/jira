@@ -9,7 +9,7 @@ WORKDIR = ENV.fetch('WORKDIR', '../repos/')
 BASEURL = ENV.fetch('BB_URL', 'git@bitbucket.org:')
 
 JIRA_USERNAME = ENV.fetch('JIRA_USERNAME', 'default')
-JIRA_PASSWORD = ENV.fetch('JIRA_PASSWORD', 'bWx3h6wjHgHEyi')
+JIRA_PASSWORD = ENV.fetch('JIRA_PASSWORD', 'default')
 JIRA_SITE = ENV.fetch('JIRA_SITE', 'default')
 
 fail_on_jscs = ENV.fetch('FAIL_ON_JSCS', false)

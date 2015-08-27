@@ -5,7 +5,7 @@ require './lib/issue'
 opts = Slop.parse do |o|
   # Connection settings
   o.string '-u', '--username', 'username', default: 'default'
-  o.string '-p', '--password', 'password', default: 'bWx3h6wjHgHEyi'
+  o.string '-p', '--password', 'password', default: 'default'
   o.string '--site', 'site', default: 'default'
   o.string '--context_path', 'context path', default: ''
   o.string '--release', 'release'
