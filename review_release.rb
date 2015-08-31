@@ -15,7 +15,7 @@ JIRA_SITE = ENV.fetch('JIRA_SITE', 'default')
 fail_on_jscs = ENV.fetch('FAIL_ON_JSCS', false)
 FAIL_ON_JSCS = fail_on_jscs ? !fail_on_jscs.empty? : false
 
-TRANSITION = 'Back To Work'
+TRANSITION = 'WTF'
 
 Dir.mkdir WORKDIR unless Dir.exist? WORKDIR
 
@@ -64,7 +64,6 @@ branches.each do |branch|
     puts "Branch #{branch_name} does not exist any more...\n#{e.message}"
     next
   end
-
 
   # g_rep.checkout branch_name
   puts 'Merging new version'
