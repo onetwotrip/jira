@@ -95,7 +95,7 @@ crit_changed_files.uniq!
 unless crit_changed_files.empty?
   puts "Notifying code-control!\n#{crit_changed_files.join "\n"}\n"
   mail = SendGrid::Mail.new do |m|
-    m.to = 'vadzay@onetwotrip.com'
+    m.to = 'code-control@default.com'
     m.from = EMAIL_FROM
     m.subject = "Изменены критичные файлы в #{payload['repository']['full_name']}"
     diff_link = 'https://bitbucket.org/'+
