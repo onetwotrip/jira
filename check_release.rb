@@ -118,8 +118,7 @@ print res_text
 print "Will be emailed to #{email_to}\n"
 
 mail = SendGrid::Mail.new do |m|
-  # m.to = email_to
-  m.to = 'vadzay@onetwotrip.com'
+  m.to = email_to
   m.from = EMAIL_FROM
   m.subject = "JSCS/JSHint: проблемы с комитом в #{payload['repository']['full_name']}"
   msg = ''
