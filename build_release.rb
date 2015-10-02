@@ -49,7 +49,7 @@ else
   issues = client.Issue.jql(%[(project = Accounting AND status = Passed OR
     status in ("Merge ready") OR (status in ( "In Release")
     AND issue in linkedIssues(#{release.key},"deployes")))
-    AND project not in ("Servers & Services", Hotels)
+    AND project not in ("Servers & Services", Hotels, "Russian Railroad")
     ORDER BY priority DESC, issuekey DESC])
   issues.each do |issue|
     puts issue.key
