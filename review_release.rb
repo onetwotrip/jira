@@ -12,6 +12,8 @@ JIRA_USERNAME = ENV.fetch('JIRA_USERNAME', 'default')
 JIRA_PASSWORD = ENV.fetch('JIRA_PASSWORD', 'default')
 JIRA_SITE = ENV.fetch('JIRA_SITE', 'default')
 
+post_to_ticket = ENV.fetch('ROOT_BUILD_CAUSE_REMOTECAUSE', nil) == 'true' ? true : false
+
 fail_on_jscs = ENV.fetch('FAIL_ON_JSCS', false)
 FAIL_ON_JSCS = fail_on_jscs ? !fail_on_jscs.empty? : false
 
@@ -128,4 +130,4 @@ npm test: #{ENV['NO_TEST'] ? 'SKIPPED' : 'PASSED'}\n"
 end
 
 puts comment_text
-issue.post_comment comment_text
+issue.post_comment comment_text if post_to_ticket
