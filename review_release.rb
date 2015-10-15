@@ -129,5 +129,6 @@ npm test: #{ENV['NO_TEST'] ? 'SKIPPED' : 'PASSED'}\n"
   end
 end
 
+comment_text << "\nBuild URL: #{ENV.fetch('BUILD_URL', 'none')}"
 puts comment_text
 issue.post_comment comment_text if post_to_ticket
