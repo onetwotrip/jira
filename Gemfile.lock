@@ -1,9 +1,14 @@
 GIT
   remote: https://github.com/onetwotrip/ruby-git.git
-  revision: 43ed3408ba3e9c11a0686846e1919455a8085146
-  branch: merge-base
+  revision: 74e320d55db5b0b41f1b7017c2e86852de5b8be6
+  branch: develop
   specs:
     git (1.2.9.1)
+
+PATH
+  remote: .
+  specs:
+    jira (0.1.0)
 
 GEM
   remote: https://rubygems.org/
@@ -80,6 +85,7 @@ DEPENDENCIES
   addressable
   git!
   java-properties
+  jira!
   jira-ruby
   json
   rest-client
@@ -87,3 +93,6 @@ DEPENDENCIES
   rubocop
   sendgrid-ruby
   slop (= 4.1.0)
+
+BUNDLED WITH
+   1.10.6

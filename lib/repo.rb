@@ -6,15 +6,13 @@ class GitRepo
   attr_reader :git
 
   def initialize(url, name, opts = {})
+    url = Git::Utils.url_to_ssh( url )
     # Checkout or open repo
     Dir.chdir((opts[:workdir] or './')) do
       if File.writable? name
         @git = Git.open(name)
       else
-        uri = Addressable::URI.parse("#{url}.git")
-        uri.user ||= opts[:gitusername]
-        uri.password ||= opts[:gitpassword]
-        @git = Git.clone(uri, name, opts)
+        @git = Git.clone(url, name, opts)
       end
     end
     # Fetch and clean repo
