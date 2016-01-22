@@ -3,7 +3,6 @@ before_script:
   - gem install bundler
   - bundle install
 job_raketest:
-    script: "rake test"
-    tags:
-        - ruby
-        - docker
+  script: "rake test"
+  tags:
+    - ruby
