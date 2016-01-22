@@ -1,7 +1,4 @@
-require 'rspec'
-require 'rspec/mocks'
-require 'addressable/uri'
-require 'git'
+require 'bundler/setup'
 require 'repo'
 
 RSpec.configure do |config|

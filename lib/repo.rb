@@ -1,5 +1,6 @@
 require 'addressable/uri'
 require 'open3'
+require 'git'
 
 class GitRepo
 
