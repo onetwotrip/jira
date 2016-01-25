@@ -5,7 +5,7 @@ twiket_backoffice
 seo_pages
 .properties
 .idea
-.swp
+*.swp
 npm-debug.log
 coverage/
 /.bundle/
