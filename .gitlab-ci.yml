@@ -2,7 +2,16 @@ before_script:
   - ruby -v
   - gem install bundler
   - bundle install
-job_raketest:
-  script: "rake test"
-  tags:
-    - rubocop
+
+test:2.1:
+  image: ruby:2.1
+  script:
+  - rake test
+test:2.2:
+  image: ruby:2.2
+  script:
+  - rake test
+test:2.3:
+  image: ruby:2.3
+  script:
+  - rake test
