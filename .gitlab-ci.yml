@@ -5,4 +5,4 @@ before_script:
 job_raketest:
   script: "rake test"
   tags:
-    - ruby
+    - rubocop
