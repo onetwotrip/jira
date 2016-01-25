@@ -9,6 +9,9 @@ gem 'addressable'
 gem 'java-properties'
 gem 'sendgrid-ruby'
 
+group :test do
+  gem 'simplecov', '~>0.11.1'
+end
 group :dev do
   gem 'rspec'
   gem 'rubocop'
