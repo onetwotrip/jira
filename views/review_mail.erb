@@ -1,0 +1,11 @@
+Привет, Строгий Контроль!<br />
+Тут вот чего: <%= cr[:authors].to_sentence.html_safe %>
+решил поменять кое-что критичное, а именно:<br />
+<pre>
+<%= cr[:changes].join("<br />\n").html_safe %>
+</pre><br />
+Вот тут подробности:<br />
+<%= cr[:pullrequests]
+      .map{|l| "<a href='"+ l[:url] +"'>"+ l[:name] +"</a>"}
+      .join("<br />\n").html_safe%>
+<br />Удачи!
