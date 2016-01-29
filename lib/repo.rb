@@ -36,16 +36,16 @@ class GitRepo
     end
   end
 
-  def prepare_branch(source, dest, clean = false)
+  def prepare_branch(source, destination, clean = false)
     @git.fetch
     @git.branch(source).checkout
     @git.pull
     if clean
-      @git.branch(dest)
-      delete_branch! dest
-      @git.branch(dest).checkout
+      @git.branch(destination)
+      delete_branch! destination
+      @git.branch(destination).checkout
     else
-      @git.branch(dest).checkout
+      @git.branch(destination).checkout
       @git.merge(source,
                  "CI: merge source branch #{source} to release #{destination}")
     end
