@@ -7,6 +7,7 @@ require 'bitbucket'
 require 'check'
 require 'issue'
 require 'repo'
+require 'pullrequests'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
