@@ -2,19 +2,23 @@ require 'addressable/uri'
 require 'open3'
 require 'git'
 
+##
+# This class represents a git repo
+# rubocop:disable ClassLength
+# rubocop:disable MethodLength
+# rubocop:disable Metrics/AbcSize
 class GitRepo
-
   attr_reader :git
 
   def initialize(url, name, opts = {})
-    url = Git::Utils.url_to_ssh( url ).to_s
+    url = Git::Utils.url_to_ssh(url).to_s
     # Checkout or open repo
-    Dir.chdir((opts[:workdir] or './')) do
-      if File.writable? name
-        @git = Git.open(name)
-      else
-        @git = Git.clone(url, name, opts)
-      end
+    Dir.chdir((opts[:workdir] || './')) do
+      @git = if File.writable? name
+               Git.open(name)
+             else
+               Git.clone(url, name, opts)
+             end
     end
     # Fetch and clean repo
     @git.fetch
@@ -188,12 +192,12 @@ class GitRepo
   def diffed_lines(diff)
     ranges = []
     diff.each_line do |l|
-      return [] if /^Binary files ([^ ]+) and ([^ ]+) differ$/.match(l)
-      return [0..1] if /@@ -0,0 +1 @@/.match(l)
+      return [] if l =~ /^Binary files ([^ ]+) and ([^ ]+) differ$/
+      return [0..1] if l =~ /@@ -0,0 +1 @@/
       next unless (md = /^@@ -\d+(?:,\d+)? \+(\d+),(\d+) @@/.match(l))
       ranges << ((md[1].to_i)..(md[1].to_i + md[2].to_i))
     end
-    if ranges.empty? and !diff.empty?
+    if ranges.empty? && !diff.empty?
       puts diff
       puts 'Diff without marks or unknown marks!'
     end
@@ -201,7 +205,7 @@ class GitRepo
   end
 
   def run_command(command, commit = nil)
-    if command.nil? or command.empty?
+    if command.nil? || command.empty?
       fail ArgumentError.new, 'Empty or nil command!'
     end
     out = ''
