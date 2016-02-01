@@ -72,14 +72,11 @@ pullrequests.each do |pr|
   repo.merge "origin/#{src.branch}"
   # Get files change
   repo.gtree("origin/#{dst.branch}").diff("HEAD").stats[:files].keys.each do |file|
-    # Get reviewer mail by file from .gitattributes
-    result = Hash[
-      repo.lib.checkattr(file).split("\n").map{ |i| i.split(': ')[1,2] }
-    ]
-    result.each { |k, v| result[k] = v.split(',') }
-    # Store results
-    cr[:changes] << file
-    cr[:reviewers] += result['owner.mail'] unless result['owner.mail'].nil?
+    # Get reviewer mail by file
+    repo.get_attrs( file )['owner.mail'].each do |reviewer|
+      cr[:changes] << file
+      cr[:reviewers] += reviewer
+    end
   end
   # Cleanup local repo
   repo.reset_hard "origin/#{dst.branch}"
