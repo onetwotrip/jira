@@ -17,5 +17,11 @@ describe 'JIRA::PullRequests' do
       @pullrequests.push Hash['source' => { 'url2' => 'A' }]
       expect(@pullrequests.valid?).to_not be true
     end
+    it 'should not be valid' do
+      @pullrequests = JIRA::PullRequests.new
+      expect(@pullrequests.valid?).to_not be true
+      @pullrequests.push "String"
+      expect(@pullrequests.valid?).to_not be true
+    end
   end
 end

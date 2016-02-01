@@ -1,6 +1,9 @@
 module JIRA
   class PullRequests < Array
     def valid?
+      if self.empty?
+        puts "PullRequests is empty"; return
+      end
       self.each do |item|
         unless item.is_a? Hash
           puts "Item is not Hash"; return
