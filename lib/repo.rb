@@ -7,7 +7,7 @@ class GitRepo
   attr_reader :git
 
   def initialize(url, name, opts = {})
-    url = Git::Utils.url_to_ssh( url )
+    url = Git::Utils.url_to_ssh( url ).to_s
     # Checkout or open repo
     Dir.chdir((opts[:workdir] or './')) do
       if File.writable? name
