@@ -88,12 +88,14 @@ pullrequests.each do |pr|
 end
 
 # Send CodeReview
-mailer = OttInfra::SendMail.new({
-  from: SENDGRID_FROM,
-  user: SENDGRID_USER,
-  pass: SENDGRID_PASS})
-mailer.sendmail( cr[:reviewers], {
-  cc: 'dmitry.shmelev@default.com',
-  subject: 'CodeReview',
-  message: ERB.new(File.read('views/review_mail.erb')).result
-})
+unless (cr[:reviewers].empty?)
+  mailer = OttInfra::SendMail.new({
+    from: SENDGRID_FROM,
+    user: SENDGRID_USER,
+    pass: SENDGRID_PASS})
+  mailer.sendmail( cr[:reviewers], {
+    cc: 'dmitry.shmelev@default.com',
+    subject: 'CodeReview',
+    message: ERB.new(File.read('views/review_mail.erb')).result
+  })
+end
