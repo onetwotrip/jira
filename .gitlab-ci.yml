@@ -3,14 +3,6 @@ before_script:
   - gem install bundler
   - bundle install
 
-test:2.1:
-  image: ruby:2.1
-  script:
-  - rake test
-test:2.2:
-  image: ruby:2.2
-  script:
-  - rake test
 test:2.3:
   image: ruby:2.3
   script:
