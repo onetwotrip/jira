@@ -41,7 +41,7 @@ cr[:assignee] = issue.assignee.attrs
 # Getting PR
 pullrequests = JIRA::PullRequests.new
 issue.related['pullRequests'].each do |pr|
-  if pr['source']['url'].include? ISSUE_ID
+  if pr['source']['url'].include? ISSUE_ID and pr['status'].eql? 'OPEN'
     pullrequests << pr
   end
 end
