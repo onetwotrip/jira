@@ -53,27 +53,35 @@ unless pullrequests.valid?
   fail "Fails on PR validation"
 end
 
-# Getting PR changes
+# Get reviewers from changes of PR
 pullrequests.each do |pr|
+  # Get of merge source and destination
   src = Git::Utils.url_to_ssh pr['source']['url']
   dst = Git::Utils.url_to_ssh pr['destination']['url']
   puts "Source: #{src.to_repo_s} #{src.branch}"
   puts "Destination: #{dst.to_repo_s} #{dst.branch}"
+  # Return fail if src/dist repos not equal
   unless src.to_repo_s.eql? dst.to_repo_s
     # sendmail
     fail "Source and Destination repos in PR is different"
   end
+  # Clone/Open dist branch
   repo = Git.get_branch dst.to_repo_s
   repo.fetch
+  # Merge src to dist branch
   repo.merge "origin/#{src.branch}"
+  # Get files change
   repo.gtree("origin/#{dst.branch}").diff("HEAD").stats[:files].keys.each do |file|
+    # Get reviewer mail by file from .gitattributes
     result = Hash[
       repo.lib.checkattr(file).split("\n").map{ |i| i.split(': ')[1,2] }
     ]
     result.each { |k, v| result[k] = v.split(',') }
+    # Store results
     cr[:changes] << file
     cr[:reviewers] += result['owner.mail'] unless result['owner.mail'].nil?
   end
+  # Cleanup local repo
   repo.reset_hard "origin/#{dst.branch}"
   cr[:authors] << pr['author']['name']
   cr[:pullrequests] << Hash[url: pr['url'], name: pr['name']]
