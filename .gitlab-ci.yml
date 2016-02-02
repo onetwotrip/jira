@@ -1,0 +1,9 @@
+before_script:
+  - ruby -v
+  - gem install bundler
+  - bundle install
+
+test:2.3:
+  image: ruby:2.3
+  script:
+  - rake test

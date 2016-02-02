@@ -5,5 +5,14 @@ twiket_backoffice
 seo_pages
 .properties
 .idea
+*.swp
 npm-debug.log
 coverage/
+/.bundle/
+/.yardoc
+/Gemfile.lock
+/_yardoc/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/

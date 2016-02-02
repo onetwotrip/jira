@@ -1,20 +1,19 @@
 require 'addressable/uri'
 require 'open3'
+require 'git'
 
 class GitRepo
 
   attr_reader :git
 
   def initialize(url, name, opts = {})
+    url = Git::Utils.url_to_ssh( url ).to_s
     # Checkout or open repo
     Dir.chdir((opts[:workdir] or './')) do
       if File.writable? name
         @git = Git.open(name)
       else
-        uri = Addressable::URI.parse("#{url}.git")
-        uri.user ||= opts[:gitusername]
-        uri.password ||= opts[:gitpassword]
-        @git = Git.clone(uri, name, opts)
+        @git = Git.clone(url, name, opts)
       end
     end
     # Fetch and clean repo
@@ -37,16 +36,16 @@ class GitRepo
     end
   end
 
-  def prepare_branch(source, dest, clean = false)
+  def prepare_branch(source, destination, clean = false)
     @git.fetch
     @git.branch(source).checkout
     @git.pull
     if clean
-      @git.branch(dest)
-      delete_branch! dest
-      @git.branch(dest).checkout
+      @git.branch(destination)
+      delete_branch! destination
+      @git.branch(destination).checkout
     else
-      @git.branch(dest).checkout
+      @git.branch(destination).checkout
       @git.merge(source,
                  "CI: merge source branch #{source} to release #{destination}")
     end

@@ -1,7 +1,4 @@
-require 'addressable/uri'
-require 'git'
-require_relative 'spec_helper'
-require_relative '../lib/repo'
+require 'spec_helper'
 
 def create_test_object!
   allow(File).to receive(:writable?).with('repo') { true }
@@ -36,9 +33,9 @@ describe 'GitRepo' do
       g = GitRepo.new 'git@git:some/repo.git', 'repo'
       expect(g.git).to eq(@git_double)
     end
-    it 'should clone repo if it does not exist' do
+    it 'should clone ssh repo if it does not exist' do
       expect(File).to receive(:writable?).with('repo') { false }
-      expect(Git).to receive(:clone).with(instance_of(Addressable::URI), 'repo', {}) { @git_double }
+      expect(Git).to receive(:clone).with('git@git:some/repo.git', 'repo', {}) { @git_double }
       expect(Git).not_to receive(:open)
       expect(@git_double).to receive(:fetch)
       expect(@git_double).to receive(:checkout).with('master')
@@ -46,6 +43,18 @@ describe 'GitRepo' do
       expect(@git_double).to receive(:reset_hard)
 
       g = GitRepo.new 'git@git:some/repo.git', 'repo'
+      expect(g.git).to eq(@git_double)
+    end
+    it 'should clone https repo if it does not exist' do
+      expect(File).to receive(:writable?).with('repo') { false }
+      expect(Git).to receive(:clone).with('git@git.com:vendor/repo.git', 'repo', {}) { @git_double }
+      expect(Git).not_to receive(:open)
+      expect(@git_double).to receive(:fetch)
+      expect(@git_double).to receive(:checkout).with('master')
+      expect(@git_double).to receive(:pull)
+      expect(@git_double).to receive(:reset_hard)
+
+      g = GitRepo.new 'https://git.com/vendor/repo.git', 'repo'
       expect(g.git).to eq(@git_double)
     end
   end
