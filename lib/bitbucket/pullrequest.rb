@@ -1,6 +1,8 @@
 require 'rest-client'
 
 class BitBucket
+  ##
+  # This class represents a BitBucket PullRequest
   class PullRequest
     def self.unimplemented
       fail 'Not Implemented!'
@@ -31,7 +33,7 @@ class BitBucket
     end
 
     def method_missing(*args)
-      if args.length == 1 and hash.key? args[0].to_s
+      if (args.length == 1) && (hash.key? args[0].to_s)
         hash[args[0].to_s]
       else
         super
