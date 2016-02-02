@@ -121,9 +121,13 @@ describe 'GitRepo' do
     end
     it 'should run commands if flags are not dropped' do
       expect(@git_repo).to receive(:has_jscs?).ordered { true }
-      expect(@git_repo).to receive(:run_check).with('jscs -c \'.//.jscsrc\' -r inline .//some/file.js', 'some/file.js', []).ordered { '' }
+      expect(@git_repo).to receive(:run_check)
+        .with('jscs -c \'.//.jscsrc\' -r inline .//some/file.js', 'some/file.js', [])
+        .ordered { '' }
       expect(@git_repo).to receive(:has_jshint?).ordered { true }
-      expect(@git_repo).to receive(:run_check).with('jshint -c \'.//.jshintrc\' .//some/file.js', 'some/file.js', []).ordered { '' }
+      expect(@git_repo).to receive(:run_check)
+        .with('jshint -c \'.//.jshintrc\' .//some/file.js', 'some/file.js', [])
+        .ordered { '' }
       @git_repo.check_jscs 'some/file.js'
       @git_repo.check_jshint 'some/file.js'
     end
@@ -184,7 +188,7 @@ describe 'GitRepo' do
   describe 'diffed_lines' do
     it 'should parse diff' do
       # rubocop:disable Metrics/LineLength
-      diff = 'diff --git a/src/tw_shared_types/DAL/buyermanager/riak.js b/src/tw_shared_types/DAL/buyermanager/riak.js
+      diff = "diff --git a/src/tw_shared_types/DAL/buyermanager/riak.js b/src/tw_shared_types/DAL/buyermanager/riak.js
 index 7b85bc4..c8d6996 100644
 --- a/src/tw_shared_types/DAL/buyermanager/riak.js
 +++ b/src/tw_shared_types/DAL/buyermanager/riak.js
@@ -226,7 +230,7 @@ index 7b85bc4..c8d6996 100644
                                                 }
 
                                                 if(curPas.frequentFlyerCard){
-'
+"
       # rubocop:enable Metrics/LineLength
       res = @git_repo.send :diffed_lines, diff
       expect(res).to eq [710..722, 724..737]
@@ -238,7 +242,7 @@ index 7b85bc4..c8d6996 100644
     end
     it 'should not raise error if diff contains no "diff" line marks' do
       # rubocop:disable Metrics/LineLength
-      diff = 'diff --git a/src/tw_shared_types/DAL/buyermanager/riak.js b/src/tw_shared_types/DAL/buyermanager/riak.js
+      diff = "diff --git a/src/tw_shared_types/DAL/buyermanager/riak.js b/src/tw_shared_types/DAL/buyermanager/riak.js
 index 7b85bc4..c8d6996 100644
 --- a/src/tw_shared_types/DAL/buyermanager/riak.js
 +++ b/src/tw_shared_types/DAL/buyermanager/riak.js
@@ -280,7 +284,7 @@ index 7b85bc4..c8d6996 100644
                                                 }
 
                                                 if(curPas.frequentFlyerCard){
-'
+"
       # rubocop:enable Metrics/LineLength
       expect(@git_repo).to receive(:puts).twice
       expect do
@@ -290,6 +294,7 @@ index 7b85bc4..c8d6996 100644
   end
 
   describe 'run command' do
+    let(:text) { "line1\nline2\nline3" }
     it 'should run commands' do
       expect(Open3).to receive(:capture2e).with('cmd') { ['', nil] }
       @git_repo.send :run_command, 'cmd'
@@ -300,9 +305,6 @@ index 7b85bc4..c8d6996 100644
       @git_repo.send :run_command, 'cmd', 'commit'
     end
     it 'should yield each line if block given' do
-      text = 'line1
-line2
-line3'
       expect(Open3).to receive(:capture2e).with('cmd') { [text, nil] }
       f = double(:fake)
       expect(f).to receive(:some_method).with(instance_of(String)).exactly(3).times
@@ -311,11 +313,8 @@ line3'
       end
     end
     it 'should return whole output if block given' do
-      text = 'line1
-line2
-line3'
       expect(Open3).to receive(:capture2e).with('cmd') { [text, nil] }
-      expect(@git_repo.send :run_command, 'cmd').to eq [text, nil]
+      expect(@git_repo.send(:run_command, 'cmd')).to eq [text, nil]
     end
     it 'should fail on empty command (?)' do
       expect do
