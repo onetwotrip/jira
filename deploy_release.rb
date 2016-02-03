@@ -27,7 +27,7 @@ release = client.Issue.find(opts[:release])
 
 prs = release.related['pullRequests']
 
-prs.select! { |pr| /^#{opts[:release]}/.match pr['name'] and pr['status'] != 'DECLINED' }
+prs.select! { |pr| /^#{opts[:release]}/.match pr['name'] && pr['status'] != 'DECLINED' }
 
 if prs.empty?
   puts 'No pull requests for this task!'
