@@ -17,7 +17,7 @@ group :test do
 end
 group :dev do
   gem 'rspec'
-  gem 'rubocop'
+  gem 'rubocop', '0.35.1'
 end
 
 # Specify your gem's dependencies in jira.gemspec
