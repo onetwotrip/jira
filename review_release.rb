@@ -1,3 +1,6 @@
+##
+# frozen_string_literal: true
+#
 require 'json'
 require 'git'
 require 'jira'
@@ -15,7 +18,7 @@ JIRA_SITE = ENV.fetch('JIRA_SITE', 'default')
 fail_on_jscs = ENV.fetch('FAIL_ON_JSCS', false)
 FAIL_ON_JSCS = fail_on_jscs ? !fail_on_jscs.empty? : false
 
-TRANSITION = 'Back To Work'
+TRANSITION = 'Back To Work'.freeze
 
 Dir.mkdir WORKDIR unless Dir.exist? WORKDIR
 
@@ -33,7 +36,7 @@ jira = JIRA::Client.new username: JIRA_USERNAME,
                         context_path: ''
 # noinspection RubyArgCount
 issue = jira.Issue.jql("key = #{triggered_issue}")
-if issue.is_a? Array and issue.length > 1
+if (issue.is_a? Array) && (issue.length > 1)
   fail "WTF??? Issue search returned #{issue.length} elements!"
 elsif issue.is_a? Array
   issue = issue[0]
@@ -64,7 +67,6 @@ branches.each do |branch|
     puts "Branch #{branch_name} does not exist any more...\n#{e.message}"
     next
   end
-
 
   # g_rep.checkout branch_name
   puts 'Merging new version'

@@ -1,6 +1,8 @@
 require 'addressable/uri'
 require 'rest-client'
 
+##
+# This class represents a BitBucket
 class BitBucket
   attr_reader :user, :owner, :repo, :password
 

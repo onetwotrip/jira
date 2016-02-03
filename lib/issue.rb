@@ -11,17 +11,20 @@ module JIRA
         endpoint = create_endpoint 'rest/api/2/issueLink'
         params = {
           type: { name: 'Deployed' },
-          inwardIssue: { key: "#{opts[:release]}" },
-          outwardIssue: { key: "#{key}" }
+          inwardIssue: { key: opts[:release].to_s },
+          outwardIssue: { key: key.to_s },
         }
         return if opts[:dryrun]
         RestClient.post endpoint.to_s, params.to_json,
                         content_type: :json, accept: :json
       end
 
+      # rubocop:disable Style/PredicateName
       def has_transition?(name)
+        # rubocop:disable Style/DoubleNegation
         !!get_transition_by_name(name)
       end
+      # rubocop:enable Style/PredicateName, Style/DoubleNegation
 
       def get_transition_by_name(name)
         available_transitions = client.Transition.all(issue: self)
@@ -37,7 +40,7 @@ module JIRA
 
       def transition(status)
         transition = get_transition_by_name status
-        raise ArgumentError.new, "Transition state #{status} not found!" unless transition
+        fail ArgumentError, "Transition state #{status} not found!" unless transition
         puts "#{key} changed status to #{transition.name}"
         return if opts[:dryrun]
         action = transitions.build
@@ -56,7 +59,7 @@ module JIRA
         params = {
           issueId: id,
           applicationType: 'bitbucket',
-          dataType: 'pullrequest'
+          dataType: 'pullrequest',
         }
         response = RestClient.get endpoint.to_s, params: params
         @related = JSON.parse(response)['detail'].first

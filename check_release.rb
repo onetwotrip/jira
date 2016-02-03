@@ -1,3 +1,6 @@
+##
+# frozen_string_literal: true
+#
 require 'json'
 require 'git'
 require 'sendgrid-ruby'
@@ -29,9 +32,9 @@ NOTIFY_LIST = %w(
   src/mcore/**
   conf/api/**
   lib/nodejs/*
-)
+).freeze
 
-if not ENV['payload'] or ENV['payload'].empty?
+if !ENV['payload'] || ENV['payload'].empty?
   print "No payload - no result\n"
   exit 2
 end
@@ -46,12 +49,9 @@ Dir.mkdir WORKDIR unless Dir.exist? WORKDIR
 
 g_rep = GitRepo.new BASEURL + payload['repository']['full_name'], repo_name, workdir: WORKDIR
 
-new_commit = payload['push']['changes'][0]['new']['target']['hash']
-if payload['push']['changes'][0]['old']
-  old_commit = payload['push']['changes'][0]['old']['target']['hash']
-else
-  old_commit = g_rep.git.merge_base 'master', new_commit
-end
+changes = payload['push']['changes'][0]
+new_commit = changes['new']['target']['hash']
+old_commit = changes.dig('old', 'target', 'hash') || g_rep.git.merge_base('master', new_commit)
 
 puts "Old: #{old_commit}; new: #{new_commit}"
 author_name = g_rep.git.gcommit(new_commit).author.name
@@ -75,13 +75,12 @@ unless crit_changed_files.empty?
     m.to = 'code-control@default.com'
     m.from = EMAIL_FROM
     m.subject = "Изменены критичные файлы в #{payload['repository']['full_name']}"
-    # rubocop:disable Metrics/LineLength
     m.html = <<MAIL
 Привет, Строгий Контроль!<br />
 Тут вот чего: <a href=\"mailto:#{email_to}\">#{author_name}</a> решил
 поменять кое-что критичное, а именно:<br />
 <pre>#{crit_changed_files.join("\n")}</pre><br />
-Вот <a href=\"https://bitbucket.org/#{payload['repository']['full_name']}/branches/compare/#{new_commit}..#{old_commit}\">тут</a> подробности.
+Подробности: <a href=\"https://bitbucket.org/#{payload['repository']['full_name']}/branches/compare/#{new_commit}..#{old_commit}\">тут</a>.
 <br />Удачи!"
 MAIL
     # rubocop:enable Metrics/LineLength

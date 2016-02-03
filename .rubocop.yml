@@ -1,19 +1,9 @@
-# Show me at least one monitor 24x80
+Style/TrailingComma:
+  # If EnforcedStyleForMultiline is comma, the cop requires a comma after the
+  # last item of a list, but only for lists where each item is on its own line.
+  # If EnforcedStyleForMultiline is consistent_comma, the cop requires a comma
+  # after the last item of a list, for all lists.
+  EnforcedStyleForMultiline: comma
 Metrics/LineLength:
-  Max: 120
-
-# Rubocop fails to count this metric in any good way.
-Metrics/AbcSize:
-  Enabled: false
-
-# WTF? 10 lines? Is this a joke?!
-# We are not in Rails, remember?
-Metrics/MethodLength:
-  Enabled: false
-
-# Fuck it. Just fuck it.
-# No offence.
-Style/AndOr:
-  Enabled: false
-Style/Not:
-  Enabled: false
+  Enabled: true
+  Max: 140

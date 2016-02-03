@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require "bundler/setup"
-require "repo"
+require 'bundler/setup'
+require 'repo'
 require 'jira'
 require 'issue'
 require 'pullrequests'
@@ -12,7 +12,7 @@ cr = {
   reviewers: [],
   changes: [],
   authors: [],
-  pullrequests: []
+  pullrequests: [],
 }
 # Setting variables
 WORKDIR = ENV.fetch('WORKDIR', '../repos/')
@@ -36,21 +36,21 @@ jira = JIRA::Client.new username: JIRA_USERNAME,
                         context_path: ''
 issue = jira.Issue.find(ISSUE_ID)
 cr[:assignee] = issue.assignee.attrs
-#cr[:reviewers] << issue.assignee.emailAddress
+# cr[:reviewers] << issue.assignee.emailAddress
 
 # Getting PR
 pullrequests = JIRA::PullRequests.new
 issue.related['pullRequests'].each do |pr|
-  if pr['source']['url'].include? ISSUE_ID and pr['status'].eql? 'OPEN'
+  if (pr['source']['url'].include? ISSUE_ID) && (pr['status'].eql? 'OPEN')
     pullrequests << pr
   end
 end
 
 # Parsing/Validating PR
-pullrequests.uniq! {|i| i['source']['url']}
+pullrequests.uniq! { |i| i['source']['url'] }
 unless pullrequests.valid?
-  #sendmail
-  fail "Fails on PR validation"
+  # sendmail
+  fail 'Fails on PR validation'
 end
 
 # Get reviewers from changes of PR
@@ -63,7 +63,7 @@ pullrequests.each do |pr|
   # Return fail if src/dist repos not equal
   unless src.to_repo_s.eql? dst.to_repo_s
     # sendmail
-    fail "Source and Destination repos in PR is different"
+    fail 'Source and Destination repos in PR are different'
   end
   # Clone/Open dist branch
   repo = Git.get_branch dst.to_repo_s
@@ -71,9 +71,9 @@ pullrequests.each do |pr|
   # Merge src to dist branch
   repo.merge "origin/#{src.branch}"
   # Get files change
-  repo.gtree("origin/#{dst.branch}").diff("HEAD").stats[:files].keys.each do |file|
+  repo.gtree("origin/#{dst.branch}").diff('HEAD').stats[:files].keys.each do |file|
     # Get reviewer mail by file
-    repo.get_attrs( file )['owner.mail'].each do |reviewer|
+    repo.get_attrs(file)['owner.mail'].each do |reviewer|
       cr[:changes] << file
       cr[:reviewers] += reviewer
     end
@@ -85,14 +85,12 @@ pullrequests.each do |pr|
 end
 
 # Send CodeReview
-unless (cr[:reviewers].empty?)
-  mailer = OttInfra::SendMail.new({
-    from: SENDGRID_FROM,
-    user: SENDGRID_USER,
-    pass: SENDGRID_PASS})
-  mailer.sendmail( cr[:reviewers], {
-    cc: 'dmitry.shmelev@default.com',
-    subject: 'CodeReview',
-    message: ERB.new(File.read('views/review_mail.erb')).result
-  })
+unless cr[:reviewers].empty?
+  message = ERB.new(File.read('views/review_mail.erb')).result
+  mailer = OttInfra::SendMail.new(from: SENDGRID_FROM,
+                                  user: SENDGRID_USER,
+                                  pass: SENDGRID_PASS)
+  mailer.sendmail(cr[:reviewers], cc: 'dmitry.shmelev@default.com',
+                                  subject: 'CodeReview',
+                                  message: message)
 end

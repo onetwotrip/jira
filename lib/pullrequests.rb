@@ -1,22 +1,25 @@
 module JIRA
+  ##
+  # This class represents an array of PullRequests
   class PullRequests < Array
     def valid?
-      if self.empty?
-        puts "PullRequests is empty"; return
-      end
-      self.each do |item|
-        unless item.is_a? Hash
-          puts "Item is not Hash"; return
+      !empty? && items_valid? && !duplicates?
+    end
+
+    private
+
+    def items_valid?
+      each do |item|
+        if (!item.is_a? Hash) || (!item.dig('source', 'url'))
+          puts "Item of PullRequests is not valid: #{item.inspect}"
+          return false
         end
-        unless item['source'] && item['source']['url']
-          puts "Item has not ['source']['url'] key"; return
-        end
       end
-      urls = self.map{|i| i['source']['url']}
-      if urls.uniq.length != urls.length
-        puts "PullRequests has duplicates"; return
-      end
-      true
+    end
+
+    def duplicates?
+      urls = map { |i| i['source']['url'] }
+      urls.uniq.length != urls.length
     end
   end
 end

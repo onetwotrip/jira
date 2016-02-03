@@ -34,30 +34,28 @@ client = JIRA::Client.new(options)
 
 release = client.Issue.find(opts[:release])
 release.related['branches'].each do |branch|
-  if branch['name'].match "^#{release.key}-pre"
-    puts branch['repository']['name']
-    today = Time.new.strftime('%d.%m.%Y')
-    old_branch = branch['name']
-    new_branch = "#{release.key}-release-#{today}"
+  next unless branch['name'].match "^#{release.key}-pre"
+  puts branch['repository']['name']
+  today = Time.new.strftime('%d.%m.%Y')
+  old_branch = branch['name']
+  new_branch = "#{release.key}-release-#{today}"
 
-    repo_path = git_repo(branch['repository']['url'],
-                         branch['repository']['name'],
-                         opts)
-    with repo_path do
-      fetch
-      checkout(old_branch)
-      pull
-      branch(new_branch).checkout
-      checkout(old_branch)
-      branch(new_branch).delete
-      branch(new_branch).checkout
-      puts diff(old_branch, new_branch).size
-    end
-
-    if opts[:force]
-      puts "Pushing #{new_branch} and deleting #{old_branch} branch"
-      repo_path.push(repo_path.remote('origin'), new_branch)
-      clean_branch(repo_path, old_branch)
-    end
+  repo_path = git_repo(branch['repository']['url'],
+                       branch['repository']['name'],
+                       opts)
+  with repo_path do
+    fetch
+    checkout(old_branch)
+    pull
+    branch(new_branch).checkout
+    checkout(old_branch)
+    branch(new_branch).delete
+    branch(new_branch).checkout
+    puts diff(old_branch, new_branch).size
   end
+
+  next unless opts[:force]
+  puts "Pushing #{new_branch} and deleting #{old_branch} branch"
+  repo_path.push(repo_path.remote('origin'), new_branch)
+  clean_branch(repo_path, old_branch)
 end

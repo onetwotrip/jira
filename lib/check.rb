@@ -1,12 +1,16 @@
 require 'open3'
 
+# rubocop:disable Metrics/CyclomaticComplexity
+# rubocop:disable Metrics/PerceivedComplexity
+# rubocop:disable MethodLength
+# rubocop:disable Metrics/AbcSize
 def check_diff(git_repo, new_commit, old_commit = nil)
   res_text = ''
   prj_dir = Dir.new git_repo.dir.path
   has_jscs = prj_dir.each.to_a.include? '.jscsrc'
   has_jshint = prj_dir.each.to_a.include? '.jshintrc'
 
-  if not has_jscs and not has_jshint
+  if !has_jscs && !has_jshint
     print "check_diff: Nothing to do.\n"
     return ''
   end
@@ -18,7 +22,7 @@ def check_diff(git_repo, new_commit, old_commit = nil)
 
   puts "Diff #{old_commit} with #{new_commit}"
   puts 'Commits:'
-  puts git_repo.log.between(old_commit, new_commit).collect {|commit| "#{commit.sha}: #{commit.message}\n"}
+  puts git_repo.log.between(old_commit, new_commit).collect { |commit| "#{commit.sha}: #{commit.message}\n" }
 
   diff = git_repo.diff old_commit, new_commit
 

@@ -64,6 +64,7 @@ repos = {}
 release_branch = "#{opts[:release]}-#{opts[:postfix]}"
 source = opts[:source]
 
+# rubocop:disable Metrics/BlockNesting
 issues = release.deploys
 puts issues.size
 issues.each do |issue|
@@ -84,45 +85,44 @@ issues.each do |issue|
       end
       if pullrequest['source']['branch'].match "^#{issue.key}"
         issue.related['branches'].each do |branch|
-          if branch['url'] == pullrequest['source']['url']
+          next unless branch['url'] == pullrequest['source']['url']
 
-            repo_name = branch['repository']['name']
-            repo_url = branch['repository']['url']
-            repos[repo_name] ||= { url: repo_url, branches: [] }
-            repos[repo_name][:repo_base] ||= git_repo(repo_url, repo_name, opts)
-            repos[repo_name][:branches].push(issue: issue,
-                                             pullrequest: pullrequest,
-                                             branch: branch)
-            repo_path = repos[repo_name][:repo_base]
-            prepare_branch(repo_path, source, release_branch, opts[:clean])
-            begin
-              merge_message = "CI: merge branch #{branch['name']} to release "\
-                              " #{opts[:release]}.  (pull request #{pullrequest['id']}) "
-              repo_path.merge("origin/#{branch['name']}", merge_message)
-              puts "#{branch['name']} merged"
-              has_merges = true
-            rescue Git::GitExecuteError => e
-              body = <<-BODY
-              CI: Error while merging to release #{opts[:release]}
-              [~#{issue.assignee.key}]
-              Repo: #{repo_name}
-              Author: #{pullrequest['author']['name']}
-              PR: #{pullrequest['url']}
-              {noformat:title=Ошибка}
-              Error #{e}
-              {noformat}
-              Замержите ветку #{branch['name']} в ветку релиза #{release_branch}.
-              После этого сообщите своему тимлиду, чтобы он перевёл задачу в статус in Release
-              BODY
-              if opts[:push]
-                issue.post_comment body
-                merge_fail = true
-              end
-              badissues[:unmerged] = [] unless badissues.key?(:unmerged)
-              badissues[:unmerged].push(key: issue.key, body: body)
-              repo_path.reset_hard
-              puts "\n"
+          repo_name = branch['repository']['name']
+          repo_url = branch['repository']['url']
+          repos[repo_name] ||= { url: repo_url, branches: [] }
+          repos[repo_name][:repo_base] ||= git_repo(repo_url, repo_name, opts)
+          repos[repo_name][:branches].push(issue: issue,
+                                           pullrequest: pullrequest,
+                                           branch: branch)
+          repo_path = repos[repo_name][:repo_base]
+          prepare_branch(repo_path, source, release_branch, opts[:clean])
+          begin
+            merge_message = "CI: merge branch #{branch['name']} to release "\
+                            " #{opts[:release]}.  (pull request #{pullrequest['id']}) "
+            repo_path.merge("origin/#{branch['name']}", merge_message)
+            puts "#{branch['name']} merged"
+            has_merges = true
+          rescue Git::GitExecuteError => e
+            body = <<-BODY
+            CI: Error while merging to release #{opts[:release]}
+            [~#{issue.assignee.key}]
+            Repo: #{repo_name}
+            Author: #{pullrequest['author']['name']}
+            PR: #{pullrequest['url']}
+            {noformat:title=Ошибка}
+            Error #{e}
+            {noformat}
+            Замержите ветку #{branch['name']} в ветку релиза #{release_branch}.
+            После этого сообщите своему тимлиду, чтобы он перевёл задачу в статус in Release
+            BODY
+            if opts[:push]
+              issue.post_comment body
+              merge_fail = true
             end
+            badissues[:unmerged] = [] unless badissues.key?(:unmerged)
+            badissues[:unmerged].push(key: issue.key, body: body)
+            repo_path.reset_hard
+            puts "\n"
           end
         end
       else
