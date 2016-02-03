@@ -63,7 +63,7 @@ pullrequests.each do |pr|
   # Return fail if src/dist repos not equal
   unless src.to_repo_s.eql? dst.to_repo_s
     # sendmail
-    fail 'Source and Destination repos in PR is different'
+    fail 'Source and Destination repos in PR are different'
   end
   # Clone/Open dist branch
   repo = Git.get_branch dst.to_repo_s
