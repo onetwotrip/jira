@@ -27,11 +27,13 @@ release = client.Issue.find(opts[:release])
 
 prs = release.related['pullRequests']
 
-prs.select! { |pr| /^#{opts[:release]}/.match pr['name'] && pr['status'] != 'DECLINED' }
+git_style_release = opts[:release].tr('-', ' ').downcase.capitalize
+
+prs.select! { |pr| /^((#{opts[:release]})|(#{git_style_release}))/.match pr['name'] && pr['status'] != 'DECLINED' }
 
 if prs.empty?
   puts 'No pull requests for this task!'
-  exit 0
+  exit 1
 end
 
 puts prs.map { |pr| pr['name'] }
