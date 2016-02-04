@@ -55,7 +55,7 @@ exit 0 if branches.empty?
 branches.each do |branch|
   branch_name = branch['name']
   repo_name = branch['repository']['name']
-  repo_url = "#{BASEURL}/OneTwoTrip/#{repo_name}"
+  repo_url = branch['repository']['url']
   # Checkout repo
   print "Working with #{repo_name}\n"
   g_rep = GitRepo.new repo_url, repo_name, workdir: WORKDIR
