@@ -1,6 +1,3 @@
-##
-# frozen_string_literal: true
-#
 require 'json'
 require 'git'
 require 'jira'
