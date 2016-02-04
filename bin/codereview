@@ -15,6 +15,7 @@ cr = {
   pullrequests: [],
 }
 # Setting variables
+GITATTR_REVIEWER_KEY = ENV.fetch('GITATTR_REVIEWER_KEY', 'reviewer.mail')
 WORKDIR = ENV.fetch('WORKDIR', '../repos/')
 
 SENDGRID_FROM = ENV.fetch('SG_FROM', 'default@default.com')
@@ -73,7 +74,7 @@ pullrequests.each do |pr|
   # Get files change
   repo.gtree("origin/#{dst.branch}").diff('HEAD').stats[:files].keys.each do |file|
     # Get reviewer mail by file
-    repo.get_attrs(file)['owner.mail'].each do |reviewer|
+    repo.get_attrs(file)[GITATTR_REVIEWER_KEY].each do |reviewer|
       cr[:changes] << file
       cr[:reviewers] += reviewer
     end
@@ -85,7 +86,9 @@ pullrequests.each do |pr|
 end
 
 # Send CodeReview
-unless cr[:reviewers].empty?
+if cr[:reviewers].empty?
+  puts 'No reviewers found'
+else
   message = ERB.new(File.read('views/review_mail.erb')).result
   mailer = OttInfra::SendMail.new(from: SENDGRID_FROM,
                                   user: SENDGRID_USER,
