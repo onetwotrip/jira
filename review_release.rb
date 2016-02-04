@@ -6,7 +6,6 @@ require_relative 'lib/repo'
 require_relative 'lib/issue'
 
 WORKDIR = ENV.fetch('WORKDIR', '../repos/')
-BASEURL = ENV.fetch('BB_URL', 'git@bitbucket.org:')
 
 JIRA_USERNAME = ENV.fetch('JIRA_USERNAME', 'default')
 JIRA_PASSWORD = ENV.fetch('JIRA_PASSWORD', 'default')
