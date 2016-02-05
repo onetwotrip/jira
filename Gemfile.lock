@@ -6,7 +6,7 @@ GIT
 
 GIT
   remote: https://github.com/onetwotrip/ott_infra-sendmail.git
-  revision: fd3cdb5cd340f2c0c2efa867f78b51b463734e8f
+  revision: 96a4831d218800ae897b98acec5ddec1efb8ec50
   branch: develop
   specs:
     ottinfra-sendmail (0.1.1)
