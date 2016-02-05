@@ -52,8 +52,9 @@ end
 # Parsing/Validating PR
 pullrequests.uniq! { |i| i['source']['url'] }
 unless pullrequests.valid?
-  # sendmail
-  fail 'Fails on PR validation'
+  # Exit if pullrequests invalid
+  puts 'Fails on PR validation'
+  exit
 end
 
 # Get reviewers from changes of PR
@@ -63,10 +64,11 @@ pullrequests.each do |pr|
   dst = Git::Utils.url_to_ssh pr['destination']['url']
   puts "Source: #{src.to_repo_s} #{src.branch}"
   puts "Destination: #{dst.to_repo_s} #{dst.branch}"
-  # Return fail if src/dist repos not equal
+  # Exit if src/dist repos not equal
   unless src.to_repo_s.eql? dst.to_repo_s
     # sendmail
-    fail 'Source and Destination repos in PR are different'
+    puts 'Source and Destination repos in PR are different'
+    exit
   end
   # Clone/Open dist branch
   repo = Git.get_branch dst.to_repo_s
