@@ -13,8 +13,10 @@ cr = {
   changes: [],
   authors: [],
   pullrequests: [],
+  mails: [],
 }
 # Setting variables
+GITATTR_REVIEWER = ENV.fetch('GITATTR_REVIEWER', 'code-control@default.com')
 GITATTR_REVIEWER_KEY = ENV.fetch('GITATTR_REVIEWER_KEY', 'reviewer.mail')
 WORKDIR = ENV.fetch('WORKDIR', '../repos/')
 
@@ -73,6 +75,8 @@ pullrequests.each do |pr|
   repo.merge "origin/#{src.branch}"
   # Get files change
   repo.gtree("origin/#{dst.branch}").diff('HEAD').stats[:files].keys.each do |file|
+    # Set change flag if .gitattributes file modified
+    cr[:gitattr_flag] = true if file.include? '.gitattributes'
     # Get reviewer mail by file
     repo.get_attrs(file)[GITATTR_REVIEWER_KEY].each do |reviewer|
       cr[:changes] << file
@@ -85,15 +89,28 @@ pullrequests.each do |pr|
   cr[:pullrequests] << Hash[url: pr['url'], name: pr['name']]
 end
 
+# Create mails
+mailer = OttInfra::SendMail.new(user: SENDGRID_USER,
+                                pass: SENDGRID_PASS)
+
+if cr[:gitattr_flag]
+  mailer.add from: SENDGRID_FROM,
+             to: GITATTR_REVIEWER,
+             cc: 'dmitry.shmelev@default.com',
+             subject: 'CodeReview: GitAttribute changed!',
+             message: ERB.new(File.read('views/gitattr_mail.erb')).result
+end
+unless cr[:reviewers].empty?
+  mailer.add from: SENDGRID_FROM,
+             to: cr[:reviewers],
+             cc: 'dmitry.shmelev@default.com',
+             subject: 'CodeReview',
+             message: ERB.new(File.read('views/review_mail.erb')).result
+end
+
 # Send CodeReview
-if cr[:reviewers].empty?
-  puts 'No reviewers found'
+if mailer.mails.empty?
+  puts 'SendMail: Nothing to send'
 else
-  message = ERB.new(File.read('views/review_mail.erb')).result
-  mailer = OttInfra::SendMail.new(from: SENDGRID_FROM,
-                                  user: SENDGRID_USER,
-                                  pass: SENDGRID_PASS)
-  mailer.sendmail(cr[:reviewers], cc: 'dmitry.shmelev@default.com',
-                                  subject: 'CodeReview',
-                                  message: message)
+  mailer.sendmail
 end
