@@ -53,7 +53,7 @@ end
 pullrequests.uniq! { |i| i['source']['url'] }
 unless pullrequests.valid?
   # Exit if pullrequests invalid
-  issue.post_comment p('CodeReview: Fails on PR validation')
+  issue.post_comment p("CodeReview: #{pullrequests.valid_msg}")
   exit
 end
 
