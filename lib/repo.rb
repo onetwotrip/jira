@@ -146,6 +146,7 @@ class GitRepo
     @git.chdir(&block)
   end
 
+  # :nocov:
   def run_tests!
     errors = ''
     @git.chdir do
@@ -164,6 +165,7 @@ class GitRepo
     end
     errors
   end
+  # :nocov:
 
   def method_missing(*args)
     method_name = args.shift
@@ -173,6 +175,7 @@ class GitRepo
 
   private
 
+  # :nocov:
   def run_check(command, filename, ranges)
     text = ''
     run_command(command)[0].each_line do |line|
@@ -182,6 +185,7 @@ class GitRepo
     end
     text
   end
+  # :nocov:
 
   def format_line(line, ranges)
     return nil unless (md = /\.js: line (\d+)(,?.*)$/.match(line))
@@ -225,6 +229,7 @@ class GitRepo
   end
 end
 
+# :nocov:
 def git_repo(url, name, opts = {})
   if File.writable?(name)
     git_repo = Git.open(name)
@@ -263,3 +268,4 @@ def prepare_branch(repo, source, destination, clean = false)
   repo.merge(source,
              "CI: merge source branch #{source} to release #{destination}")
 end
+# :nocov:
