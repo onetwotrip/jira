@@ -42,11 +42,8 @@ cr[:assignee] = issue.assignee.attrs
 # cr[:reviewers] << issue.assignee.emailAddress
 
 # Getting PR
-pullrequests = JIRA::PullRequests.new
-issue.related['pullRequests'].each do |pr|
-  if (pr['source']['url'].include? ISSUE_ID) && (pr['status'].eql? 'OPEN')
-    pullrequests << pr
-  end
+pullrequests = JIRA::PullRequests.new issue.related['pullRequests'].select do |pr|
+  (pr['source']['url'].include? ISSUE_ID) && (pr['status'].eql? 'OPEN')
 end
 
 # Parsing/Validating PR

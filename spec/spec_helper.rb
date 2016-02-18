@@ -18,9 +18,9 @@ RSpec.configure do |config|
   end
 end
 
-shared_examples_for 'push and fail' do |pushed|
+shared_examples_for 'add and fail' do |pushed|
   it 'push it to the fail' do
-    subject.push pushed
+    subject.add pushed
     should_not be_valid
   end
 end
