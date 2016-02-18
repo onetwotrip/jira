@@ -16,6 +16,7 @@ group :test do
   gem 'simplecov', '~>0.11.1'
 end
 group :dev do
+  gem 'rake'
   gem 'rspec'
   gem 'rubocop', '0.35.1'
 end
