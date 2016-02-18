@@ -74,6 +74,10 @@ module JIRA
         endpoint
       end
 
+      def pullrequests
+        JIRA::PullRequests.new related['pullRequests']
+      end
+
       def deploys
         client.Issue.jql(%(issue in linkedIssues(#{key},"deployes")))
       end
