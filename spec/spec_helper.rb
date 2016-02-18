@@ -2,9 +2,6 @@ require 'bundler/setup'
 require 'simplecov'
 SimpleCov.start
 
-require 'bitbucket/pullrequest'
-require 'bitbucket'
-require 'check'
 require 'issue'
 require 'repo'
 require 'pullrequests'
