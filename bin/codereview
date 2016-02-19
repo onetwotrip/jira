@@ -41,13 +41,10 @@ issue = jira.Issue.find(ISSUE_ID)
 cr[:assignee] = issue.assignee.attrs
 # cr[:reviewers] << issue.assignee.emailAddress
 
-# Getting PR
-pullrequests = JIRA::PullRequests.new issue.related['pullRequests'].select do |pr|
-  (pr['source']['url'].include? ISSUE_ID) && (pr['status'].eql? 'OPEN')
-end
+# Filter PR
+issue.pullrequests.filter_by_status('OPEN').filter_by_source_url(ISSUE_ID)
 
 # Parsing/Validating PR
-pullrequests.uniq! { |i| i['source']['url'] }
 unless pullrequests.valid?
   # Exit if pullrequests invalid
   issue.post_comment p("CodeReview: #{pullrequests.valid_msg}")
@@ -56,22 +53,13 @@ end
 
 # Get reviewers from changes of PR
 pullrequests.each do |pr|
-  # Get of merge source and destination
-  src = Git::Utils.url_to_ssh pr['source']['url']
-  dst = Git::Utils.url_to_ssh pr['destination']['url']
-  # Exit if src/dist repos not equal
-  unless src.to_repo_s.eql? dst.to_repo_s
-    # sendmail
-    issue.post_comment p('CodeReview: Source and Destination repos in PR are different')
-    exit
-  end
   # Clone/Open dist branch
   repo = Git.get_branch dst.to_repo_s
   repo.fetch
   # Merge src to dist branch
-  repo.merge "origin/#{src.branch}"
+  repo.merge "origin/#{pr.src.branch}"
   # Get files change
-  repo.gtree("origin/#{dst.branch}").diff('HEAD').stats[:files].keys.each do |file|
+  repo.gtree("origin/#{pr.dst.branch}").diff('HEAD').stats[:files].keys.each do |file|
     # Set change flag if .gitattributes file modified
     cr[:gitattr_flag] = true if file.include? '.gitattributes'
     # Get reviewer mail by file

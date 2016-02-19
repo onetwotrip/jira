@@ -1,18 +1,31 @@
 require 'spec_helper'
+describe JIRA::PullRequest do
+  subject do
+    pr = { 'source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0003' },
+           'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
+           'status' => 'CANCEL' }
+    described_class.new pr
+  end
+  it '.src and .dst should return URI::Git::Generic' do
+    expect(subject.src.class).to eq(URI::Git::Generic)
+    expect(subject.dst.class).to eq(URI::Git::Generic)
+  end
+end
+
 describe JIRA::PullRequests do
   subject do
-    open_pr = [
+    open_prs = [
       { 'source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0001' },
         'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
         'status' => 'OPEN' },
       { 'source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0002' },
         'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
         'status' => 'OPEN' }]
-    cancel_pr = [
+    cancel_prs = [
       { 'source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0003' },
         'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
         'status' => 'CANCEL' }]
-    described_class.new open_pr + cancel_pr
+    described_class.new open_prs + cancel_prs
   end
 
   it { expect be_valid }
@@ -42,11 +55,18 @@ describe JIRA::PullRequests do
     ).to eq [subject[0]]
   end
 
-  it '.filter_by_* should return filtered PullRequests' do
+  it '.filter_by_* should change PullRequests' do
+    expected = subject[0]
+    url = expected['source']['url']
+    subject.filter_by_status('OPEN')
+      .filter_by_source_url(url)
+    expect(subject).to eq [expected]
+  end
+  it '.grep_by_* should return grepped PullRequests' do
     url = subject[0]['source']['url']
     expect(
-      subject.filter_by_status('OPEN')
-             .filter_by_source_url(url)
+      subject.grep_by_status('OPEN')
+             .grep_by_source_url(url)
     ).to eq [subject[0]]
   end
 
