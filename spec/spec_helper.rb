@@ -1,10 +1,9 @@
 require 'bundler/setup'
 require 'simplecov'
-SimpleCov.start
+SimpleCov.start do
+  SimpleCov.minimum_coverage_by_file 95
+end
 
-require 'bitbucket/pullrequest'
-require 'bitbucket'
-require 'check'
 require 'issue'
 require 'repo'
 require 'pullrequests'
@@ -15,6 +14,18 @@ RSpec.configure do |config|
   end
   config.mock_with :rspec do |mocks|
     mocks.verify_partial_doubles = true
+  end
+  # suppress console output during rspec tests
+  original_stderr = $stderr
+  original_stdout = $stdout
+  config.before(:all) do
+    # Redirect stderr and stdout
+    $stderr = File.open(File::NULL, 'w')
+    $stdout = File.open(File::NULL, 'w')
+  end
+  config.after(:all) do
+    $stderr = original_stderr
+    $stdout = original_stdout
   end
 end
 

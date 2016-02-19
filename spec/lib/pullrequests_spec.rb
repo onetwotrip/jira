@@ -20,6 +20,8 @@ describe JIRA::PullRequests do
     subject.clear
     is_expected.to_not be_valid
   end
+  it_behaves_like 'add and fail', 'source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0001' },
+                                  'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' }
   it_behaves_like 'add and fail', 'source' => { 'url' => 'https://bb.org/org/repo_one/branch/OTT-0004' },
                                   'destination' => { 'url' => 'https://bb.org/org/repo_two/branch/master' }
   it_behaves_like 'add and fail', Hash['source' => { 'url' => 'A' }]
@@ -46,5 +48,9 @@ describe JIRA::PullRequests do
       subject.filter_by_status('OPEN')
              .filter_by_source_url(url)
     ).to eq [subject[0]]
+  end
+
+  it '.method_missing calls super' do
+    expect { subject.non_existed }.to raise_error(NoMethodError)
   end
 end

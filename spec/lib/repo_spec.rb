@@ -72,6 +72,72 @@ describe 'GitRepo' do
       @git_repo.delete_branch! 'some-branch'
     end
   end
+
+  describe 'prepare_branch' do
+    it 'should attempt to prepare branch' do
+      src_bd = double(:src_branch_double)
+      expect(@git_double).to receive(:branch).with('src-branch').twice { src_bd }
+      expect(src_bd).to receive(:checkout).twice
+
+      dst_bd = double(:dst_branch_double)
+      expect(@git_double).to receive(:branch).with('dst-branch').exactly(3).times { dst_bd }
+      expect(dst_bd).to receive(:checkout).twice
+
+      expect(@git_double).to receive(:fetch)
+      expect(@git_double).to receive(:merge)
+      expect(@git_repo).to receive(:delete_branch!).with('dst-branch')
+      @git_repo.prepare_branch 'src-branch', 'dst-branch'
+      @git_repo.prepare_branch 'src-branch', 'dst-branch', true
+    end
+  end
+
+  describe 'merge!' do
+    it 'should call git.merge' do
+      expect(@git_double).to receive(:merge).with('branch')
+      @git_repo.merge! 'branch'
+    end
+  end
+  describe 'abort_merge!' do
+    it 'should call git merge --abort' do
+      lib = double(:lib)
+      expect(lib).to receive(:command).with('merge', '--abort')
+      expect(@git_double).to receive(:revparse).with('MERGE_HEAD') { true }
+      expect(@git_double).to receive(:lib) { lib }
+      @git_repo.abort_merge!
+    end
+  end
+
+  describe 'chdir' do
+    it 'should call git.chdir' do
+      expect(@git_double).to receive(:chdir).and_yield
+      @git_repo.chdir {}
+    end
+  end
+
+  describe 'check_diff' do
+    it 'should call diff.map' do
+      file = double(:file)
+      expect(file).to receive(:path) { '/path.js' }
+      expect(@git_double).to receive(:merge_base).with('new_commit', 'master') { 'master' }
+      expect(@git_double).to receive(:diff).with('master', 'new_commit') { [file] }
+      @git_repo.changed_files 'new_commit'
+    end
+  end
+
+  describe 'check_diff' do
+    it 'should check diff' do
+      file = double(:file)
+      expect(file).to receive(:patch) { 'patch_line' }
+      expect(file).to receive(:path).exactly(3).times { '/path.js' }
+
+      expect(@git_double).to receive(:merge_base).with('new_commit', 'master') { 'master' }
+      expect(@git_double).to receive(:diff).with('master', 'new_commit') { [file] }
+      expect(@git_double).to receive(:revparse).with('HEAD')
+      expect(@git_double).to receive(:checkout).twice
+      @git_repo.check_diff 'new_commit'
+    end
+  end
+
   describe 'commits_between' do
     it 'should ask git.log about it' do
       expect(@git_double).to receive_message_chain(:log, :between).with('c1', 'c2')
@@ -320,6 +386,13 @@ index 7b85bc4..c8d6996 100644
       expect do
         @git_repo.send :run_command, ''
       end.to raise_error ArgumentError, 'Empty or nil command!'
+    end
+  end
+  describe 'method_missing' do
+    it 'should call git private method' do
+      expect(@git_double).to receive(:send).with(:non_existent)
+      expect(@git_double).to receive(:respond_to?).with(:non_existent) { true }
+      @git_repo.non_existent
     end
   end
 end
