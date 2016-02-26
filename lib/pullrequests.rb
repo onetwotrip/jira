@@ -3,21 +3,28 @@ require 'git'
 module JIRA
   ##
   # This class represent PullRequest
-  class PullRequest < Hash
+  class PullRequest
     GITATTR_REVIEWER_KEY = ENV.fetch('GITATTR_REVIEWER_KEY', 'reviewer.mail')
-    attr_accessor :repo
+    attr_reader :pr, :repo
 
     def initialize(hash)
-      merge! hash
-      create_repodir
+      begin
+        valid?(hash)
+      rescue => e
+        puts e
+        @pr = {}
+        return false
+      end
+      @pr = hash
+      # create_repodir
     end
 
     def src
-      Git::Utils.url_to_ssh self['source']['url']
+      parse_url @pr['source']['url']
     end
 
     def dst
-      Git::Utils.url_to_ssh self['destination']['url']
+      parse_url @pr['destination']['url']
     end
 
     def changed_files
@@ -30,11 +37,21 @@ module JIRA
       end
     end
 
-    def valid?
-      fail 'Source and Destination repos in PR are different' unless src.to_repo_s == dst.to_repo_s
+    def empty?
+      @pr.empty?
     end
 
     private
+
+    def parse_url(url)
+      Git::Utils.url_to_ssh url
+    end
+
+    def valid?(input)
+      src = parse_url(input['source']['url'])
+      dst = parse_url(input['destination']['url'])
+      fail 'Source and Destination repos in PR are different' unless src.to_repo_s == dst.to_repo_s
+    end
 
     def create_repodir
       @repo = Git.get_branch dst.to_repo_s
@@ -49,23 +66,29 @@ module JIRA
 
   ##
   # This class represents an array of PullRequests
-  class PullRequests < Array
+  class PullRequests
     attr_reader :valid_msg
+    attr_reader :prs
 
-    def initialize(arr)
-      arr.each do |i|
-        add(i)
+    def initialize(*arr)
+      @prs = []
+      arr.each do |pr|
+        add(pr)
       end
     end
 
     def add(pr)
-      push PullRequest.new.merge(pr)
+      if pr.instance_of?(PullRequest)
+        @prs.push pr
+      else
+        fail TypeError, "Expected PullRequest value. Got #{pr.class}"
+      end
     end
 
     def valid?
-      !empty? && items_valid? && !duplicates?
+      !empty? && !duplicates?
     rescue => e
-      @valid_msg = e
+      @valid_msg = p(e)
       return false
     end
 
@@ -74,21 +97,26 @@ module JIRA
     end
 
     def empty?
-      fail 'Has no PullRequests' if super
+      fail 'Has no PullRequests' if @prs.empty?
     end
 
     def filter_by(key, *args)
-      keep_if do |pr|
-        args.include? key.split('_').inject(pr) { |a, e| a[e] }
+      @prs.keep_if do |pr|
+        args.include? key.split('_').inject(pr.pr) { |a, e| a[e] }
       end
+      self
     end
 
     def grep_by(key, *args)
       self.class.new(
-        select do |pr|
-          args.include? key.split('_').inject(pr) { |a, e| a[e] }
+        *@prs.select do |pr|
+          args.include? key.split('_').inject(pr.pr) { |a, e| a[e] }
         end
       )
+    end
+
+    def each
+      @prs.each
     end
 
     def method_missing(m, *args, &block)
@@ -103,12 +131,8 @@ module JIRA
 
     private
 
-    def items_valid?
-      each(&:valid?)
-    end
-
     def duplicates?
-      urls = map { |i| i['source']['url'] }
+      urls = @prs.map { |i| i.pr['source']['url'] }
       fail "PullRequests has duplication: #{urls.join ','}" if urls.uniq.length != urls.length
     end
   end

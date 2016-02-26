@@ -75,7 +75,9 @@ module JIRA
       end
 
       def pullrequests
-        JIRA::PullRequests.new related['pullRequests']
+        JIRA::PullRequests.new(
+          *related['pullRequests'].map { |i| JIRA::PullRequest.new(i) }
+        )
       end
 
       def deploys
