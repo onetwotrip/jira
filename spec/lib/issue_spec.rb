@@ -26,7 +26,7 @@ describe JIRA::Resource::Issue do
     allow_any_instance_of(JIRA::Resource::Issue).to receive(:related)
       .and_return(open_pr)
     issue = JIRA::Resource::Issue.new(@jira)
-    expect(issue.pullrequests.class).to eq(JIRA::PullRequests)
+    expect(issue.pullrequests(Config.git).class).to eq(JIRA::PullRequests)
   end
 
   it '.create_endpoint should returns Addressable::URI' do

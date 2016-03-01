@@ -1,48 +1,24 @@
 #!/usr/bin/env ruby
-
 require 'bundler/setup'
 require 'repo'
 require 'jira'
 require 'issue'
 require 'pullrequests'
 require 'ottinfra/sendmail'
-require 'erb'
 
-cr = {
-  reviewers: [],
-  changes: [],
-  authors: [],
-  pullrequests: [],
-  mails: [],
-}
-# Setting variables
-GITATTR_REVIEWER = ENV.fetch('GITATTR_REVIEWER', 'code-control@default.com')
-GITATTR_REVIEWER_KEY = ENV.fetch('GITATTR_REVIEWER_KEY', 'reviewer.mail')
-WORKDIR = ENV.fetch('WORKDIR', '../repos/')
+require File.expand_path('../../config/environment.rb', __FILE__)
 
-SENDGRID_FROM = ENV.fetch('SG_FROM', 'default@default.com')
-SENDGRID_USER = ENV.fetch('SG_USER', 'jenkins_ott')
-SENDGRID_PASS = ENV.fetch('SG_KEY', 'vpfzLpbe0V5iEdgW34AQ')
-JIRA_USERNAME = ENV.fetch('JIRA_USERNAME', 'default')
-JIRA_PASSWORD = ENV.fetch('JIRA_PASSWORD', 'default')
-JIRA_SITE = ENV.fetch('JIRA_SITE', 'default')
-unless (ISSUE_ID = ENV['ISSUE'])
+unless Config.jira[:issue]
   puts "CodeReview: No issue - no cry!\n"
   exit 2
 end
 
 # Getting issie
-jira = JIRA::Client.new username: JIRA_USERNAME,
-                        password: JIRA_PASSWORD,
-                        site: JIRA_SITE,
-                        auth_type: :basic,
-                        context_path: ''
-issue = jira.Issue.find(ISSUE_ID)
-cr[:assignee] = issue.assignee.attrs
-# cr[:reviewers] << issue.assignee.emailAddress
-
-# Filter PR
-issue.pullrequests.filter_by_status('OPEN').filter_by_source_url(ISSUE_ID)
+jira = JIRA::Client.new Config.jira
+issue = jira.Issue.find(Config.jira[:issue])
+pullrequests = issue.pullrequests(Config.git)
+               .filter_by_status('OPEN')
+               .filter_by_source_url(Config.jira[:issue])
 
 # Parsing/Validating PR
 unless pullrequests.valid?
@@ -51,46 +27,13 @@ unless pullrequests.valid?
   exit
 end
 
-# Get reviewers from changes of PR
-pullrequests.each do |pr|
-  # Clone/Open dist branch
-  repo = Git.get_branch dst.to_repo_s
-  repo.fetch
-  # Merge src to dist branch
-  repo.merge "origin/#{pr.src.branch}"
-  # Get files change
-  repo.gtree("origin/#{pr.dst.branch}").diff('HEAD').stats[:files].keys.each do |file|
-    # Set change flag if .gitattributes file modified
-    cr[:gitattr_flag] = true if file.include? '.gitattributes'
-    # Get reviewer mail by file
-    repo.get_attrs(file)[GITATTR_REVIEWER_KEY].each do |reviewer|
-      cr[:changes] << file
-      cr[:reviewers] << reviewer
-    end
-  end
-  # Cleanup local repo
-  repo.reset_hard "origin/#{dst.branch}"
-  cr[:authors] << pr['author']['name']
-  cr[:pullrequests] << Hash[url: pr['url'], name: pr['name']]
-end
-
 # Create mails
-mailer = OttInfra::SendMail.new(user: SENDGRID_USER,
-                                pass: SENDGRID_PASS)
+mailer = OttInfra::SendMail.new Config.sendgrid
 
-if cr[:gitattr_flag]
-  mailer.add from: SENDGRID_FROM,
-             to: GITATTR_REVIEWER,
-             cc: 'dmitry.shmelev@default.com',
-             subject: 'CodeReview: GitAttribute changed!',
-             message: ERB.new(File.read('views/gitattr_mail.erb')).result
-end
-unless cr[:reviewers].empty?
-  mailer.add from: SENDGRID_FROM,
-             to: cr[:reviewers],
-             cc: 'dmitry.shmelev@default.com',
-             subject: 'CodeReview',
-             message: ERB.new(File.read('views/review_mail.erb')).result
+pullrequests.each do |review|
+  review.send_notify do |msg|
+    mailer.add Config.sendgrid.merge message: msg
+  end
 end
 
 # Send CodeReview

@@ -1,35 +1,4 @@
 require 'spec_helper'
-describe JIRA::PullRequest do
-  def create_test_object!(data)
-    git_double = double(:git_double)
-    allow(Git).to receive(:get_branch) { git_double }
-    allow(git_double).to receive(:fetch)
-    allow(git_double).to receive(:merge)
-    described_class.new data
-  end
-
-  before :each do
-    data =
-      { 'source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0003' },
-        'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
-        'status' => 'CANCEL' }
-    @pr = create_test_object! data
-  end
-
-  it '.new returns false with invalid input' do
-    data =
-      { 'source' => { 'url' => 'https://bb.org/org/repo_one/branch/OTT-0004' },
-        'destination' => { 'url' => 'https://bb.org/org/repo_two/branch/master' } }
-    @pr = create_test_object! data
-    expect(@pr).to be_empty
-  end
-
-  it '.src and .dst return URI::Git::Generic' do
-    expect(@pr.src.class).to eq(URI::Git::Generic)
-    expect(@pr.dst.class).to eq(URI::Git::Generic)
-  end
-end
-
 describe JIRA::PullRequests do
   before :each do
     @pullreq_double = double(:pullreq_double)
@@ -74,16 +43,6 @@ describe JIRA::PullRequests do
 
   it '.add method fails if argument is not PullRequest' do
     expect { @prs.add 'String' }.to raise_error(TypeError)
-  end
-
-  it '.each returns PullRequest' do
-    pr_data =
-      { 'source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0001' },
-        'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
-        'status' => 'OPEN' }
-    allow(@pullreq_double).to receive(:pr) { pr_data }
-    @prs.add @pullreq_double
-    @prs.each { |i| expect(i.class).to eq JIRA::PullRequest }
   end
 
   it '.filter_by_* returns self' do
