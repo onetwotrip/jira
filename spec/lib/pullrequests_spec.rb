@@ -1,53 +1,123 @@
 require 'spec_helper'
 describe JIRA::PullRequests do
-  subject do
-    open_pr = [
+  before :each do
+    @pullreq_double = double(:pullreq_double)
+    allow(@pullreq_double).to receive(:instance_of?).with(JIRA::PullRequest) { true }
+    allow(@pullreq_double).to receive(:valid?) { true }
+    @prs = described_class.new
+  end
+
+  it '.valid? with PR returns true' do
+    pr_data =
       { 'source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0001' },
         'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
-        'status' => 'OPEN' },
-      { 'source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0002' },
+        'status' => 'OPEN' }
+    allow(@pullreq_double).to receive(:pr) { pr_data }
+    @prs.add @pullreq_double
+    expect(@prs.valid?).to eq true
+  end
+  it '.valid? without PR returns false' do
+    allow(@pullreq_double).to receive(:pr) { nil }
+    @prs.add @pullreq_double
+    expect(@prs.valid?).to eq false
+  end
+  it '.valid? of equal PR returns false' do
+    pr_data =
+      { 'source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0001' },
         'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
-        'status' => 'OPEN' }]
-    cancel_pr = [
-      { 'source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0003' },
-        'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
-        'status' => 'CANCEL' }]
-    described_class.new open_pr + cancel_pr
+        'status' => 'OPEN' }
+    allow(@pullreq_double).to receive(:pr) { pr_data }
+    @prs.add @pullreq_double
+    @prs.add @pullreq_double
+    expect(@prs.valid?).to eq false
   end
 
-  it { expect be_valid }
-  it 'not be valid' do
-    subject.clear
-    is_expected.to_not be_valid
+  it '.add method calls .valid? method of each PR' do
+    pr_data =
+      { 'source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0001' },
+        'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
+        'status' => 'OPEN' }
+    allow(@pullreq_double).to receive(:pr) { pr_data }
+    @prs.add @pullreq_double
   end
-  it_behaves_like 'add and fail', 'source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0001' },
-                                  'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' }
-  it_behaves_like 'add and fail', 'source' => { 'url' => 'https://bb.org/org/repo_one/branch/OTT-0004' },
-                                  'destination' => { 'url' => 'https://bb.org/org/repo_two/branch/master' }
-  it_behaves_like 'add and fail', Hash['source' => { 'url' => 'A' }]
-  it_behaves_like 'add and fail', Hash['source' => { 'url2' => 'A' }]
-  it { subject.each { |i| expect(i.class).to eq JIRA::PullRequest } }
 
-  it '.filter_by_* returns JIRA::PullRequests' do
-    expect(subject.filter_by_status('OPEN').class).to eq JIRA::PullRequests
+  it '.add method fails if argument is not PullRequest' do
+    expect { @prs.add 'String' }.to raise_error(TypeError)
+  end
+
+  it '.filter_by_* returns self' do
+    allow(@pullreq_double).to receive(:pr) do
+      Hash('source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0001' },
+           'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
+           'status' => 'OPEN')
+    end
+    @prs.add @pullreq_double
+    prs_obj_id = @prs.object_id
+    expect(@prs.filter_by_status('OPEN').object_id).to eq prs_obj_id
   end
 
   it '.filter_by_status(OPEN) returns OPEN PullRequests' do
-    expect(subject.filter_by_status('OPEN')).to eq subject[0..1]
+    allow(@pullreq_double).to receive(:pr) do
+      Hash('source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0001' },
+           'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
+           'status' => 'OPEN')
+    end
+    @prs.add @pullreq_double
+    pullreq2_double = double(:pullreq2_double)
+    allow(pullreq2_double).to receive(:instance_of?).with(JIRA::PullRequest) { true }
+    allow(pullreq2_double).to receive(:valid?) { true }
+    allow(pullreq2_double).to receive(:pr) do
+      Hash('source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0002' },
+           'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
+           'status' => 'CLOSE')
+    end
+    @prs.add pullreq2_double
+    @prs.filter_by_status('OPEN').prs
+    expect(@prs.prs).to include @pullreq_double
+    expect(@prs.prs).not_to include pullreq2_double
   end
 
   it '.filter_by_source_url(url) returns PullRequests with source url' do
-    expect(
-      subject.filter_by_source_url(subject[0]['source']['url'])
-    ).to eq [subject[0]]
+    allow(@pullreq_double).to receive(:pr) do
+      Hash('source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0001' },
+           'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
+           'status' => 'OPEN')
+    end
+    @prs.add @pullreq_double
+    pullreq2_double = double(:pullreq2_double)
+    allow(pullreq2_double).to receive(:instance_of?).with(JIRA::PullRequest) { true }
+    allow(pullreq2_double).to receive(:valid?) { true }
+    allow(pullreq2_double).to receive(:pr) do
+      Hash('source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0002' },
+           'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
+           'status' => 'CLOSE')
+    end
+    @prs.add pullreq2_double
+    @prs.filter_by_source_url(@pullreq_double.pr['source']['url'])
+    expect(@prs.prs).to include @pullreq_double
+    expect(@prs.prs).not_to include pullreq2_double
   end
 
-  it '.filter_by_* should return filtered PullRequests' do
-    url = subject[0]['source']['url']
-    expect(
-      subject.filter_by_status('OPEN')
-             .filter_by_source_url(url)
-    ).to eq [subject[0]]
+  it '.grep_by_* should return grepped PullRequests' do
+    allow(@pullreq_double).to receive(:pr) do
+      Hash('source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0001' },
+           'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
+           'status' => 'OPEN')
+    end
+    @prs.add @pullreq_double
+    pullreq2_double = double(:pullreq2_double)
+    allow(pullreq2_double).to receive(:instance_of?).with(JIRA::PullRequest) { true }
+    allow(pullreq2_double).to receive(:valid?) { true }
+    allow(pullreq2_double).to receive(:pr) do
+      Hash('source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0002' },
+           'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
+           'status' => 'CLOSE')
+    end
+    @prs.add pullreq2_double
+    grep = @prs.grep_by_source_url(@pullreq_double.pr['source']['url'])
+
+    expect(grep.prs).to include @pullreq_double
+    expect(grep.prs).not_to include pullreq2_double
   end
 
   it '.method_missing calls super' do

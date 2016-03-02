@@ -74,8 +74,10 @@ module JIRA
         endpoint
       end
 
-      def pullrequests
-        JIRA::PullRequests.new related['pullRequests']
+      def pullrequests(git_config = nil)
+        JIRA::PullRequests.new(
+          *related['pullRequests'].map { |i| JIRA::PullRequest.new(git_config, i) }
+        )
       end
 
       def deploys
