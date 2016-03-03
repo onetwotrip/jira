@@ -1,4 +1,10 @@
 GIT
+  remote: https://github.com/onetwotrip/SimpleConfig
+  revision: 6e604fa2781bb9bf7968c9fc47499086d075f7e8
+  specs:
+    SimpleConfig (0.0.1)
+
+GIT
   remote: https://github.com/onetwotrip/ott_infra-codereview.git
   revision: ce848670573d15bfc86eda92ba248baabd8248bd
   specs:
@@ -115,6 +121,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  SimpleConfig!
   addressable
   git!
   java-properties

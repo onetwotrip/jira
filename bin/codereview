@@ -5,20 +5,19 @@ require 'jira'
 require 'issue'
 require 'pullrequests'
 require 'ottinfra/sendmail'
+require 'simple_config'
 
-require File.expand_path('../../config/environment.rb', __FILE__)
-
-unless Config.jira[:issue]
+unless SimpleConfig.jira.issue
   puts "CodeReview: No issue - no cry!\n"
   exit 2
 end
 
 # Getting issie
-jira = JIRA::Client.new Config.jira
-issue = jira.Issue.find(Config.jira[:issue])
-pullrequests = issue.pullrequests(Config.git)
+jira = JIRA::Client.new SimpleConfig.jira.to_h
+issue = jira.Issue.find(SimpleConfig.jira.issue)
+pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
                .filter_by_status('OPEN')
-               .filter_by_source_url(Config.jira[:issue])
+               .filter_by_source_url(SimpleConfig.jira.issue)
 
 # Parsing/Validating PR
 unless pullrequests.valid?
@@ -28,11 +27,13 @@ unless pullrequests.valid?
 end
 
 # Create mails
-mailer = OttInfra::SendMail.new Config.sendgrid
+mailer = OttInfra::SendMail.new SimpleConfig.sendgrid.to_h
+
+require 'yaml'
 
 pullrequests.each do |review|
   review.send_notify do |msg|
-    mailer.add Config.sendgrid.merge message: msg
+    mailer.add SimpleConfig.sendgrid.to_h.merge message: msg
   end
 end
 
