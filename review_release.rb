@@ -1,3 +1,4 @@
+require 'simple_config'
 require 'json'
 require 'git'
 require 'jira'
