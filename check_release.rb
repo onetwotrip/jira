@@ -7,11 +7,11 @@ require 'sendgrid-ruby'
 require_relative 'lib/check'
 require_relative 'lib/repo'
 
-WORKDIR = ENV.fetch('WORKDIR', '../repos/')
+WORKDIR = SimpleConfig.git.workdir
 BASEURL = ENV.fetch('BB_URL', 'git@bitbucket.org:')
-EMAIL_FROM = ENV.fetch('SG_FROM', 'default@default.com')
-SG_USER = ENV.fetch('SG_USER', 'user')
-SG_KEY = ENV.fetch('SG_KEY', 'pass')
+EMAIL_FROM = SimpleConfig.sendgrid.from
+SG_USER = SimpleConfig.sendgrid.user
+SG_KEY = SimpleConfig.sendgrid.pass
 NOTIFY_LIST = %w(
   src/mcore_modules/oauth2/**
   src/mcore_modules/session_auth/**
@@ -94,7 +94,7 @@ crit_changed_files.uniq!
 unless crit_changed_files.empty?
   puts "Notifying code-control!\n#{crit_changed_files.join "\n"}\n"
   mail = SendGrid::Mail.new do |m|
-    m.to = 'code-control@default.com'
+    m.to = SimpleConfig.git.reviewer
     m.from = EMAIL_FROM
     m.subject = "Изменены критичные файлы в #{payload['repository']['full_name']}"
     diff_link = 'https://bitbucket.org/'\

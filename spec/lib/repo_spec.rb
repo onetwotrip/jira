@@ -9,7 +9,6 @@ def create_test_object!
   allow(@git_double).to receive(:pull)
   allow(@git_double).to receive(:reset_hard)
   allow(@git_double).to receive(:dir) { './' }
-
   g = GitRepo.new 'git@git:some/repo.git', 'repo'
   expect(g.git).to eq(@git_double)
   g

@@ -5,11 +5,11 @@ require_relative 'lib/check'
 require_relative 'lib/repo'
 require_relative 'lib/issue'
 
-WORKDIR = ENV.fetch('WORKDIR', '../repos/')
+WORKDIR = SimpleConfig.git.workdir
 
-JIRA_USERNAME = ENV.fetch('JIRA_USERNAME', 'default')
-JIRA_PASSWORD = ENV.fetch('JIRA_PASSWORD', 'default')
-JIRA_SITE = ENV.fetch('JIRA_SITE', 'default')
+JIRA_USERNAME = SimpleConfig.jira.user
+JIRA_PASSWORD = SimpleConfig.jira.pass
+JIRA_SITE = SimpleConfig.jira.site
 
 post_to_ticket = ENV.fetch('ROOT_BUILD_CAUSE_REMOTECAUSE', nil) == 'true' ? true : false
 
@@ -22,7 +22,7 @@ Dir.mkdir WORKDIR unless Dir.exist? WORKDIR
 
 # Workflow
 # Collect data about release and Issue
-unless (triggered_issue = ENV['ISSUE'])
+unless (triggered_issue = SimpleConfig.jira.issue)
   print "No issue - no cry!\n"
   exit 2
 end

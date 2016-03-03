@@ -7,7 +7,9 @@ describe JIRA::Resource::Issue do
       'destination' => { 'url' => 'https://bb.org/org/repo/branch/master' },
       'status' => 'OPEN' }
   ] }
-
+  config_git = { reviewer: 'Reviewer',
+                 reviewer_key: 'reviewer.mail',
+                 workdir: './workdir' }
   before :each do
     client_options = {
       username: 'User',
@@ -26,7 +28,7 @@ describe JIRA::Resource::Issue do
     allow_any_instance_of(JIRA::Resource::Issue).to receive(:related)
       .and_return(open_pr)
     issue = JIRA::Resource::Issue.new(@jira)
-    expect(issue.pullrequests(Config.git).class).to eq(JIRA::PullRequests)
+    expect(issue.pullrequests(config_git).class).to eq(JIRA::PullRequests)
   end
 
   it '.create_endpoint should returns Addressable::URI' do
