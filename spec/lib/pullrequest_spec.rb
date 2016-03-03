@@ -13,7 +13,10 @@ describe JIRA::PullRequest do
     allow(git_double).to receive(:fetch)
     allow(git_double).to receive(:merge)
 
-    described_class.new Config.git, data
+    config_git = { reviewer: 'Reviewer',
+                   reviewer_key: 'reviewer.mail',
+                   workdir: './workdir' }
+    described_class.new config_git, data
   end
 
   before :each do
