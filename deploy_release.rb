@@ -1,3 +1,4 @@
+require 'simple_config'
 require 'jira'
 require 'slop'
 require 'pp'
