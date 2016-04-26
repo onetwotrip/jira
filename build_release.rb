@@ -105,6 +105,7 @@ issues.each do |issue|
                                            pullrequest: pullrequest,
                                            branch: branch)
           repo_path = repos[repo_name][:repo_base]
+          repo_path.checkout('master')
           # Removal of existing branches
           if repo_path.find_branch?(pre_release_branch)
             puts "Found pre release branch: #{pre_release_branch}. Deleting...".red
