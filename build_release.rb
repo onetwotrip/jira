@@ -115,7 +115,7 @@ issues.each do |issue|
             repo_path.branch(release_branch).delete_both
           end
           # Merge master to release_branch (ex OTT-8703-pre)
-          prepare_branch(repo_path, source, pre_branch, opts[:clean])
+          prepare_branch(repo_path, source, pre_release_branch, opts[:clean])
           begin
             merge_message = "CI: merge branch #{branch['name']} to release "\
                             " #{opts[:release]}.  (pull request #{pullrequest['id']}) "
