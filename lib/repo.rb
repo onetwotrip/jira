@@ -223,6 +223,18 @@ def git_repo(url, name, opts = {})
   git_repo.checkout 'master'
   git_repo.pull
   git_repo.reset_hard
+  # Removal of existing branches
+  opts[:delete_branches].each do |branch|
+    next unless git_repo.find_branch? branch
+    if git_repo.is_local_branch? branch
+      puts "Found pre release branch: #{branch}. Deleting local...".red
+      git_repo.lib.branch_delete branch
+    end
+    if git_repo.is_remote_branch? branch
+      puts "Found pre release branch: #{branch}. Deleting remote...".red
+      git_repo.lib.branch_delete_remote branch
+    end
+  end
   git_repo
 end
 

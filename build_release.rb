@@ -100,22 +100,16 @@ issues.each do |issue|
           #   ...
           # }
           repos[repo_name] ||= { url: repo_url, branches: [] }
-          repos[repo_name][:repo_base] ||= git_repo(repo_url, repo_name, opts)
+          repos[repo_name][:repo_base] ||= git_repo(repo_url,
+                                                    repo_name,
+                                                    delete_branches: [pre_release_branch, release_branch])
           repos[repo_name][:branches].push(issue: issue,
                                            pullrequest: pullrequest,
                                            branch: branch)
           repo_path = repos[repo_name][:repo_base]
-          # Removal of existing branches
-          if repo_path.find_branch?(pre_release_branch)
-            puts "Found pre release branch: #{pre_release_branch}. Deleting...".red
-            repo_path.branch(pre_release_branch).delete_both
-          end
-          if repo_path.find_branch?(release_branch)
-            puts "Found release branch: #{release_branch}. Deleting...".red
-            repo_path.branch(release_branch).delete_both
-          end
-          # Merge master to release_branch (ex OTT-8703-pre)
-          prepare_branch(repo_path, source, pre_branch, opts[:clean])
+          repo_path.checkout('master')
+          # Merge master to pre_release_branch (ex OTT-8703-pre)
+          prepare_branch(repo_path, source, pre_release_branch, opts[:clean])
           begin
             merge_message = "CI: merge branch #{branch['name']} to release "\
                             " #{opts[:release]}.  (pull request #{pullrequest['id']}) "
@@ -165,7 +159,7 @@ end
 
 puts 'Repos:'.green
 repos.each do |name, repo|
-  puts name
+  puts "Push '#{pre_release_branch}' to '#{name}' repo".green
   if opts[:push]
     local_repo = repo[:repo_base]
     local_repo.push('origin', pre_release_branch)
