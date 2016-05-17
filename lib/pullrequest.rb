@@ -1,3 +1,4 @@
+require 'helpers'
 require 'tests'
 require 'git'
 require 'erb'
@@ -6,7 +7,7 @@ module JIRA
   ##
   # This class represent PullRequest
   class PullRequest
-    attr_reader :pr, :git_config, :changed_files, :reviewers
+    attr_reader :pr, :git_config, :changed_files, :reviewers, :tests
 
     def initialize(git_config, hash)
       raise ArgumentError, 'Missing git config' unless git_config
@@ -45,6 +46,10 @@ module JIRA
       @pr['name']
     end
 
+    def tests
+      @tests ||= Ott::Tests.new(@repo)
+    end
+
     def reviewers
       @reviewers ||= reviewers_by_files(changed_files)
     end
@@ -54,7 +59,13 @@ module JIRA
     end
 
     def send_notify
-      yield ERB.new(File.read("#{Ott.root}/views/review_mail.erb")).result(binding) unless reviewers.empty?
+      yield ERB.new(File.read("#{Ott::Helpers.root}/views/review_mail.erb")).result(binding) unless reviewers.empty?
+    end
+
+    def repo
+      @repo ||= Git.get_branch dst.full_url
+      @repo.merge "origin/#{src.branch}"
+      @repo
     end
 
     private
