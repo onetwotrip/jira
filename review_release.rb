@@ -9,8 +9,7 @@ require_relative 'lib/issue'
 
 post_to_ticket = ENV.fetch('ROOT_BUILD_CAUSE_REMOTECAUSE', nil) == 'true' ? true : false
 
-fail_on_jscs = ENV.fetch('FAIL_ON_JSCS', false)
-FAIL_ON_JSCS = fail_on_jscs ? !fail_on_jscs.empty? : false
+FAIL_ON_JSCS = ENV.fetch('FAIL_ON_JSCS', false)
 
 TRANSITION = 'WTF'.freeze
 
@@ -31,11 +30,6 @@ issue = jira.Issue.jql("key = #{triggered_issue}")
 raise "WTF??? Issue search returned #{issue.length} elements!" if (issue.is_a? Array) && (issue.length > 1)
 issue = issue[0] if issue.is_a? Array
 
-err_struct = Struct.new(:name, :detail)
-errors = []
-
-fail_release = false
-
 pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
                     .filter_by_status('OPEN')
                     .filter_by_source_url(SimpleConfig.jira.issue)
@@ -46,84 +40,66 @@ unless pullrequests.valid?
 end
 
 pullrequests.each do |pr|
-  src_branch = pr.src.branch
-  dst_branch = pr.dst.branch
-
   # Checkout repo
-  puts "Clone/Open with #{pr.dst} branch #{dst_branch}".green
-
+  puts "Clone/Open with #{pr.dst} branch #{pr.dst.branch} and merge #{pr.src.branch}".green
   begin
-    g_rep = GitRepo.new pr.dst.full_url
+    pr.repo
   rescue Git::GitExecuteError => e
-    puts "Branch #{dst_branch} does not exist any more...\n#{e.message}".red
+    puts e.message.red
     next
-  end
-
-  unless ENV['NO_MERGE']
-    puts "Merging code from #{src_branch} version".green
-    begin
-      g_rep.merge! "origin/#{src_branch}"
-    rescue Git::GitExecuteError => e
-      errors << err_struct.new('Merge', "Failed to merge #{src_branch} to branch #{dst_branch}.
-Git had this to say:\n{noformat}\n#{e.message}\n{noformat}")
-      fail_release = true
-      g_rep.abort_merge!
-    end
   end
 
   # JSCS; JSHint
   unless ENV['NO_JSCS']
     puts 'Checking JSCS/JSHint'.green
-    res_text = g_rep.check_diff 'HEAD', 'HEAD~1'
-    unless res_text.empty?
-      errors << err_struct.new('JSCS/JSHint', "Checking pullrequest '#{pr.name}':\n{noformat}\n#{res_text}\n{noformat}")
-      fail_release = true if FAIL_ON_JSCS
-    end
+    pr.run_tests(:js, dryrun: !FAIL_ON_JSCS)
   end
 
-  puts 'NPM Test'.green
   # NPM test
-  test_out = ''
-  test_out = g_rep.run_tests! unless ENV['NO_TESTS']
-  if test_out.code > 0
-    fail_release = true
-    errors << err_struct.new('NPM Test', "Exitcode: #{test_out.code}\n{noformat}\n#{test_out.out}\n{noformat}")
+  unless ENV['NO_TESTS']
+    puts 'NPM Test'.green
+    pr.run_tests(:npm)
   end
 end
-
+comment_text = <<EOS
+Automatic code review complete.
+Merge master: #{ENV['NO_MERGE'] ? 'SKIPPED' : 'PASSED'}
+JSCS/JSHint:  #{if ENV['NO_JSCS']
+                  'SKIPPED'
+                else
+                  pullrequests.tests_status_string(:js)
+                end}
+npm test:     #{if ENV['NO_TEST']
+                  'SKIPPED'
+                else
+                  pullrequests.tests_status_string(:npm)
+                end}
+EOS
 # If something failed:
-if fail_release
-  comment_text = "There were some errors:\n\t#{errors.map(&:name).join("\n\t")}"
+unless pullrequests.tests_status
+  comment_text << "There were some errors:\n\t#{pullrequests.tests_fails.join("\n\t")}\n"
   # return issue to "In Progress"
   if issue.has_transition? TRANSITION
     puts 'TRANSITIONING DISABLED'
     issue.transition TRANSITION
   else
     puts "No transition #{TRANSITION} available.".red
-    comment_text = "Unable to transition issue to \"In Progress\" state.\n" + comment_text
+    comment_text << "Unable to transition issue to \"In Progress\" state.\n"
   end
-else
-  comment_text = <<EOS
-Automatic code review complete.
-Merge master: #{ENV['NO_MERGE'] ? 'SKIPPED' : 'PASSED'}
-JSCS/JSHint: #{if ENV['NO_JSCS']
-                 'SKIPPED'
-               else
-                 ENV['FAIL_ON_JSCS'] ? 'PASSED' : 'IGNORED'
-               end}
-npm test: #{ENV['NO_TEST'] ? 'SKIPPED' : 'PASSED'}
-EOS
 end
 
-puts 'Errors:'.red unless errors.empty?
-errors.each do |error|
-  puts error.name.red
-  puts error.detail
+puts "Errors: #{pullrequests.tests_fails.join(' ')}".red
+pullrequests.each do |pr|
+  pr.tests.each do |test|
+    unless test.code
+      puts "Details for #{test.name}:".red
+      puts test.outs
+    end
+  end
 end
 
 comment_text << "\nBuild URL: #{ENV.fetch('BUILD_URL', 'none')}"
 puts 'Summary comment text:'.green
 puts comment_text
 issue.post_comment comment_text if post_to_ticket
-
-exit 1 if fail_release
+exit 1 unless pullrequests.tests_status

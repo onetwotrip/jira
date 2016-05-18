@@ -52,6 +52,51 @@ module JIRA
       end
     end
 
+    def tests_fails
+      names = []
+      @prs.each do |pr|
+        pr.tests.each do |test|
+          names.push test.name unless test.code
+        end
+      end
+      names
+    end
+
+    def tests_dryrun(name)
+      @prs.each do |pr|
+        pr.test(name).each do |test|
+          return true if test.dryrun
+        end
+      end
+      false
+    end
+
+    def tests_status(name = nil)
+      @prs.each do |pr|
+        pr.test(name).each do |test|
+          return false unless test.status
+        end
+      end
+      true
+    end
+
+    def tests_code(name)
+      @prs.each do |pr|
+        pr.test(name).each do |test|
+          return false unless test.code
+        end
+      end
+      true
+    end
+
+    def tests_status_string(task = nil)
+      if tests_dryrun(task)
+        tests_code(task) ? 'IGNORED (PASSED)' : 'IGNORED (FAIL)'
+      else
+        tests_status(task) ? 'PASSED' : 'FAIL'
+      end
+    end
+
     def method_missing(m, *args, &block)
       if (key = m[/filter_by_(\w+)/, 1])
         filter_by(key, *args)
