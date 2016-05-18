@@ -7,6 +7,54 @@ describe JIRA::PullRequests do
     @prs = described_class.new
   end
 
+  it '.tests_fails returns array of fail names' do
+    @ok_test = double(:ok_double)
+    allow(@ok_test).to receive(:name) { :ok }
+    allow(@ok_test).to receive(:status) { true }
+    allow(@ok_test).to receive(:code) { true }
+
+    @fail_test = double(:fail_double)
+    allow(@fail_test).to receive(:name) { :failed }
+    allow(@fail_test).to receive(:status) { false }
+    allow(@fail_test).to receive(:code) { false }
+
+    allow(@pullreq_double).to receive(:tests) { [@ok_test, @fail_test] }
+
+    @prs.add @pullreq_double
+    expect(@prs.tests_fails).to match_array(:failed)
+  end
+
+  it '.tests_*' do
+    @ok_test = double(:tests_double)
+    allow(@ok_test).to receive(:name)   { :ok }
+    allow(@ok_test).to receive(:status) { true }
+    allow(@ok_test).to receive(:dryrun) { false }
+    allow(@ok_test).to receive(:code) { true }
+
+    @fail_test = double(:tests_double)
+    allow(@fail_test).to receive(:name)   { :failed }
+    allow(@fail_test).to receive(:status) { true }
+    allow(@fail_test).to receive(:dryrun) { true }
+    allow(@fail_test).to receive(:code) { false }
+
+    allow(@pullreq_double).to receive(:test).with(:ok) { [@ok_test] }
+    allow(@pullreq_double).to receive(:test).with(:failed) { [@fail_test] }
+
+    @prs.add @pullreq_double
+
+    expect(@prs.tests_dryrun(:ok)).to eq false
+    expect(@prs.tests_dryrun(:failed)).to eq true
+
+    expect(@prs.tests_status(:ok)).to eq true
+    expect(@prs.tests_status(:failed)).to eq true
+
+    expect(@prs.tests_code(:ok)).to eq true
+    expect(@prs.tests_code(:failed)).to eq false
+
+    expect(@prs.tests_status_string(:ok)).to eq 'PASSED'
+    expect(@prs.tests_status_string(:failed)).to eq 'IGNORED (FAIL)'
+  end
+
   it '.valid? with PR returns true' do
     pr_data =
       { 'source' => { 'url' => 'https://bb.org/org/repo/branch/OTT-0001' },
