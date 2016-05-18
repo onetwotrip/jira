@@ -1,5 +1,5 @@
 require 'helpers'
-require 'tests'
+require 'test'
 require 'git'
 require 'erb'
 
@@ -19,7 +19,22 @@ module JIRA
         return false
       end
       @pr = hash
+      @tests = []
       @git_config = git_config
+    end
+
+    def run_tests(name, params = {})
+      test = Ott::Test.new(name, @repo)
+      test.run!(params)
+      @tests.push test
+    end
+
+    def tests_fails
+      @tests.select { |test| !test.status }
+    end
+
+    def test(name)
+      name ? @tests.select { |t| t.name == name } : @tests
     end
 
     def empty?
@@ -44,10 +59,6 @@ module JIRA
 
     def name
       @pr['name']
-    end
-
-    def tests
-      @tests ||= Ott::Tests.new(@repo)
     end
 
     def reviewers
@@ -92,12 +103,6 @@ module JIRA
 
     def review_files?(file)
       !review_files(file).empty?
-    end
-
-    def repo
-      @repo ||= Git.get_branch dst.full_url
-      @repo.merge "origin/#{src.branch}"
-      @repo
     end
 
     def parse_url(url)
