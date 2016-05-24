@@ -8,6 +8,7 @@ require 'pullrequests'
 module JIRA
   module Resource
     class Issue < JIRA::Base # :nodoc:
+      # Link current issue to opts[:release]
       def link
         endpoint = create_endpoint 'rest/api/2/issueLink'
         params = {
@@ -81,28 +82,30 @@ module JIRA
         )
       end
 
+      # Get deploys issues
       def deploys
         client.Issue.jql(%(issue in linkedIssues(#{key},"deployes")))
       end
 
-      # rubocop:disable MethodLength
-      def all_deploys(&block)
+      def dig_deploys(&filter)
         result = []
-        if block_given?
-          if yield self
+        deploys.each do |issue|
+          if block_given? && !(yield issue)
             puts "Issue #{key} skipped by filter"
-            return result
+            next
           end
-        end
-        if deploys.any?
-          deploys.each do |issue|
-            result.push issue
-            result.concat issue.all_deploys(&block)
-          end
+          result.concat issue.dig_deploys(&filter).push(issue)
         end
         result
       end
-      # rubocop:enable MethodLength
+
+      def all_deploys(&filter)
+        if block_given? && !(yield self)
+          puts "Issue #{key} skipped by filter"
+          return []
+        end
+        dig_deploys(&filter)
+      end
 
       def tags?(fkey, val)
         unless fields[fkey].nil?

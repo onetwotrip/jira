@@ -102,9 +102,9 @@ describe JIRA::Resource::Issue do
     issue_2 = issue.dup
     sub_issue = issue.dup
 
-    allow(issue).to receive(:deploys).and_return [issue_1, issue_2]
-    allow(issue_1).to receive(:deploys).and_return [sub_issue]
-    allow(issue_2).to receive(:deploys).and_return []
+    allow(issue).to     receive(:deploys).and_return [issue_1, issue_2]
+    allow(issue_1).to   receive(:deploys).and_return [sub_issue]
+    allow(issue_2).to   receive(:deploys).and_return []
     allow(sub_issue).to receive(:deploys).and_return []
 
     expect(issue.all_deploys.class.name).to eq 'Array'
@@ -112,6 +112,47 @@ describe JIRA::Resource::Issue do
   end
   it '.all_deploys should returns filtered issues' do
     issue = JIRA::Resource::Issue.new(@jira)
+    issue_1 = issue.dup
+    issue_2 = issue.dup
+    sub_issue = issue.dup
+    issue.instance_variable_set(:@attrs, 'fields' => { 'key' => 'ISSUE' })
+    issue_1.instance_variable_set(:@attrs, 'fields' => { 'key' => 'ISSUE_1' })
+    issue_2.instance_variable_set(:@attrs, 'fields' => { 'key' => 'ISSUE_2' })
+    sub_issue.instance_variable_set(:@attrs, 'fields' => { 'key' => 'SUB_ISSUE' })
+
+    allow(issue).to     receive(:deploys).and_return [issue_1, issue_2]
+    allow(issue_1).to   receive(:deploys).and_return [sub_issue]
+    allow(issue_2).to   receive(:deploys).and_return []
+    allow(sub_issue).to receive(:deploys).and_return []
+
+    allow(issue).to     receive(:tags?).with('customtags', 'value').and_return true
+    allow(issue_1).to   receive(:tags?).with('customtags', 'value').and_return false
+    allow(issue_2).to   receive(:tags?).with('customtags', 'value').and_return false
+    allow(sub_issue).to receive(:tags?).with('customtags', 'value').and_return false
+
+    expect(issue.all_deploys { |i| !i.tags?('customtags', 'value') }).to contain_exactly
+
+    allow(issue).to     receive(:tags?).with('customtags', 'value').and_return false
+    allow(issue_1).to   receive(:tags?).with('customtags', 'value').and_return false
+    allow(issue_2).to   receive(:tags?).with('customtags', 'value').and_return true
+    allow(sub_issue).to receive(:tags?).with('customtags', 'value').and_return true
+
+    expect(issue.all_deploys { |i| !i.tags?('customtags', 'value') }).to contain_exactly issue_1
+
+    allow(issue).to     receive(:tags?).with('customtags', 'value').and_return false
+    allow(issue_1).to   receive(:tags?).with('customtags', 'value').and_return true
+    allow(issue_2).to   receive(:tags?).with('customtags', 'value').and_return false
+    allow(sub_issue).to receive(:tags?).with('customtags', 'value').and_return true
+
+    expect(issue.all_deploys { |i| !i.tags?('customtags', 'value') }).to contain_exactly issue_2
+  end
+  it '.tags? return true if tag available' do
+    issue = JIRA::Resource::Issue.new(@jira)
+    issue.instance_variable_set(:@attrs, 'fields' => {
+                                  'key' => 'ID',
+                                  'fields' => {} })
+    expect(issue.tags?('customtags', 'value')).to eq false
+
     issue.instance_variable_set(:@attrs, 'fields' => {
                                   'key' => 'ID',
                                   'fields' => {
@@ -119,19 +160,6 @@ describe JIRA::Resource::Issue do
                                       { 'value' => 'value' }
                                     ]
                                   } })
-
-    issue_1 = issue.dup
-    issue_2 = issue.dup
-    sub_issue = issue.dup
-
-    allow(issue).to receive(:deploys).and_return [issue_1, issue_2]
-    allow(issue_1).to receive(:deploys).and_return [sub_issue]
-    allow(issue_2).to receive(:deploys).and_return []
-
-    allow(issue).to receive(:tags?).with('customtags', 'value').and_return false
-    allow(issue_1).to receive(:tags?).with('customtags', 'value').and_return true
-    allow(issue_2).to receive(:tags?).with('customtags', 'value').and_return false
-
-    expect(issue.all_deploys { |i| i.tags?('customtags', 'value') }).to include issue_2
+    expect(issue.tags?('customtags', 'value')).to eq true
   end
 end

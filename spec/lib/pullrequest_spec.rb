@@ -57,4 +57,27 @@ describe JIRA::PullRequest do
       expect(msg).to include '.gitattributes'
     end
   end
+
+  it '.tests_fails returns failed name' do
+    @ok_test = double(:ok_tests_double)
+    allow(@ok_test).to receive(:name)   { :ok }
+    allow(@ok_test).to receive(:status) { true }
+    allow(@ok_test).to receive(:dryrun) { false }
+
+    @fail_test = double(:fail_tests_double)
+    allow(@fail_test).to receive(:name)   { :failed }
+    allow(@fail_test).to receive(:status) { false }
+    allow(@fail_test).to receive(:dryrun) { true }
+
+    allow(Ott::Test).to receive(:new).with(:ok, nil) { @ok_test }
+    allow(Ott::Test).to receive(:new).with(:failed, nil) { @fail_test }
+
+    expect(@ok_test).to receive(:run!)
+    @pr.run_tests(:ok)
+
+    expect(@fail_test).to receive(:run!)
+    @pr.run_tests(:failed)
+
+    expect(@pr.tests_fails).to match_array(@fail_test)
+  end
 end

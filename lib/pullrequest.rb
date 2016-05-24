@@ -1,4 +1,5 @@
-require 'tests'
+require 'helpers'
+require 'test'
 require 'git'
 require 'erb'
 
@@ -6,7 +7,7 @@ module JIRA
   ##
   # This class represent PullRequest
   class PullRequest
-    attr_reader :pr, :git_config, :changed_files, :reviewers
+    attr_reader :pr, :git_config, :changed_files, :reviewers, :tests
 
     def initialize(git_config, hash)
       raise ArgumentError, 'Missing git config' unless git_config
@@ -18,7 +19,22 @@ module JIRA
         return false
       end
       @pr = hash
+      @tests = []
       @git_config = git_config
+    end
+
+    def run_tests(name, params = {})
+      test = Ott::Test.new(name, @repo)
+      test.run!(params)
+      @tests.push test
+    end
+
+    def tests_fails
+      @tests.select { |test| !test.status }
+    end
+
+    def test(name)
+      name ? @tests.select { |t| t.name == name } : @tests
     end
 
     def empty?
@@ -54,7 +70,13 @@ module JIRA
     end
 
     def send_notify
-      yield ERB.new(File.read("#{Ott.root}/views/review_mail.erb")).result(binding) unless reviewers.empty?
+      yield ERB.new(File.read("#{Ott::Helpers.root}/views/review_mail.erb")).result(binding) unless reviewers.empty?
+    end
+
+    def repo
+      @repo ||= Git.get_branch dst.full_url
+      @repo.merge "origin/#{src.branch}"
+      @repo
     end
 
     private
@@ -81,12 +103,6 @@ module JIRA
 
     def review_files?(file)
       !review_files(file).empty?
-    end
-
-    def repo
-      @repo ||= Git.get_branch dst.full_url
-      @repo.merge "origin/#{src.branch}"
-      @repo
     end
 
     def parse_url(url)

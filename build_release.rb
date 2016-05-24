@@ -52,8 +52,9 @@ unless release.deploys.any? && !opts[:ignorelinks]
   ).each(&:link)
 end
 
+# Exclude issues with manual deploy
 issues = release.all_deploys do |issue|
-  issue.tags?(SimpleConfig.jira.tags.field, SimpleConfig.jira.tags.deploy)
+  !issue.tags?(SimpleConfig.jira.tags.field, SimpleConfig.jira.tags.deploy)
 end
 
 badissues = {}
