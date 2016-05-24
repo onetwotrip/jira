@@ -17,7 +17,6 @@ jira:
     field: 'customfield_11001'
     deploy: 'Manual Deploy'
   excluded_projects:
-    - 'Russian Railroad'
     - 'Hotels'
     - 'Servers & Services'
 git:
