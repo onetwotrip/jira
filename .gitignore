@@ -16,3 +16,4 @@ coverage/
 /spec/reports/
 /tmp/
 /repos/
+*.sublime-*
