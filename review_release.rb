@@ -48,7 +48,7 @@ pullrequests.each do |pr|
     puts e.message.red
     next
   end
-
+  NPM_DRYRUN = SimpleConfig.test.npm.dryrun_for.include? pr.dst.repo
   # JSCS; JSHint
   unless ENV['NO_JSCS']
     puts 'Checking JSCS/JSHint'.green
@@ -58,7 +58,7 @@ pullrequests.each do |pr|
   # NPM test
   unless ENV['NO_TESTS']
     puts 'NPM Test'.green
-    pr.run_tests(:npm)
+    pr.run_tests(:npm, dryrun: NPM_DRYRUN)
   end
 end
 comment_text = <<EOS
