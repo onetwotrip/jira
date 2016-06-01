@@ -1,6 +1,7 @@
 require 'simple_config'
 require 'jira'
 require 'slop'
+require 'colorize'
 require './lib/issue'
 
 opts = Slop.parse do |o|
