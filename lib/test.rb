@@ -30,17 +30,17 @@ module Ott
       case @name
       when :npm
         npmrun(params)
-      when :js
-        jsrun(params)
+      when :jscs
+        jscs(params)
+      when :jshint
+        jshint(params)
       end
     end
 
     def npmrun(params = {})
       @repo.chdir do
         t = Thread.new do
-          @outs = `npm install 2>&1`
-          @code = $?.exitstatus # rubocop:disable Style/SpecialGlobalVars
-          @outs += `npm test 2>&1`
+          @outs += `npm install && npm test 2>&1`
           @code += $?.exitstatus # rubocop:disable Style/SpecialGlobalVars
           @dryrun = true if params[:dryrun]
         end
@@ -48,32 +48,23 @@ module Ott
       end
     end
 
-    def jsrun(params = {})
+    def jscs(params = {})
       @repo.diff('origin/HEAD').each do |file|
         next unless File.extname(file.path) == '.js'
-        ranges = diffed_lines file.patch
+        ranges = Ott::Helpers.diffed_lines file.patch
         check_jscs file.path, ranges
-        check_jshint file.path, ranges
       end
       @dryrun = 1 if params[:dryrun]
     end
 
-    # rubocop:disable Metrics/AbcSize
-    def diffed_lines(diff)
-      ranges = []
-      diff.each_line do |l|
-        return [] if l =~ /^Binary files ([^ ]+) and ([^ ]+) differ$/ # skip binary files
-        return [0..1] if l =~ /@@ -0,0 +\d+ @@/                       # return [0..1] for a new file
-        next unless (md = /^@@ -\d+(?:,\d+)? \+(\d+),(\d+) @@/.match(l))
-        ranges << ((md[1].to_i)..(md[1].to_i + md[2].to_i))
+    def jshint(params = {})
+      @repo.diff('origin/HEAD').each do |file|
+        next unless File.extname(file.path) == '.js'
+        ranges = Ott::Helpers.diffed_lines file.patch
+        check_jshint file.path, ranges
       end
-      if ranges.empty? && !diff.empty?
-        puts diff
-        puts 'Diff without marks or unknown marks!'
-      end
-      ranges
+      @dryrun = 1 if params[:dryrun]
     end
-    # rubocop:enable Metrics/AbcSize
 
     def check_jscs(filename, ranges = [])
       run_check "jscs -c '#{path}/.jscsrc' -r inline #{path}/#{filename}", filename, ranges if File.readable? path + '/.jscsrc'

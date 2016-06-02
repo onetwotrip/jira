@@ -10,6 +10,7 @@ require_relative 'lib/issue'
 post_to_ticket = ENV.fetch('ROOT_BUILD_CAUSE_REMOTECAUSE', nil) == 'true' ? true : false
 
 FAIL_ON_JSCS = ENV.fetch('FAIL_ON_JSCS', false)
+FAIL_ON_JSHINT = ENV.fetch('FAIL_ON_JSHINT', false)
 
 TRANSITION = 'WTF'.freeze
 
@@ -48,32 +49,45 @@ pullrequests.each do |pr|
     puts e.message.red
     next
   end
-  NPM_DRYRUN = SimpleConfig.test.npm.dryrun_for.include? pr.dst.repo
-  # JSCS; JSHint
+
+  # JSCS
   unless ENV['NO_JSCS']
-    puts 'Checking JSCS/JSHint'.green
-    pr.run_tests(:js, dryrun: !FAIL_ON_JSCS)
+    puts 'Checking JSCS'.green
+    pr.run_tests(:jscs, dryrun: !FAIL_ON_JSCS)
+  end
+
+  # JSHint
+  unless ENV['NO_JSHINT']
+    puts 'Checking JSHint'.green
+    pr.run_tests(:jshint, dryrun: !FAIL_ON_JSHINT)
   end
 
   # NPM test
+  NPM_DRYRUN = SimpleConfig.test.npm.dryrun_for.include? pr.dst.repo
   unless ENV['NO_TESTS']
     puts 'NPM Test'.green
     pr.run_tests(:npm, dryrun: NPM_DRYRUN)
   end
+  break
 end
 comment_text = <<EOS
 Automatic code review complete.
 Merge master: #{ENV['NO_MERGE'] ? 'SKIPPED' : 'PASSED'}
-JSCS/JSHint:  #{if ENV['NO_JSCS']
-                  'SKIPPED'
-                else
-                  pullrequests.tests_status_string(:js)
-                end}
-npm test:     #{if ENV['NO_TEST']
-                  'SKIPPED'
-                else
-                  pullrequests.tests_status_string(:npm)
-                end}
+JSCS:     #{if ENV['NO_JSCS']
+              'SKIPPED'
+            else
+              pullrequests.tests_status_string(:jscs)
+            end}
+JSHint:   #{if ENV['NO_JSHINT']
+              'SKIPPED'
+            else
+              pullrequests.tests_status_string(:jshint)
+            end}
+npm test: #{if ENV['NO_TEST']
+              'SKIPPED'
+            else
+              pullrequests.tests_status_string(:npm)
+            end}
 EOS
 # If something failed:
 unless pullrequests.tests_status
