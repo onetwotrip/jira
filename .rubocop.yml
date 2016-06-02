@@ -1,11 +1,11 @@
 Style/TrailingCommaInLiteral:
-  # If EnforcedStyleForMultiline is comma, the cop requires a comma after the
-  # last item of a list, but only for lists where each item is on its own line.
-  # If EnforcedStyleForMultiline is consistent_comma, the cop requires a comma
-  # after the last item of a list, for all lists.
   EnforcedStyleForMultiline: comma
 Metrics/LineLength:
   Enabled: true
   Max: 140
 Metrics/MethodLength:
   Max: 12
+AllCops:
+  Exclude:
+    - repos/**/*
+    - vendor/**/*
