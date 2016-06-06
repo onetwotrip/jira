@@ -1,6 +1,7 @@
 require 'addressable/uri'
 require 'open3'
 require 'git'
+require 'git/bitbucket'
 
 ##
 # This class represents a git repo

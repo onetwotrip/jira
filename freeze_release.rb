@@ -2,7 +2,6 @@ require 'simple_config'
 require 'jira'
 require 'slop'
 require 'pp'
-require 'git'
 require './lib/issue'
 require_relative 'lib/repo'
 
@@ -57,4 +56,5 @@ release.related['branches'].each do |branch|
   puts "Pushing #{new_branch} and deleting #{old_branch} branch"
   repo_path.push(repo_path.remote('origin'), new_branch) # push -release to origin
   clean_branch(repo_path, old_branch) # delete -pre and push to origin
+  repo_path.create_pullrequest SimpleConfig.bitbucket.to_h
 end

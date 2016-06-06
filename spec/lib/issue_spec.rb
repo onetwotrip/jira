@@ -150,7 +150,8 @@ describe JIRA::Resource::Issue do
     issue = JIRA::Resource::Issue.new(@jira)
     issue.instance_variable_set(:@attrs, 'fields' => {
                                   'key' => 'ID',
-                                  'fields' => {} })
+                                  'fields' => {}
+                                })
     expect(issue.tags?('customtags', 'value')).to eq false
 
     issue.instance_variable_set(:@attrs, 'fields' => {
@@ -159,7 +160,8 @@ describe JIRA::Resource::Issue do
                                     'customtags' => [
                                       { 'value' => 'value' }
                                     ]
-                                  } })
+                                  }
+                                })
     expect(issue.tags?('customtags', 'value')).to eq true
   end
 end

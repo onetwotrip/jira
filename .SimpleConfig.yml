@@ -6,6 +6,9 @@ sendgrid:
   to:   <%= ENV['REVIEWER'] %>
   cc: dmitry.shmelev@onetwotrip.com
   subject: 'OTT-Infra: CodeReview'
+bitbucket:
+  username: <%= ENV['BB_USERNAME'] %>
+  password: <%= ENV['BB_PASSWORD'] %>
 jira:
   username: <%= ENV['JIRA_USERNAME'] %>
   password: <%= ENV['JIRA_PASSWORD'] %>
