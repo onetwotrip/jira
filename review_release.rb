@@ -68,7 +68,6 @@ pullrequests.each do |pr|
     puts 'NPM Test'.green
     pr.run_tests(:npm, dryrun: NPM_DRYRUN)
   end
-  break
 end
 comment_text = <<EOS
 Automatic code review complete.
