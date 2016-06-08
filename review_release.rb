@@ -45,6 +45,7 @@ pullrequests.each do |pr|
   puts "Clone/Open with #{pr.dst} branch #{pr.dst.branch} and merge #{pr.src.branch}".green
   begin
     pr.repo
+    puts 'Changed files:', pr.repo.diff('origin/HEAD').map(&:path)
   rescue Git::GitExecuteError => e
     puts e.message.red
     next
