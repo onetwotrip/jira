@@ -12,6 +12,9 @@ gem 'java-properties'
 gem 'sendgrid-ruby'
 gem 'colorize'
 
+group :development do
+  gem 'overcommit'
+end
 group :test, :development do
   gem 'rake'
   gem 'rspec'

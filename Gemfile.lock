@@ -39,6 +39,8 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.4.0)
     ast (2.2.0)
+    childprocess (0.5.9)
+      ffi (~> 1.0, >= 1.0.11)
     codeclimate-test-reporter (0.5.0)
       simplecov (>= 0.7.1, < 1.0.0)
     colorize (0.7.7)
@@ -48,9 +50,11 @@ GEM
       unf (>= 0.0.5, < 1.0.0)
     faraday (0.9.2)
       multipart-post (>= 1.2, < 3)
+    ffi (1.9.10)
     http-cookie (1.0.2)
       domain_name (~> 0.5)
     i18n (0.7.0)
+    iniparse (1.4.2)
     java-properties (0.1.1)
     jira-ruby (0.1.17)
       activesupport
@@ -62,6 +66,9 @@ GEM
     multipart-post (2.0.0)
     netrc (0.11.0)
     oauth (0.4.7)
+    overcommit (0.33.0)
+      childprocess (~> 0.5.8)
+      iniparse (~> 1.4)
     parser (2.3.0.6)
       ast (~> 2.2)
     powerpack (0.1.1)
@@ -125,6 +132,7 @@ DEPENDENCIES
   json
   ottinfra-codereview!
   ottinfra-sendmail!
+  overcommit
   rake
   rest-client
   rspec
@@ -134,4 +142,4 @@ DEPENDENCIES
   slop
 
 BUNDLED WITH
-   1.12.1
+   1.12.5
