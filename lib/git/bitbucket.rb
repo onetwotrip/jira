@@ -19,7 +19,6 @@ module Git
         RestClient.post url, request.to_json, content_type: :json
       rescue => e
         puts "Error: #{e}; URL: #{url}; PARAMS: #{request}"
-        raise e
       end
     end
   end
