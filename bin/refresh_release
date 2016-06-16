@@ -1,7 +1,7 @@
-require 'simple_config'
-require 'jira'
+#!/usr/bin/env ruby
+require 'bundler/setup'
+require 'scenarios'
 require 'slop'
-require './lib/issue'
 
 opts = Slop.parse do |o|
   # Connection settings
@@ -19,13 +19,4 @@ opts = Slop.parse do |o|
   end
 end
 
-STDOUT.sync = true
-
-options = { auth_type: :basic }.merge(opts.to_hash)
-client = JIRA::Client.new(options)
-release = client.Issue.find(opts[:release])
-release.deploys.each do |issue|
-  puts issue.key
-  # Transition to Merge Ready
-  issue.transition 'Not merged' if issue.has_transition? 'Not merged'
-end
+Scenarios::RefreshRelease.new(opts).run
