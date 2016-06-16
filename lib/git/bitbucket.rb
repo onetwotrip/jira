@@ -10,7 +10,7 @@ module Git
     # Create pull request from src branch to dst
     # By default: from local branch to master
     def create_pullrequest(src: current_branch, dst: 'master', repo: remote.url.repo, username: nil, password: nil)
-      request = { title: "#{repo} from #{src} to #{dst}",
+      request = { title: "#{src} #{repo}",
                   source: { branch: { name: src },
                             repository: { full_name: repo } },
                   destination: { branch: { name: dst } } }
