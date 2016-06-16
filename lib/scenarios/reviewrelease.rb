@@ -16,16 +16,14 @@ module Scenarios
 
       # Workflow
       # Collect data about release and Issue
-      unless (triggered_issue = SimpleConfig.jira.issue)
-        print "No issue - no cry!\n"
+      unless SimpleConfig.jira.issue
+        puts "ReviewRelease: No issue - no cry!\n"
         exit 2
       end
 
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       # noinspection RubyArgCount
-      issue = jira.Issue.jql("key = #{triggered_issue}")
-      raise "WTF??? Issue search returned #{issue.length} elements!" if (issue.is_a? Array) && (issue.length > 1)
-      issue = issue[0] if issue.is_a? Array
+      issue = jira.Issue.find(SimpleConfig.jira.issue)
 
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
                           .filter_by_status('OPEN')
