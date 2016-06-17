@@ -20,6 +20,7 @@ Metrics/PerceivedComplexity:
   Exclude:
     - lib/scenarios/*.rb
 AllCops:
+  TargetRubyVersion: 2.1
   Exclude:
     - repos/**/*
     - vendor/**/*

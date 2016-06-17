@@ -23,9 +23,9 @@ module JIRA
       @git_config = git_config
     end
 
-    def run_tests(name, params = {})
-      test = Ott::Test.new(name, @repo)
-      test.run!(params)
+    def run_tests(params = {})
+      test = Ott::Test.new params.merge(repo: @repo)
+      test.run!
       @tests.push test
     end
 

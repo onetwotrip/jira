@@ -4,10 +4,11 @@ module Ott
   ##
   # This class represents Tests
   class Test
-    attr_reader :repo, :code, :dryrun, :outs, :name
+    attr_reader :repo, :code, :dryrun, :outs, :name, :scope
 
-    def initialize(name, repo)
-      @outs = ''
+    def initialize(repo:, name:, dryrun: nil, scope: 'release')
+      @scope = scope
+      @dryrun = dryrun
       @repo = repo
       @name = name
     end
@@ -25,45 +26,53 @@ module Ott
     end
 
     # :nocov:
-    def run!(params = {})
+    def run!
+      @outs = ''
       @code = 0
       case @name
       when :npm
-        npmrun(params)
+        :scope == 'release' ? npmfull : npmpart
       when :jscs
-        jscs(params)
+        jscs
       when :jshint
-        jshint(params)
+        jshint
       end
     end
 
-    def npmrun(params = {})
+    def npmfull
       @repo.chdir do
         t = Thread.new do
           @outs += `npm install && npm test 2>&1`
-          @code += $?.exitstatus # rubocop:disable Style/SpecialGlobalVars
-          @dryrun = true if params[:dryrun]
+          @code += $CHILD_STATUS.exitstatus
         end
         t.join
       end
     end
 
-    def jscs(params = {})
+    def npmpart
+      @repo.chdir do
+        t = Thread.new do
+          @outs += `npm install && npm test 2>&1`
+          @code += $CHILD_STATUS.exitstatus
+        end
+        t.join
+      end
+    end
+
+    def jscs
       @repo.diff('origin/HEAD').each do |file|
         next unless File.extname(file.path) == '.js'
         ranges = Ott::Helpers.diffed_lines file.patch
         check_jscs file.path, ranges
       end
-      @dryrun = 1 if params[:dryrun]
     end
 
-    def jshint(params = {})
+    def jshint
       @repo.diff('origin/HEAD').each do |file|
         next unless File.extname(file.path) == '.js'
         ranges = Ott::Helpers.diffed_lines file.patch
         check_jshint file.path, ranges
       end
-      @dryrun = 1 if params[:dryrun]
     end
 
     def check_jscs(filename, ranges = [])

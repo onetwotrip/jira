@@ -2,7 +2,7 @@ require 'spec_helper'
 describe Ott::Test do
   before :each do
     @repo_double = double(:repo_double)
-    @tests = described_class.new(:task, @repo_double)
+    @tests = described_class.new(name: :task, repo: @repo_double)
   end
 
   describe '.dryrun?' do
@@ -30,7 +30,7 @@ describe Ott::Test do
   end
   describe '.outs' do
     it 'on init' do
-      expect(@tests.outs).to eq ''
+      expect(@tests.outs).to eq nil
     end
   end
   it '.path returns repo.path' do

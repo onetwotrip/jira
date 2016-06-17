@@ -48,20 +48,20 @@ module Scenarios
         # JSCS
         unless ENV['NO_JSCS']
           puts 'Checking JSCS'.green
-          pr.run_tests(:jscs, dryrun: !fail_on_jscs)
+          pr.run_tests(name: :jscs, dryrun: !fail_on_jscs)
         end
 
         # JSHint
         unless ENV['NO_JSHINT']
           puts 'Checking JSHint'.green
-          pr.run_tests(:jshint, dryrun: !fail_on_jshint)
+          pr.run_tests(name: :jshint, dryrun: !fail_on_jshint)
         end
 
         # NPM test
         npm_dryrun = SimpleConfig.test.npm.dryrun_for.include? pr.dst.repo
         unless ENV['NO_TESTS']
           puts 'NPM Test'.green
-          pr.run_tests(:npm, dryrun: npm_dryrun)
+          pr.run_tests(name: :npm, dryrun: npm_dryrun, scope: 'release')
         end
       end
       comment_text = <<EOS
