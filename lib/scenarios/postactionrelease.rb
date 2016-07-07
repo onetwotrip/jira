@@ -2,27 +2,17 @@ module Scenarios
   ##
   # PostactionRelease scenario
   class PostactionRelease
-    attr_reader :opts
-
-    def initialize(opts)
-      @opts = opts
-    end
-
     def run
-      STDOUT.sync = true
+      jira = JIRA::Client.new SimpleConfig.jira.to_h
+      # noinspection RubyArgCount
+      issue = jira.Issue.find(SimpleConfig.jira.issue)
 
-      options = { auth_type: :basic }.merge(opts.to_hash)
-      client = JIRA::Client.new(options)
-      release = client.Issue.find(opts[:release])
-      raise "WTF??? release search returned #{release.length} elements!" if (release.is_a? Array) && (release.length > 1)
-      release = release[0] if release.is_a? Array
-
-      pullrequests = release.pullrequests(SimpleConfig.git.to_h)
-                            .filter_by_status('OPEN')
-                            .filter_by_source_url(opts[:release])
+      pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
+                          .filter_by_status('OPEN')
+                          .filter_by_source_url(SimpleConfig.jira.issue)
 
       unless pullrequests.valid?
-        release.post_comment p("ReviewRelease: #{pullrequests.valid_msg}")
+        issue.post_comment p("ReviewRelease: #{pullrequests.valid_msg}")
         exit
       end
 
@@ -37,10 +27,10 @@ module Scenarios
         end
       end
 
-      release.deploys.each do |issue|
-        puts issue.key
+      issue.deploys.each do |subissue|
+        puts subissue.key
         # Transition to DONE
-        issue.transition 'To master' if issue.get_transition_by_name 'To master'
+        subissue.transition 'To master' if subissue.get_transition_by_name 'To master'
       end
     end
   end

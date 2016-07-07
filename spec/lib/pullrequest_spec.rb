@@ -69,14 +69,14 @@ describe JIRA::PullRequest do
     allow(@fail_test).to receive(:status) { false }
     allow(@fail_test).to receive(:dryrun) { true }
 
-    allow(Ott::Test).to receive(:new).with(:ok, nil) { @ok_test }
-    allow(Ott::Test).to receive(:new).with(:failed, nil) { @fail_test }
+    allow(Ott::Test).to receive(:new).with(name: :ok, repo: nil) { @ok_test }
+    allow(Ott::Test).to receive(:new).with(name: :failed, repo: nil) { @fail_test }
 
     expect(@ok_test).to receive(:run!)
-    @pr.run_tests(:ok)
+    @pr.run_tests(name: :ok)
 
     expect(@fail_test).to receive(:run!)
-    @pr.run_tests(:failed)
+    @pr.run_tests(name: :failed)
 
     expect(@pr.tests_fails).to match_array(@fail_test)
   end
