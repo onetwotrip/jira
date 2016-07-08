@@ -1,0 +1,15 @@
+Metrics/MethodLength:
+  Exclude:
+    - lib/scenarios/*.rb
+Metrics/ClassLength:
+  Exclude:
+    - lib/scenarios/*.rb
+Metrics/AbcSize:
+  Exclude:
+    - lib/scenarios/*.rb
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - lib/scenarios/*.rb
+Metrics/PerceivedComplexity:
+  Exclude:
+    - lib/scenarios/*.rb

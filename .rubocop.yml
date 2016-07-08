@@ -1,3 +1,4 @@
+inherit_from: .rubocop_todo.yml
 Style/TrailingCommaInLiteral:
   EnforcedStyleForMultiline: comma
 Metrics/LineLength:
@@ -5,20 +6,6 @@ Metrics/LineLength:
   Max: 140
 Metrics/MethodLength:
   Max: 12
-  Exclude:
-    - lib/scenarios/*.rb
-Metrics/ClassLength:
-  Exclude:
-    - lib/scenarios/*.rb
-Metrics/AbcSize:
-  Exclude:
-    - lib/scenarios/*.rb
-Metrics/CyclomaticComplexity:
-  Exclude:
-    - lib/scenarios/*.rb
-Metrics/PerceivedComplexity:
-  Exclude:
-    - lib/scenarios/*.rb
 AllCops:
   TargetRubyVersion: 2.1
   Exclude:
