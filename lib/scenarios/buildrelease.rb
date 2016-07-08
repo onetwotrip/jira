@@ -15,7 +15,7 @@ module Scenarios
       client = JIRA::Client.new(options)
       release = client.Issue.find(opts[:release])
 
-      if release.deploys.empty? || opts[:ignorelinks]
+      if release.linked_issues('deployes').empty? || opts[:ignorelinks]
         puts 'Deploys issue not found or ignored. Force JQL.'
         release.search_deployes.each(&:link)
       end
@@ -43,8 +43,8 @@ module Scenarios
       source = opts[:source]
 
       # rubocop:disable Metrics/BlockNesting
-      puts "Number of issues: #{release.deploys.size}"
-      release.deploys.each do |issue|
+      puts "Number of issues: #{release.linked_issues('deployes').size}"
+      release.linked_issues('deployes').each do |issue|
         puts "Working on #{issue.key}".green
         issue.transition 'Not merged' if issue.has_transition? 'Not merged'
         has_merges = false

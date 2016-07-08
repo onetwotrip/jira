@@ -27,7 +27,7 @@ module Scenarios
         end
       end
 
-      issue.deploys.each do |subissue|
+      issue.linked_issues('deployes').each do |subissue|
         puts subissue.key
         # Transition to DONE
         subissue.transition 'To master' if subissue.get_transition_by_name 'To master'

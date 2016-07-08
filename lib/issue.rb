@@ -79,11 +79,6 @@ module JIRA
         )
       end
 
-      # Get deploys issues
-      def deploys
-        linked_issues 'deployes'
-      end
-
       def linked_issues(param)
         client.Issue.jql(%(issue in linkedIssues(#{key},"#{param}")))
       end
@@ -98,24 +93,24 @@ module JIRA
         )
       end
 
-      def dig_deploys(&filter)
+      def dig_deployes(&filter)
         result = []
-        deploys.each do |issue|
+        linked_issues('deployes').each do |issue|
           if block_given? && !(yield issue)
             puts "Issue #{key} skipped by filter"
             next
           end
-          result.concat issue.dig_deploys(&filter).push(issue)
+          result.concat issue.dig_deployes(&filter).push(issue)
         end
         result
       end
 
-      def all_deploys(&filter)
+      def all_deployes(&filter)
         if block_given? && !(yield self)
           puts "Issue #{key} skipped by filter"
           return []
         end
-        dig_deploys(&filter)
+        dig_deployes(&filter)
       end
 
       def tags?(fkey, val)
