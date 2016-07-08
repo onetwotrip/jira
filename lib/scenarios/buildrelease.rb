@@ -15,21 +15,24 @@ module Scenarios
       client = JIRA::Client.new(options)
       release = client.Issue.find(opts[:release])
 
-      unless release.deploys.any? && !opts[:ignorelinks]
+      if release.deploys.empty? || opts[:ignorelinks]
         puts 'Deploys issue not found or ignored. Force JQL.'
-        client.Issue.jql(
-          %[(status in ("Merge ready")
-          OR (status in ( "In Release")
-          AND issue in linkedIssues(#{release.key},"deployes")))
-          AND (Modes is Empty OR modes != "Manual Deploy")
-          AND project not in (#{SimpleConfig.jira.excluded_projects.to_sql})
-          ORDER BY priority DESC, issuekey DESC]
-        ).each(&:link)
+        release.search_deployes.each(&:link)
       end
 
-      # Exclude issues with manual deploy
-      issues = release.all_deploys do |issue|
-        !issue.tags?(SimpleConfig.jira.tags.field, SimpleConfig.jira.tags.deploy)
+      # Unlink blocked issues:
+      #   1) Get deployes issues of release
+      #   2) Check status of blocked tasks of issues.
+      #   3) If task hasn't status DONE - unlink issue from release
+      release.issuelinks.each do |issuelink|
+        next unless issuelink.type.name == 'Deployed' &&
+                    issuelink.outwardIssue &&
+                    issuelink.outwardIssue.linked_issues('is blocked by').select { |i| i.status.name != 'Done' }.any?
+        comment = "#{issuelink.outwardIssue.key} blocked. Unlink from release #{release.key}"
+        release.post_comment comment
+        issuelink.outwardIssue.post_comment comment
+        issuelink.delete
+        puts comment.red
       end
 
       badissues = {}
@@ -40,8 +43,8 @@ module Scenarios
       source = opts[:source]
 
       # rubocop:disable Metrics/BlockNesting
-      puts "Number of issues: #{issues.size}"
-      issues.each do |issue|
+      puts "Number of issues: #{release.deploys.size}"
+      release.deploys.each do |issue|
         puts "Working on #{issue.key}".green
         issue.transition 'Not merged' if issue.has_transition? 'Not merged'
         has_merges = false

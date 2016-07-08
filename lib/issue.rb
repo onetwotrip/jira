@@ -10,15 +10,14 @@ module JIRA
     class Issue < JIRA::Base # :nodoc:
       # Link current issue to opts[:release]
       def link
-        endpoint = create_endpoint 'rest/api/2/issueLink'
         params = {
           type: { name: 'Deployed' },
           inwardIssue: { key: opts[:release].to_s },
           outwardIssue: { key: key.to_s },
         }
         return if opts[:dryrun]
-        RestClient.post endpoint.to_s, params.to_json,
-                        content_type: :json, accept: :json
+        RestClient.post create_endpoint('rest/api/2/issueLink').to_s,
+                        params.to_json, content_type: :json, accept: :json
       end
 
       # rubocop:disable Style/PredicateName
@@ -56,16 +55,14 @@ module JIRA
       end
 
       def related
-        return @related if @related
-        endpoint = create_endpoint 'rest/dev-status/1.0/issue/detail'
         params = {
           issueId: id,
           applicationType: 'bitbucket',
           dataType: 'pullrequest',
         }
-        response = RestClient.get endpoint.to_s, params: params
-        @related = JSON.parse(response)['detail'].first
-        @related
+        @related ||= JSON.parse(
+          RestClient.get(create_endpoint('rest/dev-status/1.0/issue/detail').to_s, params: params)
+        )['detail'].first
       end
 
       def create_endpoint(path)
@@ -84,7 +81,21 @@ module JIRA
 
       # Get deploys issues
       def deploys
-        client.Issue.jql(%(issue in linkedIssues(#{key},"deployes")))
+        linked_issues 'deployes'
+      end
+
+      def linked_issues(param)
+        client.Issue.jql(%(issue in linkedIssues(#{key},"#{param}")))
+      end
+
+      def search_deployes
+        client.Issue.jql(
+          %[(status in ("Merge ready")
+          OR (status in ( "In Release") AND issue in linkedIssues(#{key},"deployes")))
+          AND (Modes is Empty OR modes != "Manual Deploy")
+          AND project not in (#{SimpleConfig.jira.excluded_projects.to_sql})
+          ORDER BY priority DESC, issuekey DESC]
+        )
       end
 
       def dig_deploys(&filter)
