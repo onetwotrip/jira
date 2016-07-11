@@ -4,8 +4,6 @@ Style/TrailingCommaInLiteral:
 Metrics/LineLength:
   Enabled: true
   Max: 140
-Metrics/MethodLength:
-  Max: 12
 AllCops:
   TargetRubyVersion: 2.1
   Exclude:

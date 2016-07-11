@@ -1,9 +1,5 @@
 require 'open3'
 
-# rubocop:disable Metrics/CyclomaticComplexity
-# rubocop:disable Metrics/PerceivedComplexity
-# rubocop:disable MethodLength
-# rubocop:disable Metrics/AbcSize
 def check_diff(git_repo, new_commit, old_commit = nil)
   res_text = ''
   prj_dir = Dir.new git_repo.dir.path

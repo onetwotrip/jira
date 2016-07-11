@@ -5,9 +5,6 @@ require 'git/bitbucket'
 
 ##
 # This class represents a git repo
-# rubocop:disable ClassLength
-# rubocop:disable MethodLength
-# rubocop:disable Metrics/AbcSize
 class GitRepo
   attr_reader :git
 
@@ -118,9 +115,17 @@ class GitRepo
   end
 
   def abort_merge!
-    mergehead = @git.revparse 'MERGE_HEAD' rescue Git::GitExecuteError # rubocop:disable Style/RescueModifier
+    begin
+      mergehead = @git.revparse 'MERGE_HEAD'
+    rescue
+      Git::GitExecuteError
+    end
     return unless mergehead
-    @git.lib.send(:command, 'merge', '--abort') rescue Git::GitExecuteError # rubocop:disable Style/RescueModifier
+    begin
+      @git.lib.send(:command, 'merge', '--abort')
+    rescue
+      Git::GitExecuteError
+    end
   end
 
   def chdir(&block)
@@ -137,10 +142,10 @@ class GitRepo
       t = Thread.new do
         puts 'NPM install'
         errors.out += `npm install 2>&1`
-        errors.code += $?.exitstatus # rubocop:disable Style/SpecialGlobalVars
+        errors.code += $CHILD_STATUS.exitstatus
         puts 'NPM test'
         errors.out += `npm test 2>&1`
-        errors.code += $?.exitstatus # rubocop:disable Style/SpecialGlobalVars
+        errors.code += $CHILD_STATUS.exitstatus
       end
       t.join
     end

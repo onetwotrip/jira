@@ -9,7 +9,6 @@ module Ott
       @root
     end
 
-    # rubocop:disable Metrics/AbcSize
     def self.diffed_lines(diff)
       ranges = []
       diff.each_line do |l|
@@ -21,6 +20,5 @@ module Ott
       puts "#{diff}\n Diff without marks or unknown marks!" if ranges.empty? && !diff.empty?
       ranges
     end
-    # rubocop:enable Metrics/AbcSize
   end
 end
