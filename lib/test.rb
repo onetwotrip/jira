@@ -31,7 +31,7 @@ module Ott
       @code = 0
       case @name
       when :npm
-        :scope == 'release' ? npmfull : npmpart
+        @scope == 'release' ? npmfull : npmpart
       when :jscs
         jscs
       when :jshint

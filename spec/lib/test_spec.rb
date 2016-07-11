@@ -5,6 +5,15 @@ describe Ott::Test do
     @tests = described_class.new(name: :task, repo: @repo_double)
   end
 
+  describe 'check test scope' do
+    it 'release by default' do
+      expect(@tests.scope).to eq 'release'
+    end
+    it 'check scope' do
+      expect(described_class.new(name: :task, repo: @repo_double, scope: 'commit').scope).to eq 'commit'
+    end
+  end
+
   describe '.dryrun?' do
     it 'on init' do
       expect(@tests.dryrun).to eq nil
