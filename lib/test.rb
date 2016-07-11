@@ -43,7 +43,7 @@ module Ott
       @repo.chdir do
         t = Thread.new do
           @outs += `npm install && npm test 2>&1`
-          @code += $CHILD_STATUS.exitstatus
+          @code += $?.exitstatus
         end
         t.join
       end
@@ -53,7 +53,7 @@ module Ott
       @repo.chdir do
         t = Thread.new do
           @outs += `npm install && npm test 2>&1`
-          @code += $CHILD_STATUS.exitstatus
+          @code += $?.exitstatus
         end
         t.join
       end
