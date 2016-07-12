@@ -1,0 +1,11 @@
+Summary results
+<% @result.each do |repo, tests| %>
+ <%= repo %>
+<%   tests.each do |test| %>
+<%     status = test.code ? 'PASSED'.green : 'FAIL'.red %>
+<%     status = "IGNORED (#{status})".white if test.dryrun %>
+   <%= "#{test.name.upcase}: #{status}" %>
+<%   end %>
+<% end %>
+
+Build URL: <%= ENV.fetch('BUILD_URL', 'none') %>
