@@ -2,21 +2,15 @@ module Scenarios
   ##
   # DeployRelease scenario
   class DeployRelease
-    attr_reader :opts
-
-    def initialize(opts)
-      @opts = opts
-    end
-
     def run
       raise 'No stage!' unless ENV['STAGE']
-      options = { auth_type: :basic }.merge(opts.to_hash)
-      client = JIRA::Client.new(options)
-      release = client.Issue.find(opts[:release])
-      prs = release.related['pullRequests']
-      git_style_release = opts[:release].tr('-', ' ').downcase.capitalize
+      jira = JIRA::Client.new SimpleConfig.jira.to_h
+      issue = jira.Issue.find SimpleConfig.jira.issue
 
-      prs.select! { |pr| /^((#{opts[:release]})|(#{git_style_release}))/.match pr['name'] && pr['status'] != 'DECLINED' }
+      prs = issue.related['pullRequests']
+      git_style_release = SimpleConfig.jira.issue.tr('-', ' ').downcase.capitalize
+
+      prs.select! { |pr| /^((#{SimpleConfig.jira.issue})|(#{git_style_release}))/.match pr['name'] && pr['status'] != 'DECLINED' }
 
       if prs.empty?
         puts 'No pull requests for this task!'
@@ -30,7 +24,7 @@ module Scenarios
 
       prs.each do |pr|
         repo_name = pr['url'].split('/')[-3]
-        if pr['destination']['branch'] != 'master'
+        unless pr['destination']['branch'].include? 'master'
           puts "WTF? Why is this Pull Request here? o_O (destination: #{pr['destination']['branch']}"
           next
         end
