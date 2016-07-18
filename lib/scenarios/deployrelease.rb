@@ -10,7 +10,7 @@ module Scenarios
       prs = issue.related['pullRequests']
       git_style_release = SimpleConfig.jira.issue.tr('-', ' ').downcase.capitalize
 
-      prs.select! { |pr| /^((#{SimpleConfig.jira.issue})|(#{git_style_release}))/.match pr['name'] && pr['status'] != 'DECLINED' }
+      prs.select! { |pr| (/^((#{SimpleConfig.jira.issue})|(#{git_style_release}))/.match pr['name']) && pr['status'] != 'DECLINED' }
 
       if prs.empty?
         puts 'No pull requests for this task!'
