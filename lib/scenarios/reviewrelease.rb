@@ -68,7 +68,7 @@ module Scenarios
           puts "No transition #{transition} available.".red
           comment_text << "Unable to transition issue to #{transition} state."
         end
-        release.post_comment comment_text.white if post_to_ticket
+        release.post_comment comment_text.uncolorize if post_to_ticket
         exit 1
       end
     end
