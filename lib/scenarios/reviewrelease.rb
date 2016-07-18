@@ -7,8 +7,8 @@ module Scenarios
       transition = 'WTF'.freeze
       post_to_ticket = ENV.fetch('ROOT_BUILD_CAUSE_REMOTECAUSE', nil) == 'true' ? true : false
       dryrun = {
-        jscs: ENV.fetch('FAIL_ON_JSCS', false),
-        jshint: ENV.fetch('FAIL_ON_JSHINT', false),
+        jscs: ENV.fetch('DRYRUN_FOR_JSCS', false),
+        jshint: ENV.fetch('DRYRUN_FOR_JSHINT', false),
       }
 
       workdir = SimpleConfig.git.workdir
