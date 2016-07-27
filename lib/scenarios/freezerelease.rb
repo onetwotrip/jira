@@ -2,34 +2,26 @@ module Scenarios
   ##
   # FreezeRelease scenario
   class FreezeRelease
-    attr_reader :opts
-
-    def initialize(opts)
-      @opts = opts
-    end
-
     def with(instance, &block)
       instance.instance_eval(&block)
       instance
     end
 
     def run
-      puts "Starting freeze_release for #{opts[:release]}".green
-      options = { auth_type: :basic }.merge(opts.to_hash)
-      client = JIRA::Client.new(options)
+      puts "Starting freeze_release for #{SimpleConfig.jira.issue}".green
+      jira = JIRA::Client.new SimpleConfig.jira.to_h
+      issue = jira.Issue.find(SimpleConfig.jira.issue)
 
-      release = client.Issue.find(opts[:release])
-      release.related['branches'].each do |branch|
-        unless branch['name'].match "^#{release.key}-pre"
+      issue.related['branches'].each do |branch|
+        unless branch['name'].match "^#{SimpleConfig.jira.issue}-pre"
           puts "Incorrect branch #{branch['name']} name".red
           next
         end
         today = Time.new.strftime('%d.%m.%Y')
         old_branch = branch['name']
-        new_branch = "#{release.key}-release-#{today}"
+        new_branch = "#{SimpleConfig.jira.issue}-release-#{today}"
 
-        repo_path = git_repo(branch['repository']['url'],
-                             opts)
+        repo_path = git_repo(branch['repository']['url'])
 
         # copy -pre to -release
         puts "Working with #{repo_path.remote.url.repo}".green
@@ -49,7 +41,6 @@ module Scenarios
           checkout cur_branch
         end
 
-        next unless opts[:force]
         puts "Pushing #{new_branch} and deleting #{old_branch} branch".green
         with repo_path do
           push(repo_path.remote('origin'), new_branch) # push -release to origin
