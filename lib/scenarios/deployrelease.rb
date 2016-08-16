@@ -29,6 +29,13 @@ module Scenarios
           next
         end
         prop_values["#{repo_name.upcase}_BRANCH"] = pr['source']['branch']
+        project_labels = []
+        issue.linked_issues('deployes').each do |linked_issue|
+          linked_issue.labels.each do |label|
+            project_labels << label.remove("#{repo_name}_") if label.start_with? "#{repo_name}_"
+          end
+        end
+        prop_values["#{repo_name.upcase}_LABELS"] = project_labels.uniq.join(',') unless project_labels.empty?
       end
 
       pp prop_values
