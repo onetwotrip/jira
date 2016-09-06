@@ -22,7 +22,6 @@ jira:
   excluded_projects:
     - 'Hotels'
     - 'Servers & Services'
-    - 'Russian Railroad'
 git:
   reviewer: <%= ENV['GITATTR_REVIEWER'] %>
   reviewer_key: <%= ENV.fetch('GITATTR_REVIEWER_KEY', 'reviewer.mail') %>
