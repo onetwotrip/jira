@@ -7,7 +7,7 @@ module Scenarios
       transition = 'WTF'.freeze
       post_to_ticket = ENV.fetch('ROOT_BUILD_CAUSE_REMOTECAUSE', nil) == 'true' ? true : false
       dryrun = {
-        jscs: ENV.fetch('DRYRUN_FOR_JSCS', false),
+        #jscs: ENV.fetch('DRYRUN_FOR_JSCS', false),
         jshint: ENV.fetch('DRYRUN_FOR_JSHINT', false),
       }
 
@@ -36,7 +36,7 @@ module Scenarios
 
         puts "Working with #{repo_name} branch #{branch_name}".green
         @result[repo_name] = []
-        [:jscs, :jshint, :npm].each do |name|
+        [:jshint, :npm].each do |name|
           puts "Checking #{repo_name}:#{branch_name} for #{name} test".green
           test = Ott::Test.new repo: repo,
                                name: name,

@@ -46,10 +46,10 @@ module Scenarios
         end
 
         # JSCS
-        unless ENV['NO_JSCS']
-          puts 'Checking JSCS'.green
-          pr.run_tests(name: :jscs, dryrun: !fail_on_jscs)
-        end
+        #unless ENV['NO_JSCS']
+        #  puts 'Checking JSCS'.green
+        #  pr.run_tests(name: :jscs, dryrun: !fail_on_jscs)
+        #end
 
         # JSHint
         unless ENV['NO_JSHINT']
