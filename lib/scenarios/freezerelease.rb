@@ -14,7 +14,7 @@ module Scenarios
 
       issue.related['branches'].each do |branch|
         unless branch['name'].match "^#{SimpleConfig.jira.issue}-pre"
-          puts "Incorrect branch #{branch['name']} name".red
+          puts "[SKIP] #{branch['repository']['name']}/#{branch['name']} - incorrect branch name".red
           next
         end
         today = Time.new.strftime('%d.%m.%Y')
