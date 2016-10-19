@@ -58,7 +58,9 @@ module Scenarios
         else
           issue.related['pullRequests'].each do |pullrequest|
             if pullrequest['status'] != 'OPEN'
-              puts "Not processing not OPEN PR #{pullrequest['url']}".red
+              msg = "Not processing not OPEN PR #{pullrequest['url']}"
+              puts msg.red
+              issue.post_comment msg
               next
             end
             if pullrequest['source']['branch'].match "^#{issue.key}"
