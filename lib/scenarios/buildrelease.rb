@@ -23,11 +23,12 @@ module Scenarios
       # Unlink blocked issues:
       #   1) Get deployes issues of release
       #   2) Check status of blocked tasks of issues.
-      #   3) If task hasn't status DONE - unlink issue from release
+      #   3) If task hasn't necessary status - unlink issue from release
+      good_statuses = %w(Done Closed Fixed Rejected)
       release.issuelinks.each do |issuelink|
         next unless issuelink.type.name == 'Deployed' &&
                     issuelink.outwardIssue &&
-                    issuelink.outwardIssue.linked_issues('is blocked by').select { |i| i.status.name != 'Done' }.any?
+                    issuelink.outwardIssue.linked_issues('is blocked by').any? { |i| !good_statuses.include? i.status.name }
         comment = "#{issuelink.outwardIssue.key} blocked. Unlink from release #{release.key}"
         release.post_comment comment
         issuelink.outwardIssue.post_comment comment
