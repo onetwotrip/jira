@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/onetwotrip/SimpleConfig
-  revision: 600820c14307fbca0b6390ffe7c02ba2a3d658ce
+  revision: bd851aabf9b264374986339ad2e260c6ea49eb6a
   specs:
     SimpleConfig (0.0.1)
 
@@ -142,4 +142,4 @@ DEPENDENCIES
   slop
 
 BUNDLED WITH
-   1.13.2
+   1.12.5
