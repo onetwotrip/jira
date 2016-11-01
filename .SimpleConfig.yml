@@ -30,8 +30,3 @@ test:
   npm:
     dryrun_for:
       - 'OneTwoTrip/xjsx'
-release:
-  filter: <%= ENV['RELEASE_FILTER'] %>
-  name: <%= ENV['RELEASE_NAME'] %>
-  project: <%= ENV['RELEASE_KEY'] %>
-  tasks: <%= ENV['RELEASE_TASKS'] %>

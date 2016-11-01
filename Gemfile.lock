@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/onetwotrip/SimpleConfig
-  revision: bd851aabf9b264374986339ad2e260c6ea49eb6a
+  revision: 2637c73a0fbf0b29fa0e335825b8dcc021b46876
   specs:
     SimpleConfig (0.0.1)
 
