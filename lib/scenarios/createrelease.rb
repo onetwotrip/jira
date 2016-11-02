@@ -13,7 +13,7 @@ module Scenarios
         exit
       end
 
-      if params.filter && !params.filter.empty?
+      if params.filter
         begin
           issues = client.Issue.jql("filter=#{params[:filter]}")
         rescue JIRA::HTTPError => jira_error
