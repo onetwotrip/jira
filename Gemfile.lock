@@ -31,11 +31,10 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (4.2.6)
+    activesupport (5.0.0.1)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (~> 0.7)
-      json (~> 1.7, >= 1.7.7)
       minitest (~> 5.1)
-      thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
     addressable (2.4.0)
     ast (2.2.0)
@@ -44,6 +43,7 @@ GEM
     codeclimate-test-reporter (0.5.0)
       simplecov (>= 0.7.1, < 1.0.0)
     colorize (0.7.7)
+    concurrent-ruby (1.0.2)
     diff-lcs (1.2.5)
     docile (1.1.5)
     domain_name (0.5.20160310)
@@ -56,16 +56,16 @@ GEM
     i18n (0.7.0)
     iniparse (1.4.2)
     java-properties (0.1.1)
-    jira-ruby (0.1.17)
+    jira-ruby (1.1.2)
       activesupport
-      oauth (~> 0.4.7)
+      oauth (~> 0.5, >= 0.5.0)
     json (1.8.3)
     mime-types (2.99.1)
     mimemagic (0.3.1)
-    minitest (5.8.4)
+    minitest (5.9.1)
     multipart-post (2.0.0)
     netrc (0.11.0)
-    oauth (0.4.7)
+    oauth (0.5.1)
     overcommit (0.33.0)
       childprocess (~> 0.5.8)
       iniparse (~> 1.4)
@@ -142,4 +142,4 @@ DEPENDENCIES
   slop
 
 BUNDLED WITH
-   1.12.5
+   1.13.6
