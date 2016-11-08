@@ -4,14 +4,19 @@ module Scenarios
   class CreateRelease
     def run
       params = SimpleConfig.release
-      puts "Create release from filter #{params[:filter]} with name #{params[:name]}".green
 
-      client = JIRA::Client.new SimpleConfig.jira.to_h
+      unless params
+        puts 'No Release params in ENV'.red
+        exit
+      end
+      puts "Create release from filter #{params[:filter]} with name #{params[:name]}".green
 
       if !params.filter && !params.tasks
         puts 'No necessary params - filter of tasks'.red
         exit
       end
+
+      client = JIRA::Client.new SimpleConfig.jira.to_h
 
       if params.filter
         begin
