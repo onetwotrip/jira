@@ -4,15 +4,15 @@ require 'scenarios'
 describe Scenarios::CreateRelease do
   before :each do
     client_options = {
-        username: 'User',
-        password: 'Pass',
-        site: 'http://site.org',
-        context_path: '/context'
+      username: 'User',
+      password: 'Pass',
+      site: 'http://site.org',
+      context_path: '/context'
     }
     @jira = double(
-        JIRA::Client, options: client_options,
-        Project: JIRA::Resource::Project,
-        Issue: JIRA::Resource::Issue
+      JIRA::Client, options: client_options,
+                    Project: JIRA::Resource::Project,
+                    Issue: JIRA::Resource::Issue
     )
     @scenario = Scenarios::CreateRelease.new
   end
