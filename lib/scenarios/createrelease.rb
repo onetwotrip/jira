@@ -2,6 +2,17 @@ module Scenarios
   ##
   # CreateRelease scenario
   class CreateRelease
+    def find_by_filter(issue, filter)
+      begin
+        issue.jql("filter=#{filter}")
+      rescue JIRA::HTTPError => jira_error
+        error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
+
+        puts "Error in JIRA with the search by filter #{error_message}"
+        -1
+      end
+    end
+
     def run
       params = SimpleConfig.release
 
@@ -20,14 +31,7 @@ module Scenarios
       client = JIRA::Client.new SimpleConfig.jira.to_h
 
       if params.filter
-        begin
-          issues = client.Issue.jql("filter=#{params[:filter]}")
-        rescue JIRA::HTTPError => jira_error
-          error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
-
-          puts "Error in JIRA with the search by filter #{error_message}"
-        end
-
+        issues = find_by_filter(client.Issue, params.filter)
       end
 
       if params.tasks && !params.tasks.empty?
