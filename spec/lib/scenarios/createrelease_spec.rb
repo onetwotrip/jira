@@ -2,7 +2,8 @@ require 'spec_helper'
 require 'scenarios'
 
 describe Scenarios::CreateRelease do
-  jira_filter = 12341
+  jira_filter = '12341'
+  jira_tasks = 'XXX-100,XYZ-101'
   before :each do
     client_options = {
       username: 'User',
@@ -31,7 +32,14 @@ describe Scenarios::CreateRelease do
   it 'should failed if had HTTP error from search by filter' do
     issue = double
     allow(issue).to receive(:jql).with(any_args).and_throw(JIRA::HTTPError)
-    expect(@scenario).to receive(:find_by_filter).with(issue, jira_filter).and_return -1
+    expect(@scenario).to receive(:find_by_filter).with(issue, jira_filter).and_return []
     @scenario.find_by_filter(issue, jira_filter)
+  end
+
+  it 'should failed if had HTTP error from search by tasks' do
+    issue = double
+    allow(issue).to receive(:jql).with(any_args).and_throw(JIRA::HTTPError)
+    expect(@scenario).to receive(:find_by_tasks).with(issue, jira_tasks).and_return []
+    @scenario.find_by_tasks(issue, jira_tasks)
   end
 end
