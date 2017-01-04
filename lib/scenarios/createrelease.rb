@@ -17,7 +17,7 @@ module Scenarios
         # Try to find issue by key
         begin
           issues_from_string << issue.find(issue_key)
-        rescue JIRA::HTTPError => jira_error
+        rescue
           error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
 
           puts "Error in JIRA with the search by issue key #{error_message}"
@@ -25,6 +25,20 @@ module Scenarios
       end
 
       issues_from_string
+    end
+
+    def create_release_issue(project, issue, project_key='OTT', release_name='Release')
+      project = project.find(project_key)
+      release = issue.build
+      release.save('fields' => { 'summary' => release_name, 'project' => { 'id' => project.id },
+                                 'issuetype' => { 'name' => 'Release' } })
+      release.fetch
+      release
+    rescue JIRA::HTTPError => jira_error
+      error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
+      raise error_message
+    rescue Exception => e
+      raise e
     end
 
     def run
@@ -51,11 +65,13 @@ module Scenarios
         issues = issues_from_string unless issues_from_string.empty?
       end
 
-      project = client.Project.find(params[:project])
-      release = client.Issue.build
-      release.save('fields' => { 'summary' => params[:name], 'project' => { 'id' => project.id },
-                                 'issuetype' => { 'name' => 'Release' } })
-      release.fetch
+      begin
+        release = create_release_issue(client.Project, client.Issue, params[:project], params[:name])
+      rescue Exception => e
+        puts "Creation of release was failed with error #{e}".red
+        exit
+      end
+
       puts "Start to link issues to release #{release.key}".green
 
       issues.each { |issue| issue.link(release.key) }

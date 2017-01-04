@@ -42,4 +42,12 @@ describe Scenarios::CreateRelease do
     expect(@scenario).to receive(:find_by_tasks).with(issue, jira_tasks).and_return []
     @scenario.find_by_tasks(issue, jira_tasks)
   end
+
+  it 'should failed if received HTTP error from jira when create release task' do
+    project = double
+    issue = double
+    allow(project).to receive(:find).with(any_args).and_throw(JIRA::HTTPError)
+    expect(@scenario).to receive(:create_release_issue).with(any_args).and_return 10
+    @scenario.create_release_issue(project, issue, 'OTT', 'RELEASE')
+  end
 end
