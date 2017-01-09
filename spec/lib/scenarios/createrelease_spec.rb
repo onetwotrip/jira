@@ -2,8 +2,8 @@ require 'spec_helper'
 require 'scenarios'
 
 describe Scenarios::CreateRelease do
-  jira_filter = '12341'
-  jira_tasks = 'XXX-100,XYZ-101'
+  let(:jira_filter) { '12341' }
+  let(:jira_tasks) { 'XXX-100,XYZ-101' }
   before :each do
     client_options = {
       username: 'User',
@@ -31,23 +31,23 @@ describe Scenarios::CreateRelease do
 
   it 'should failed if had HTTP error from search by filter' do
     issue = double
-    allow(issue).to receive(:jql).with(any_args).and_throw(JIRA::HTTPError)
-    expect(@scenario).to receive(:find_by_filter).with(issue, jira_filter).and_return []
-    @scenario.find_by_filter(issue, jira_filter)
+    response = Struct.new('JiraError', :body, :message, :body_exists).new('NOT_FOUND', 'Message', true)
+    allow(issue).to receive(:jql).with(any_args).and_raise(JIRA::HTTPError.new(response))
+    expect(@scenario.find_by_filter(issue, jira_filter)).to eq([])
   end
 
   it 'should failed if had HTTP error from search by tasks' do
     issue = double
-    allow(issue).to receive(:jql).with(any_args).and_throw(JIRA::HTTPError)
-    expect(@scenario).to receive(:find_by_tasks).with(issue, jira_tasks).and_return []
-    @scenario.find_by_tasks(issue, jira_tasks)
+    response = Struct.new('JiraError_tasks', :body, :message, :body_exists).new('NOT_FOUND', 'Message', true)
+    allow(issue).to receive(:find).with(any_args).and_raise(JIRA::HTTPError.new(response))
+    expect(@scenario.find_by_tasks(issue, jira_tasks)).to eq([])
   end
 
   it 'should failed if received HTTP error from jira when create release task' do
     project = double
     issue = double
-    allow(project).to receive(:find).with(any_args).and_throw(JIRA::HTTPError)
-    expect(@scenario).to receive(:create_release_issue).with(any_args).and_return 10
-    @scenario.create_release_issue(project, issue, 'OTT', 'RELEASE')
+    response = Struct.new('JiraError_create', :body, :message, :body_exists).new('NOT_FOUND', 'Message', true)
+    allow(project).to receive(:find).with(any_args).and_raise(JIRA::HTTPError.new(response))
+    expect(@scenario.create_release_issue(project, issue)).to raise_error(RuntimeError, a_string_starting_with('Mess'))
   end
 end
