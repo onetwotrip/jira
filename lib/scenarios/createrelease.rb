@@ -17,7 +17,7 @@ module Scenarios
         # Try to find issue by key
         begin
           issues_from_string << issue.find(issue_key)
-        rescue
+        rescue JIRA::HTTPError => jira_error
           error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
 
           puts "Error in JIRA with the search by issue key #{error_message}"
