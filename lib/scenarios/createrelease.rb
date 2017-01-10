@@ -6,7 +6,7 @@ module Scenarios
       issue.jql("filter=#{filter}")
     rescue JIRA::HTTPError => jira_error
       error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
-      puts "Error in JIRA with the search by filter #{error_message}"
+      puts "Error in JIRA with the search by filter #{error_message}".red
       []
     end
 
@@ -20,7 +20,7 @@ module Scenarios
         rescue JIRA::HTTPError => jira_error
           error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
 
-          puts "Error in JIRA with the search by issue key #{error_message}"
+          puts "Error in JIRA with the search by issue key #{error_message}".red
         end
       end
 
@@ -37,8 +37,6 @@ module Scenarios
     rescue JIRA::HTTPError => jira_error
       error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
       raise error_message
-    rescue Exception => e
-      raise e
     end
 
     def run
