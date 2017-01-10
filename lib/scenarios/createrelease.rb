@@ -31,7 +31,7 @@ module Scenarios
       project = project.find(project_key)
       release = issue.build
       release.save(fields: { summary: release_name, project: { id: project.id },
-                                 issuetype: { name: 'Release' } })
+                             issuetype: { name: 'Release' } })
       release.fetch
       release
     rescue JIRA::HTTPError => jira_error

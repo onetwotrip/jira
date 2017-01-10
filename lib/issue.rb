@@ -18,7 +18,7 @@ module JIRA
           outwardIssue: { key: key.to_s },
         }
         return if opts[:dryrun]
-        puts "Create Deployed link from #{key.to_s} to #{release_key}".green
+        puts "Create Deployed link from #{key} to #{release_key}".green
         li.save(params)
       end
       # :nocov:
