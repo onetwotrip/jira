@@ -48,6 +48,6 @@ describe Scenarios::CreateRelease do
     issue = double
     response = Struct.new('JiraError_create', :body, :message, :body_exists).new('NOT_FOUND', 'Message', true)
     allow(project).to receive(:find).with(any_args).and_raise(JIRA::HTTPError.new(response))
-    expect{ @scenario.create_release_issue(project, issue) }.to raise_error(RuntimeError, 'Message')
+    expect { @scenario.create_release_issue(project, issue) }.to raise_error(RuntimeError, 'Message')
   end
 end

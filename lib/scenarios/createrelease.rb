@@ -27,7 +27,7 @@ module Scenarios
       issues_from_string
     end
 
-    def create_release_issue(project, issue, project_key='OTT', release_name='Release')
+    def create_release_issue(project, issue, project_key = 'OTT', release_name = 'Release')
       project = project.find(project_key)
       release = issue.build
       release.save('fields' => { 'summary' => release_name, 'project' => { 'id' => project.id },
@@ -65,7 +65,7 @@ module Scenarios
 
       begin
         release = create_release_issue(client.Project, client.Issue, params[:project], params[:name])
-      rescue Exception => e
+      rescue RuntimeError => e
         puts "Creation of release was failed with error #{e}".red
         exit
       end
