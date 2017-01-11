@@ -4,6 +4,7 @@ require 'rest-client'
 require 'addressable/uri'
 require 'json'
 require 'pullrequests'
+require 'colorize'
 
 module JIRA
   module Resource

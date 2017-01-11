@@ -91,53 +91,53 @@ describe JIRA::Resource::Issue do
 
   it '.all_deployes should returns all dependent' do
     issue = JIRA::Resource::Issue.new(@jira)
-    issue_1 = issue.dup
-    issue_2 = issue.dup
+    issue1 = issue.dup
+    issue2 = issue.dup
     sub_issue = issue.dup
 
-    allow(issue).to     receive(:linked_issues).with('deployes').and_return [issue_1, issue_2]
-    allow(issue_1).to   receive(:linked_issues).with('deployes').and_return [sub_issue]
-    allow(issue_2).to   receive(:linked_issues).with('deployes').and_return []
+    allow(issue).to receive(:linked_issues).with('deployes').and_return [issue1, issue2]
+    allow(issue1).to receive(:linked_issues).with('deployes').and_return [sub_issue]
+    allow(issue2).to receive(:linked_issues).with('deployes').and_return []
     allow(sub_issue).to receive(:linked_issues).with('deployes').and_return []
 
     expect(issue.all_deployes.class.name).to eq 'Array'
-    expect(issue.all_deployes).to include issue_1, issue_2, sub_issue
+    expect(issue.all_deployes).to include issue1, issue2, sub_issue
   end
   it '.all_deployes should returns filtered issues' do
     issue = JIRA::Resource::Issue.new(@jira)
-    issue_1 = issue.dup
-    issue_2 = issue.dup
+    issue1 = issue.dup
+    issue2 = issue.dup
     sub_issue = issue.dup
-    issue.instance_variable_set(:@attrs, 'fields' => { 'key' => 'ISSUE' })
-    issue_1.instance_variable_set(:@attrs, 'fields' => { 'key' => 'ISSUE_1' })
-    issue_2.instance_variable_set(:@attrs, 'fields' => { 'key' => 'ISSUE_2' })
-    sub_issue.instance_variable_set(:@attrs, 'fields' => { 'key' => 'SUB_ISSUE' })
+    issue.instance_variable_set(:@attrs, fields: { key: 'ISSUE' }, 'key' => 'ISSUE')
+    issue1.instance_variable_set(:@attrs, fields: { key: 'ISSUE_1' }, 'key' => 'ISSUE_1')
+    issue2.instance_variable_set(:@attrs, fields: { key: 'ISSUE_2' }, 'key' => 'ISSUE_2')
+    sub_issue.instance_variable_set(:@attrs, fields: { key: 'SUB_ISSUE' }, 'key' => 'SUB_ISSUE')
 
-    allow(issue).to     receive(:linked_issues).with('deployes').and_return [issue_1, issue_2]
-    allow(issue_1).to   receive(:linked_issues).with('deployes').and_return [sub_issue]
-    allow(issue_2).to   receive(:linked_issues).with('deployes').and_return []
+    allow(issue).to receive(:linked_issues).with('deployes').and_return [issue1, issue2]
+    allow(issue1).to receive(:linked_issues).with('deployes').and_return [sub_issue]
+    allow(issue2).to receive(:linked_issues).with('deployes').and_return []
     allow(sub_issue).to receive(:linked_issues).with('deployes').and_return []
 
-    allow(issue).to     receive(:tags?).with('customtags', 'value').and_return true
-    allow(issue_1).to   receive(:tags?).with('customtags', 'value').and_return false
-    allow(issue_2).to   receive(:tags?).with('customtags', 'value').and_return false
+    allow(issue).to receive(:tags?).with('customtags', 'value').and_return true
+    allow(issue1).to receive(:tags?).with('customtags', 'value').and_return false
+    allow(issue2).to receive(:tags?).with('customtags', 'value').and_return false
     allow(sub_issue).to receive(:tags?).with('customtags', 'value').and_return false
 
     expect(issue.all_deployes { |i| !i.tags?('customtags', 'value') }).to contain_exactly
 
-    allow(issue).to     receive(:tags?).with('customtags', 'value').and_return false
-    allow(issue_1).to   receive(:tags?).with('customtags', 'value').and_return false
-    allow(issue_2).to   receive(:tags?).with('customtags', 'value').and_return true
+    allow(issue).to receive(:tags?).with('customtags', 'value').and_return false
+    allow(issue1).to receive(:tags?).with('customtags', 'value').and_return false
+    allow(issue2).to receive(:tags?).with('customtags', 'value').and_return true
     allow(sub_issue).to receive(:tags?).with('customtags', 'value').and_return true
 
-    expect(issue.all_deployes { |i| !i.tags?('customtags', 'value') }).to contain_exactly issue_1
+    expect(issue.all_deployes { |i| !i.tags?('customtags', 'value') }).to contain_exactly issue1
 
-    allow(issue).to     receive(:tags?).with('customtags', 'value').and_return false
-    allow(issue_1).to   receive(:tags?).with('customtags', 'value').and_return true
-    allow(issue_2).to   receive(:tags?).with('customtags', 'value').and_return false
+    allow(issue).to receive(:tags?).with('customtags', 'value').and_return false
+    allow(issue1).to receive(:tags?).with('customtags', 'value').and_return true
+    allow(issue2).to receive(:tags?).with('customtags', 'value').and_return false
     allow(sub_issue).to receive(:tags?).with('customtags', 'value').and_return true
 
-    expect(issue.all_deployes { |i| !i.tags?('customtags', 'value') }).to contain_exactly issue_2
+    expect(issue.all_deployes { |i| !i.tags?('customtags', 'value') }).to contain_exactly issue2
   end
   it '.tags? return true if tag available' do
     issue = JIRA::Resource::Issue.new(@jira)
