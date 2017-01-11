@@ -40,6 +40,7 @@ module Scenarios
       raise error_message
     end
 
+    # :nocov:
     def run
       params = SimpleConfig.release
 
@@ -76,5 +77,6 @@ module Scenarios
 
       puts "Create new release #{release.key} from filter #{params[:filter]}".green
     end
+    # :nocov:
   end
 end

@@ -1,5 +1,7 @@
 require 'spec_helper'
-require 'scenarios'
+require 'simple_config'
+
+require 'scenarios/createrelease'
 
 describe Scenarios::CreateRelease do
   let(:jira_filter) { '12341' }
