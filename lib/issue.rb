@@ -1,4 +1,4 @@
-require 'jira'
+require 'jira-ruby'
 require 'jira/client'
 require 'rest-client'
 require 'addressable/uri'
