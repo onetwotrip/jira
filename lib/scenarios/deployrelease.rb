@@ -3,10 +3,25 @@ module Scenarios
   # DeployRelease scenario
   class DeployRelease
     def run
-      raise 'No stage!' unless ENV['STAGE']
+      repo_dicts = Hash.new []
+      repo_dicts['12trip']               = %w(OTT)
+      repo_dicts['12trip-railways.node'] = %w(BLACKBOX)
+      repo_dicts['12trip-whitelabel']    = %w(SOCIAL)
+      repo_dicts['12trip_hotels']        = %w(HOTELS)
+      repo_dicts['b2b_app']              = %w(B2B)
+      repo_dicts['bundle-back']          = %w(BUNDLES)
+      repo_dicts['m-12trip']             = %w(MOBILE)
+      repo_dicts['m-hotels']             = %w(MHOTELS)
+      repo_dicts['renderer']             = %w(PASSBOOK)
+      repo_dicts['seo_pages']            = %w(SEOPAGES)
+      repo_dicts['twiket-live']          = %w(TLIVE)
+      repo_dicts['twiket_backoffice']    = %w(BO)
+      repo_dicts['xjsx']                 = %w(_XJSX XJSX_AVIA XJSX_CARS XJSX_PACKAGES XJSX_RAILWAYS)
+
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find SimpleConfig.jira.issue
 
+      prop_values = {}
       # Get unique labels from release issue and all linked issues
       labels = issue.labels
       issue.linked_issues('deployes').each do |linked_issue|
@@ -40,17 +55,20 @@ module Scenarios
       puts prs.map { |pr| pr['name'] }
       pp prs
 
-      prop_values = { 'STAGE' => ENV['STAGE'] }
-
       prs.each do |pr|
         repo_name = pr['url'].split('/')[-3]
         unless pr['destination']['branch'].include? 'master'
           puts "WTF? Why is this Pull Request here? o_O (destination: #{pr['destination']['branch']}"
           next
         end
-        prop_values["#{repo_name.upcase}_BRANCH"] = pr['source']['branch']
-        project_labels = labels.select { |label| label.start_with? "#{repo_name}_" }.map { |label| label.remove("#{repo_name}_") }
-        prop_values["#{repo_name.upcase}_LABELS"] = project_labels.join(',') unless project_labels.empty?
+        selected = (repo_dicts[repo_name] & labels.map(&:upcase))
+        if selected.empty?
+          selected.push repo_dicts[repo_name].first || repo_name.upcase
+        end
+        selected.each do |proj|
+          prop_values[proj] = 'true'
+          prop_values["#{proj}_BRANCH"] = pr['source']['branch']
+        end
       end
 
       pp prop_values
