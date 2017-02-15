@@ -32,3 +32,4 @@ test:
     dryrun_for:
       - 'OneTwoTrip/xjsx'
       - 'OneTwoTrip/12trip-railways.node'
+      - 'OneTwoTrip/seo_pages'
