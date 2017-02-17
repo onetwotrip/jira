@@ -5,9 +5,6 @@ module Scenarios
     def run
       post_to_ticket = ENV.fetch('ROOT_BUILD_CAUSE_REMOTECAUSE', nil) == 'true' ? true : false
 
-      fail_on_jscs = ENV.fetch('FAIL_ON_JSCS', false)
-      fail_on_jshint = ENV.fetch('FAIL_ON_JSHINT', false)
-
       transition = 'WTF'.freeze
 
       workdir = SimpleConfig.git.workdir
@@ -52,16 +49,17 @@ module Scenarios
         #end
 
         # JSHint
+        dryrun = SimpleConfig.test.jshint.dryrun_for.include? pr.dst.repo
         unless ENV['NO_JSHINT']
           puts 'Checking JSHint'.green
-          pr.run_tests(name: :jshint, dryrun: !fail_on_jshint)
+          pr.run_tests(name: :jshint, dryrun: dryrun)
         end
 
         # NPM test
-        npm_dryrun = SimpleConfig.test.npm.dryrun_for.include? pr.dst.repo
+        dryrun = SimpleConfig.test.npm.dryrun_for.include? pr.dst.repo
         unless ENV['NO_TESTS']
           puts 'NPM Test'.green
-          pr.run_tests(name: :npm, dryrun: npm_dryrun, scope: 'commit')
+          pr.run_tests(name: :npm, dryrun: dryrun, scope: 'commit')
         end
       end
       comment_text = <<EOS

@@ -33,7 +33,7 @@ module Scenarios
         repo_name = repo.remote.url.repo
         branch_name = repo.current_branch
         dryrun[:npm] = SimpleConfig.test.npm.dryrun_for.include? repo_name
-        dryrun[:jshint] = SimpleConfig.test.npm.dryrun_for.include? repo_name
+        dryrun[:jshint] = SimpleConfig.test.jshint.dryrun_for.include? repo_name
 
         puts "Working with #{repo_name} branch #{branch_name}".green
         @result[repo_name] = []
