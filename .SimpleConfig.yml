@@ -33,3 +33,6 @@ test:
       - 'OneTwoTrip/xjsx'
       - 'OneTwoTrip/12trip-railways.node'
       - 'OneTwoTrip/seo_pages'
+  jshint:
+    dryrun_for:
+      - 'OneTwoTrip/12trip-railways.node'
