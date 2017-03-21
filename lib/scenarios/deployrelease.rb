@@ -13,6 +13,7 @@ module Scenarios
       repo_dicts['m-12trip']             = %w(MOBILE)
       repo_dicts['m-hotels']             = %w(MHOTELS)
       repo_dicts['renderer']             = %w(PASSBOOK)
+      repo_dicts['seo_hotels']           = %w(SEOHOTELS)
       repo_dicts['seo_pages']            = %w(SEOPAGES)
       repo_dicts['twiket-live']          = %w(TLIVE)
       repo_dicts['twiket_backoffice']    = %w(BO)
