@@ -42,9 +42,9 @@ module JIRA
       end
       # :nocov:
 
-      def rollback
-        LOGGER.info "Rollback issue #{key} to Merge Ready"
-        if has_transition? 'Not merged'
+      def rollback(transition = 'Not merged')
+        LOGGER.info "Rollback issue #{key} to '#{transition}'"
+        if has_transition? transition
           branches.each do |branch|
             if branch.name =~ /-(pre|release)$/
               LOGGER.info "Rollback branch '#{branch.name}' from '#{branch.target['repository']['full_name']}'"
@@ -59,7 +59,7 @@ module JIRA
           end
           transition 'Not merged'
         else
-          LOGGER.warn "Failed. Has no 'Not merged' translition"
+          LOGGER.warn "Failed. Has no '#{transition}' translition"
         end
       end
 

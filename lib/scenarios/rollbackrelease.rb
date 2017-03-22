@@ -7,7 +7,7 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       release = jira.Issue.find(SimpleConfig.jira.issue)
       return unless release.status.name != 'Open'
-      release.rollback
+      release.rollback('Open')
       release.linked_issues('deployes').each(&:rollback)
     end
   end
