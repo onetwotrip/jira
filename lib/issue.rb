@@ -42,24 +42,25 @@ module JIRA
       end
       # :nocov:
 
-      def rollback(transition = 'Not merged')
-        LOGGER.info "Rollback issue #{key} to '#{transition}'"
-        if has_transition? transition
-          branches.each do |branch|
-            if branch.name =~ /-(pre|release)$/
-              LOGGER.info "Rollback branch '#{branch.name}' from '#{branch.target['repository']['full_name']}'"
-              branch.destroy
-            end
-          end
-          api_pullrequests.each do |pr|
-            if pr.state == 'OPEN'
-              LOGGER.info "Decline pullrequest '#{pr.title}' from '#{pr.destination['repository']['full_name']}'"
-              pr.decline
-            end
-          end
-          transition 'Not merged'
+      def rollback(do_trans: true)
+        trans = 'Not merged'
+        LOGGER.info "Rollback issue #{key} to '#{trans}'"
+        if do_trans && has_transition?(trans)
+          transition trans
         else
-          LOGGER.warn "Failed. Has no '#{transition}' translition"
+          LOGGER.warn "Translation '#{used_trans}' failed or skipped"
+        end
+        branches.each do |branch|
+          if branch.name =~ /^#{SimpleConfig.jira.issue}-(pre|release)$/
+            LOGGER.info "Rollback branch '#{branch.name}' from '#{branch.target['repository']['full_name']}'"
+            branch.destroy
+          end
+        end
+        api_pullrequests.each do |pr|
+          if pr.state == 'OPEN'
+            LOGGER.info "Decline pullrequest '#{pr.title}' from '#{pr.destination['repository']['full_name']}'"
+            pr.decline
+          end
         end
       end
 
