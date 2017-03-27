@@ -28,9 +28,14 @@ module JIRA
       def branches
         related['branches'].map do |branch|
           repo = Git::Utils.url_to_ssh branch['url']
-          BITBUCKET.repo(repo.owner, repo.slug)
-                   .branch(repo.branch)
-        end
+          begin
+            BITBUCKET.repo(repo.owner, repo.slug)
+                     .branch(repo.branch)
+          rescue Tinybucket::Error::NotFound
+            LOGGER.warn "Broken Link: branch #{repo.owner}/#{repo.slug}/#{repo.branch} not found"
+            next
+          end
+        end.reject(&:nil?)
       end
 
       def api_pullrequests
@@ -44,14 +49,15 @@ module JIRA
 
       def rollback(do_trans: true)
         trans = 'Not merged'
-        LOGGER.info "Rollback issue #{key} to '#{trans}'"
         if do_trans && has_transition?(trans)
+          LOGGER.info "Rollback issue '#{key}': transition to '#{trans}'"
           transition trans
         else
-          LOGGER.warn "Translation '#{trans}' failed or skipped"
+          LOGGER.warn "Rollback issue '#{key}': skipped" unless do_trans
+          LOGGER.warn "Rollback issue '#{key}': transition '#{trans}' not found" unless has_transition?(trans)
         end
         branches.each do |branch|
-          if branch.name =~ /^#{SimpleConfig.jira.issue}-(pre|release)$/
+          if branch.name =~ /^#{SimpleConfig.jira.issue}-(pre|release-[0-9]{2}\.[0-9]{2}\.[0-9]{4})$/
             LOGGER.info "Rollback branch '#{branch.name}' from '#{branch.target['repository']['full_name']}'"
             branch.destroy
           end
