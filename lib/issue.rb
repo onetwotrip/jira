@@ -48,7 +48,7 @@ module JIRA
         if do_trans && has_transition?(trans)
           transition trans
         else
-          LOGGER.warn "Translation '#{used_trans}' failed or skipped"
+          LOGGER.warn "Translation '#{trans}' failed or skipped"
         end
         branches.each do |branch|
           if branch.name =~ /^#{SimpleConfig.jira.issue}-(pre|release)$/
