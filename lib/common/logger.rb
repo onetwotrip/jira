@@ -1,4 +1,6 @@
 require 'logger'
+STDOUT.sync = true
+
 # :nocov:
 LOGGER = Logger.new(STDOUT)
 LOGGER.formatter = proc do |severity, datetime, _progname, msg|
