@@ -7,8 +7,16 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       release = jira.Issue.find(SimpleConfig.jira.issue)
       return unless release.status.name != 'Open'
-      release.rollback(do_trans: false)
-      release.linked_issues('deployes').each(&:rollback)
+      release.rollback
+      release.linked_issues('deployes').each do |issue|
+        trans = 'Not merged'
+        if issue.has_transition?(trans)
+          LOGGER.info "Rollback issue '#{issue.key}': transition to '#{trans}'"
+          issue.transition trans
+        else
+          LOGGER.warn "Rollback issue '#{issue.key}': transition '#{trans}' not found"
+        end
+      end
     end
   end
 end

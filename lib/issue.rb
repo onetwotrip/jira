@@ -47,15 +47,7 @@ module JIRA
       end
       # :nocov:
 
-      def rollback(do_trans: true)
-        trans = 'Not merged'
-        if do_trans && has_transition?(trans)
-          LOGGER.info "Rollback issue '#{key}': transition to '#{trans}'"
-          transition trans
-        else
-          LOGGER.warn "Rollback issue '#{key}': skipped" unless do_trans
-          LOGGER.warn "Rollback issue '#{key}': transition '#{trans}' not found" unless has_transition?(trans)
-        end
+      def rollback
         branches.each do |branch|
           if branch.name =~ /^#{SimpleConfig.jira.issue}-(pre|release-[0-9]{2}\.[0-9]{2}\.[0-9]{4})$/
             LOGGER.info "Rollback branch '#{branch.name}' from '#{branch.target['repository']['full_name']}'"
