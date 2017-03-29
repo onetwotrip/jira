@@ -49,28 +49,12 @@ module JIRA
       parse_url @pr['destination']['url']
     end
 
-    def authors
-      @pr['author']['name']
-    end
-
-    def url
-      @pr['url']
-    end
-
-    def name
-      @pr['name']
-    end
-
     def reviewers
       @reviewers ||= reviewers_by_files(changed_files)
     end
 
     def changed_files
       @changed_files ||= files
-    end
-
-    def send_notify
-      yield ERB.new(File.read("#{Ott::Helpers.root}/views/review_mail.erb")).result(binding) unless reviewers.empty?
     end
 
     def repo

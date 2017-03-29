@@ -27,12 +27,10 @@ module JIRA
 
       def branches
         related['branches'].map do |branch|
-          repo = Git::Utils.url_to_ssh branch['url']
           begin
-            BITBUCKET.repo(repo.owner, repo.slug)
-                     .branch(repo.branch)
+            repo(branch['url']).branch(branch['name'])
           rescue Tinybucket::Error::NotFound
-            LOGGER.warn "Broken Link: branch #{repo.owner}/#{repo.slug}/#{repo.branch} not found"
+            LOGGER.warn "Broken Link: branch #{branch['url']} not found"
             next
           end
         end.reject(&:nil?)
@@ -40,10 +38,13 @@ module JIRA
 
       def api_pullrequests
         related['pullRequests'].map do |pullrequest|
-          repo = Git::Utils.url_to_ssh pullrequest['url']
-          BITBUCKET.repo(repo.owner, repo.slug)
-                   .pull_request(pullrequest['id'][/\d+/])
+          repo(pullrequest['url']).pull_request(pullrequest['id'][/\d+/])
         end
+      end
+
+      def repo(url)
+        repo = Git::Utils.url_to_ssh url
+        BITBUCKET.repo(repo.owner, repo.slug)
       end
       # :nocov:
 

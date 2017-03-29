@@ -2,75 +2,58 @@ module Scenarios
   ##
   # ReviewRelease scenario
   class ReviewRelease
+    STRICT_FILES = JSON.parse ENV.fetch('STRICT_FILES', '{}')
     def run
-      @result = {}
-      transition = 'WTF'.freeze
-      post_to_ticket = ENV.fetch('ROOT_BUILD_CAUSE_REMOTECAUSE', nil) == 'true' ? true : false
-      dryrun = {
-        jscs: ENV.fetch('DRYRUN_FOR_JSCS', false),
-        jshint: ENV.fetch('DRYRUN_FOR_JSHINT', false),
-      }
-
-      workdir = SimpleConfig.git.workdir
-      Dir.mkdir workdir unless Dir.exist? workdir
-      Dir.chdir workdir || './'
-
-      unless SimpleConfig.jira.issue
-        puts "ReviewRelease: No issue - no cry!\n"
-        exit 2
-      end
-
+      strict_control = []
+      LOGGER.info "Starting ReviewRelease for #{SimpleConfig.jira.issue}"
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       release = jira.Issue.find(SimpleConfig.jira.issue)
-
-      release.related['branches'].each do |branch|
-        unless branch['name'].match "^#{release.key}-pre"
-          puts "Incorrect branch name: #{branch['name']}".red
-          next
+      # Check release status
+      unless release.status.name == 'Code review'
+        LOGGER.error "Issue '#{release.key}' doesn't have 'Code review' status"
+      end
+      # Check branches name/builds
+      release.branches.each do |branch|
+        branch_path = "#{branch.repo_owner}/#{branch.repo_slug}/#{branch.name}"
+        unless branch.name.match "^#{release.key}-pre"
+          LOGGER.error "Incorrect branch name: #{branch_path}"
         end
-        url = "#{branch['repository']['url']}/branch/#{branch['name']}"
-        repo = Git.get_branch url
-        repo_name = repo.remote.url.repo
-        branch_name = repo.current_branch
-        dryrun[:npm] = SimpleConfig.test.npm.dryrun_for.include? repo_name
-
-        puts "Working with #{repo_name} branch #{branch_name}".green
-        @result[repo_name] = []
-        [:jscs, :jshint, :npm].each do |name|
-          puts "Checking #{repo_name}:#{branch_name} for #{name} test".green
-          test = Ott::Test.new repo: repo,
-                               name: name,
-                               dryrun: dryrun[name]
-          test.run!
-          @result[repo_name].push test
+        branch_states = branch.commits.take(1).first.build_statuses.collect.map(&:state)
+        if branch_states.empty?
+          LOGGER.warn "Branch #{branch_path} doesn't have builds"
+        elsif branch_states.delete_if { |s| s == 'SUCCESSFUL' }.any?
+          LOGGER.error "Branch #{branch_path} has buildfail"
         end
       end
-
-      # Print details of fails
-      @result.each do |branch, tests|
-        tests.each do |test|
-          unless test.status
-            puts "Details of fails for #{branch} #{test.name}:".red
-            puts test.outs
+      # Check pullrequests status/stricts
+      release.api_pullrequests.select { |pr| pr.state == 'OPEN' }.each do |pr|
+        LOGGER.info "Check PR: #{pr.title}"
+        unless pr.title.match "^#{release.key}"
+          LOGGER.error "Incorrect PullRequest name: #{pr.title}"
+        end
+        repo = release.repo pr.destination['repository']['links']['html']['href']
+        pr.commits.each do |commit|
+          GitDiffParser.parse(repo.diff(commit.hash)).each do |patch|
+            STRICT_FILES.each do |strict_path|
+              next unless patch.file.start_with?(strict_path)
+              strict_control.push(author: commit.author['raw'].html_safe,
+                                  url: commit.links['html']['href'].html_safe,
+                                  file: patch.file.html_safe)
+              LOGGER.info "StrictControl: #{patch.file}"
+            end
           end
         end
       end
-
-      comment_text = ERB.new(File.read("#{Ott::Helpers.root}/views/release_test_result.erb"), nil, '<>').result(binding)
-      # Print summary
-      puts comment_text
-      # If something failed post comment to release
-      if @result.values.flatten.map(&:status).include? false
-        if release.has_transition? transition
-          puts "Set release #{release.key} to #{transition}"
-          release.transition transition
-        else
-          puts "No transition #{transition} available.".red
-          comment_text << "Unable to transition issue to #{transition} state."
-        end
-        release.post_comment comment_text.uncolorize if post_to_ticket
-        exit 1
+      b = binding
+      b.local_variable_set(:changes, strict_control)
+      mailer = OttInfra::SendMail.new SimpleConfig.sendgrid.to_h
+      mailer.add SimpleConfig.sendgrid.to_h.merge message: ERB.new(File.read("#{Ott::Helpers.root}/views/review_mail.erb")).result(b)
+      if mailer.mails.empty?
+        puts 'CodeReview: No changes for review'
+      else
+        mailer.sendmail
       end
+      release.post_comment LOGGER.history_comment
     end
   end
 end

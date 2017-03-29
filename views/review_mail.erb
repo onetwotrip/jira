@@ -1,9 +1,10 @@
 Привет, Строгий Контроль!<br />
-<%= authors.html_safe %>
-решил поменять кое-что критичное, а именно:<br />
-<pre>
-<%= changed_files.join("<br />\n").html_safe %>
-</pre><br />
-Вот тут подробности:<br />
-<%= "<a href='" + url.html_safe + "'>" + name.html_safe + "</a>" %>
-<br />Удачи!
+Тут кое-что критичное поменяли:
+<table>
+<% changes.each do |change| %>
+  <tr>
+    <td><%= change[:author] %></td>
+    <td><%= "<a href='#{change[:url]}'>#{change[:file]}</a>" %></td>
+  </tr>
+<% end %>
+</table>

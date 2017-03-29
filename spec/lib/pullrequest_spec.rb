@@ -48,16 +48,6 @@ describe JIRA::PullRequest do
     expect(@pr.changed_files).to eq %w(file1 file2)
   end
 
-  it '.message returns erb message' do
-    @pr.send_notify do |msg|
-      expect(msg).to include 'https://jira.com/issueurl'
-    end
-    allow(@pr).to receive(:changed_files) { %w(file1 .gitattributes) }
-    @pr.send_notify do |msg|
-      expect(msg).to include '.gitattributes'
-    end
-  end
-
   it '.tests_fails returns failed name' do
     @ok_test = double(:ok_tests_double)
     allow(@ok_test).to receive(:name)   { :ok }
