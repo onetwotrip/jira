@@ -14,6 +14,7 @@ module Scenarios
       repo_dicts['front-cars']           = %w(XJSX_CARS)
       repo_dicts['front-hotels']         = %w(XJSX_HOTELS)
       repo_dicts['front-packages']       = %w(XJSX_PACKAGES)
+      repo_dicts['front-railways']       = %w(XJSX_RAILWAYS)
       repo_dicts['front-tours']          = %w(XJSX_TOURS)
       repo_dicts['m-12trip']             = %w(MOBILE)
       repo_dicts['m-hotels']             = %w(MHOTELS)
@@ -22,7 +23,6 @@ module Scenarios
       repo_dicts['seo_pages']            = %w(SEOPAGES)
       repo_dicts['twiket-live']          = %w(TLIVE)
       repo_dicts['twiket_backoffice']    = %w(BO)
-      repo_dicts['xjsx']                 = %w(_XJSX XJSX_RAILWAYS)
 
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find SimpleConfig.jira.issue
