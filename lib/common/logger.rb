@@ -8,16 +8,16 @@ class EnhancedLogger < Logger
     super
     @history = Hash.new { |h, k| h[k] = [] }
     @colorize_dict = {
-      'INFO' => 'green',
-      'WARN' => '#f6c342',
-      'ERROR' => '#f79232',
-      'FATAL' => 'red',
+      INFO => 'green',
+      WARN => '#f6c342',
+      ERROR => '#f79232',
+      FATAL => 'red',
     }
   end
 
   def add(severity, progname = nil, message = nil)
+    @history[severity].push message
     super
-    @history[format_severity(severity)].push message
   end
 
   def close
@@ -25,9 +25,9 @@ class EnhancedLogger < Logger
     @history.close
   end
 
-  def history_comment
-    @history.reject { |k| k == 'INFO' }.map do |severity, msg|
-      "#{severity}:\n{color:#{@colorize_dict[severity]}}#{msg.join("\n")}{color}"
+  def history_comment(severity = UNKNOWN)
+    @history.reject { |s, _| s < severity }.map do |s, msg|
+      "#{format_severity(s)}:\n{color:#{@colorize_dict[s]}}#{msg.join("\n")}{color}"
     end.join("\n")
   end
 end
