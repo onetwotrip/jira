@@ -23,6 +23,7 @@ module Scenarios
       repo_dicts['seo_pages']            = %w(SEOPAGES)
       repo_dicts['twiket-live']          = %w(TLIVE)
       repo_dicts['twiket_backoffice']    = %w(BO)
+      repo_dicts['hotels_backoffice']    = %w(FRONT_HOTELS_BO)
 
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find SimpleConfig.jira.issue
