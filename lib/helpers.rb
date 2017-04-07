@@ -69,7 +69,7 @@ module Ott
       b.local_variable_set(:changes, strict_control)
       mailer = OttInfra::SendMail.new SimpleConfig.sendgrid.to_h
       mailer.add SimpleConfig.sendgrid.to_h.merge message: ERB.new(File.read("#{Ott::Helpers.root}/views/review_mail.erb")).result(b)
-      if mailer.mails.empty?
+      if strict_control.empty?
         puts 'CodeReview: No changes for review'
       else
         mailer.sendmail
