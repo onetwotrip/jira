@@ -20,14 +20,4 @@ require 'repo'
 require 'common/logger'
 
 # Scenarios
-require 'scenarios/buildrelease'
-require 'scenarios/checkrelease'
-require 'scenarios/createrelease'
-require 'scenarios/deployrelease'
-require 'scenarios/freezerelease'
-require 'scenarios/postactionrelease'
-require 'scenarios/refreshrelease'
-require 'scenarios/reviewcommit'
-require 'scenarios/reviewissue'
-require 'scenarios/reviewrelease'
-require 'scenarios/rollbackrelease'
+Dir[__dir__ + '/scenarios/*.rb'].each { |file| require file }
