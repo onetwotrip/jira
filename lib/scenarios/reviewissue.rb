@@ -7,8 +7,10 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
 
+      puts issue.status.name
+      exit
       # Check issie status
-      LOGGER.error "Issue '#{issue.key}' doesn't have 'Code review' status" unless issue.status.name == 'Code review'
+      LOGGER.error "Issue '#{issue.key}' doesn't have 'Code review' status" unless issue.status.name == 'Code Review'
 
       # Check builds status
       Ott::CheckBranchesBuildStatuses.run(issue)
