@@ -30,7 +30,8 @@ module Scenarios
       Ott::CheckBranchesBuildStatuses.run(issue)
 
       # Post comment
-      issue.post_comment LOGGER.history_comment(EnhancedLogger::WARN)
+      comment = LOGGER.history_comment(EnhancedLogger::WARN)
+      issue.post_comment comment.empty? ? 'OK' : comment
 
       # Send stricts
       Ott::StrictControl.run(issue)
