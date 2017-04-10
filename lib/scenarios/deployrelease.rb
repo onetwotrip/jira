@@ -19,6 +19,7 @@ module Scenarios
       repo_dicts['front-travel-vtb24']   = %w(FRONT_TRAVEL_VTB24)
       repo_dicts['hotels_backoffice']    = %w(FRONT_HOTELS_BO)
       repo_dicts['m-12trip']             = %w(MOBILE)
+      repo_dicts['m-12trip_vk']          = %w(MFRONT_12TRIP_VK)
       repo_dicts['m-hotels']             = %w(MHOTELS)
       repo_dicts['renderer']             = %w(PASSBOOK)
       repo_dicts['seo_hotels']           = %w(SEOHOTELS)

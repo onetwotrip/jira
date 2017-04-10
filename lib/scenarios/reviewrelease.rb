@@ -8,7 +8,7 @@ module Scenarios
       issue = jira.Issue.find(SimpleConfig.jira.issue)
 
       # Check issie status
-      LOGGER.error "Issue '#{issue.key}' doesn't have 'Code review' status" unless issue.status.name == 'Code review'
+      LOGGER.error "Issue '#{issue.key}' doesn't have 'Code review' status" unless issue.status.name == 'Code Review'
 
       # Check branches name
       issue.branches.each do |branch|
