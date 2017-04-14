@@ -51,8 +51,10 @@ module Scenarios
 
       git_style_release = SimpleConfig.jira.issue.tr('-', ' ').downcase.capitalize
       prs.reject! do |pr|
-        if pr['name'] =~ /^((#{SimpleConfig.jira.issue})|(#{git_style_release}))/
-          LOGGER.warn "[#{pr['name']}] - WRONG NAME! Bad guy: #{pr['author']['name']}"
+        if pr['name'] !~ /^((#{SimpleConfig.jira.issue})|(#{git_style_release}))/
+          LOGGER.warn "[#{pr['name']}] - WRONG NAME! \
+                       Expedted /^((#{SimpleConfig.jira.issue})|(#{git_style_release}))/. \
+                       Bad guy: #{pr['author']['name']}"
           true
         elsif pr['status'] == 'DECLINED'
           LOGGER.warn "[#{pr['name']}] - DECLINED! Bad guy: #{pr['author']['name']}"
