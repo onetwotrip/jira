@@ -44,16 +44,24 @@ module Scenarios
 
       prs.each do |pr|
         prname = pr['name'].dup
-        if pr['name'].strip!.nil?
-          puts "[#{prname}] - OK"
-        else
+        unless pr['name'].strip!.nil?
           puts "[#{prname}] - WRONG! Stripped. Bad guy: #{pr['author']['name']}"
         end
       end
 
       git_style_release = SimpleConfig.jira.issue.tr('-', ' ').downcase.capitalize
-
-      prs.select! { |pr| (/^((#{SimpleConfig.jira.issue})|(#{git_style_release}))/.match pr['name']) && pr['status'] != 'DECLINED' }
+      prs.reject! do |pr|
+        if pr['name'] =~ /^((#{SimpleConfig.jira.issue})|(#{git_style_release}))/
+          LOGGER.warn "[#{pr['name']}] - WRONG NAME! Bad guy: #{pr['author']['name']}"
+          true
+        elsif pr['status'] == 'DECLINED'
+          LOGGER.warn "[#{pr['name']}] - DECLINED! Bad guy: #{pr['author']['name']}"
+          true
+        else
+          LOGGER.info "[#{pr['name']}] - OK"
+          false
+        end
+      end
 
       if prs.empty?
         puts 'No pull requests for this task!'
