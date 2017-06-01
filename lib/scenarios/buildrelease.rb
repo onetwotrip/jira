@@ -13,15 +13,15 @@ module Scenarios
     # rubocop:disable Metrics/PerceivedComplexity
     # rubocop:disable Metrics/MethodLength
     def run
-      puts "Build release #{opts[:release]}".green
+      LOGGER.info "Build release #{opts[:release]}"
 
       options = { auth_type: :basic }.merge(opts.to_hash)
-      client = JIRA::Client.new(options)
+      client  = JIRA::Client.new(options)
       release = client.Issue.find(opts[:release])
 
       if release.linked_issues('deployes').empty? || opts[:ignorelinks]
-        puts 'Deploys issue not found or ignored. Force JQL.'
-        release.search_deployes.each{ |issue| issue.link(opts[:release])}
+        LOGGER.warn 'Deploys issue not found or ignored. Force JQL.'
+        release.search_deployes.each { |issue| issue.link(opts[:release]) }
       end
 
       # Unlink blocked issues:
@@ -37,7 +37,7 @@ module Scenarios
         release.post_comment comment
         issuelink.outwardIssue.post_comment comment
         issuelink.delete
-        puts comment.red
+        LOGGER.fatal comment
       end
 
       badissues = {}
@@ -48,9 +48,9 @@ module Scenarios
       source = opts[:source]
 
       # rubocop:disable Metrics/BlockNesting
-      puts "Number of issues: #{release.linked_issues('deployes').size}"
+      LOGGER.info "Number of issues: #{release.linked_issues('deployes').size}"
       release.linked_issues('deployes').each do |issue|
-        puts "Working on #{issue.key}".green
+        LOGGER.info "Working on #{issue.key}"
         issue.transition 'Not merged' if issue.has_transition? 'Not merged'
         has_merges = false
         merge_fail = false
@@ -64,7 +64,7 @@ module Scenarios
           issue.related['pullRequests'].each do |pullrequest|
             if pullrequest['status'] != 'OPEN'
               msg = "Not processing not OPEN PR #{pullrequest['url']}"
-              puts msg.red
+              LOGGER.fatal msg
               issue.post_comment msg
               next
             end
@@ -100,7 +100,7 @@ module Scenarios
                                   " #{opts[:release]}.  (pull request #{pullrequest['id']}) "
                   # Merge origin/branch (ex FE-429-Auth-Popup-fix) to pre_release_branch (ex OTT-8703-pre)
                   repo_path.merge("origin/#{branch['name']}", merge_message)
-                  puts "#{branch['name']} merged".green
+                  LOGGER.info "#{branch['name']} merged"
                   has_merges = true
                 rescue Git::GitExecuteError => e
                   body = <<-BODY
@@ -139,23 +139,23 @@ module Scenarios
           issue.transition 'Merge to release'
         elsif merge_fail
           issue.transition 'Merge Fail'
-          puts "#{issue.key} was not merged!".red
+          LOGGER.fatal "#{issue.key} was not merged!"
         end
       end
 
-      puts 'Repos:'.green if repos
+      LOGGER.info 'Repos:' unless repos.empty?
       repos.each do |name, repo|
-        puts "Push '#{pre_release_branch}' to '#{name}' repo".green
+        LOGGER.info "Push '#{pre_release_branch}' to '#{name}' repo"
         if opts[:push]
           local_repo = repo[:repo_base]
           local_repo.push('origin', pre_release_branch)
         end
       end
 
-      puts 'Not Merged:'.red if badissues
+      LOGGER.fatal 'Not Merged:' unless badissues.empty?
       badissues.each_pair do |status, keys|
-        puts "#{status}: #{keys.size}"
-        keys.each { |i| puts i[:key] }
+        LOGGER.fatal "#{status}: #{keys.size}"
+        keys.each { |i| LOGGER.fatal i[:key] }
       end
     end
   end
