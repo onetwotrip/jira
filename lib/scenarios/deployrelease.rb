@@ -64,6 +64,12 @@ module Scenarios
           puts "WTF? Why is this Pull Request here? o_O (destination: #{pr['destination']['branch']}"
           next
         end
+
+        if projects_conf[repo_name].nil?
+          puts "WTF? Dunno project for #{repo_name}"
+          next
+        end
+
         projects_conf[repo_name]['projects'].each do |proj|
           prop_values['PROJECTS'][proj] = {}
           prop_values['PROJECTS'][proj]['ENABLE'] = true
