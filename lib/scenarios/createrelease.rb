@@ -27,11 +27,11 @@ module Scenarios
       issues_from_string
     end
 
-    def create_release_issue(project, issue, project_key = 'OTT', release_name = 'Release')
+    def create_release_issue(project, issue, project_key = 'OTT', release_name = 'Release', release_labels)
       project = project.find(project_key)
       release = issue.build
       release.save(fields: { summary: release_name, project: { id: project.id },
-                             issuetype: { name: 'Release' } })
+                             issuetype: { name: 'Release' }, labels: release_labels })
       release.fetch
       release
     rescue JIRA::HTTPError => jira_error
@@ -65,8 +65,10 @@ module Scenarios
         issues = issues_from_string unless issues_from_string.empty?
       end
 
+      release_labels = ENV['RELEASE_TYPE'].split(',') if ENV['RELEASE_TYPE']
+
       begin
-        release = create_release_issue(client.Project, client.Issue, params[:project], params[:name])
+        release = create_release_issue(client.Project, client.Issue, params[:project], params[:name], release_labels)
       rescue RuntimeError
         exit
       end
