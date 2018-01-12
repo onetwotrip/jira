@@ -27,7 +27,7 @@ module Scenarios
       issues_from_string
     end
 
-    def create_release_issue(project, issue, project_key = 'OTT', release_name = 'Release', release_labels)
+    def create_release_issue(project, issue, project_key = 'OTT', release_name = 'Release', release_labels = [])
       project = project.find(project_key)
       release = issue.build
       release.save(fields: { summary: release_name, project: { id: project.id },
