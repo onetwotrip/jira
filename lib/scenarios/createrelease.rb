@@ -65,7 +65,7 @@ module Scenarios
         issues = issues_from_string unless issues_from_string.empty?
       end
 
-      release_labels = ENV['RELEASE_TYPE'].split(',') if ENV['RELEASE_TYPE']
+      release_labels = params.labels if params.labels
 
       begin
         release = create_release_issue(client.Project, client.Issue, params[:project], params[:name], release_labels)
