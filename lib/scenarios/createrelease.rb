@@ -78,6 +78,15 @@ module Scenarios
       issues.each { |issue| issue.link(release.key) }
 
       LOGGER.info "Created new release #{release.key} from filter #{params[:filter]}"
+
+      # Get repo's name from Jira Ticket
+      issue = client.Issue.find(release.key)
+
+      issue.related['branches'].each do |branch|
+        puts branch['repository']['name']
+      end
+
+
       LOGGER.info "Storing '#{release.key}' to file, to refresh buildname in Jenkins"
       Ott::Helpers.export_to_file(release.key, 'release_name.txt')
     end
