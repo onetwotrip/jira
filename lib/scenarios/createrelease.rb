@@ -27,11 +27,11 @@ module Scenarios
       issues_from_string
     end
 
-    def create_release_issue(project, issue, project_key = 'OTT', release_name = 'Release', release_labels = [])
+    def create_release_issue(project, issue, project_key = 'OTT', release_name = 'Release')
       project = project.find(project_key)
       release = issue.build
       release.save(fields: { summary: release_name, project: { id: project.id },
-                             issuetype: { name: 'Release' }, labels: release_labels })
+                             issuetype: { name: 'Release' } })
       release.fetch
       release
     rescue JIRA::HTTPError => jira_error
@@ -65,31 +65,46 @@ module Scenarios
         issues = issues_from_string unless issues_from_string.empty?
       end
 
-      release_labels = params.labels if params.labels
-
       begin
-        release = create_release_issue(client.Project, client.Issue, params[:project], params[:name], release_labels)
+        release = create_release_issue(client.Project, client.Issue, params[:project], params[:name])
       rescue RuntimeError
         exit
       end
 
       LOGGER.info "Start to link issues to release #{release.key}"
 
-      issues.each { |issue| issue.link(release.key) }
+      release_labels = []
+      issues.each do
+        |issue| issue.link(release.key)
+        issue.related['branches'].each do |branch|
+          release_labels << branch['repository']['name'].to_s
+        end
+      end
+
+      release_labels.uniq!
 
       LOGGER.info "Created new release #{release.key} from filter #{params[:filter]}"
 
-      # Get repo's name from Jira Ticket
-      issue = client.Issue.find(release.key)
-
-      issue.related['branches'].each do |branch|
-        LOGGER.info "Branch #{ branch['repository']['name']}"
-      end
+      LOGGER.info "Add labels: #{release_labels} to release #{release.key}"
+      release_issue = client.Issue.find(release.key)
+      release_issue.save(fields: {labels: release_labels })
+      release_issue.fetch
 
 
       LOGGER.info "Storing '#{release.key}' to file, to refresh buildname in Jenkins"
       Ott::Helpers.export_to_file(release.key, 'release_name.txt')
     end
     # :nocov:
+  end
+end
+
+# kill Timeout module for debug bug in Rubymine
+if $LOADED_FEATURES.any? { |f| f.include? 'debase' }
+  module Timeout
+    def timeout(sec, klass=nil)
+      yield(sec)
+    end
+
+    module_function :timeout
   end
 end
