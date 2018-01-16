@@ -83,7 +83,7 @@ module Scenarios
       issue = client.Issue.find(release.key)
 
       issue.related['branches'].each do |branch|
-        puts branch['repository']['name']
+        LOGGER.info "Branch #{ branch['repository']['name']}"
       end
 
 
