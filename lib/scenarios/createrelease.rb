@@ -74,8 +74,8 @@ module Scenarios
       LOGGER.info "Start to link issues to release #{release.key}"
 
       release_labels = []
-      issues.each do
-        |issue| issue.link(release.key)
+      issues.each do |issue|
+        issue.link(release.key)
         issue.related['branches'].each do |branch|
           release_labels << branch['repository']['name'].to_s
         end
@@ -87,9 +87,8 @@ module Scenarios
 
       LOGGER.info "Add labels: #{release_labels} to release #{release.key}"
       release_issue = client.Issue.find(release.key)
-      release_issue.save(fields: {labels: release_labels })
+      release_issue.save(fields: { labels: release_labels })
       release_issue.fetch
-
 
       LOGGER.info "Storing '#{release.key}' to file, to refresh buildname in Jenkins"
       Ott::Helpers.export_to_file(release.key, 'release_name.txt')
