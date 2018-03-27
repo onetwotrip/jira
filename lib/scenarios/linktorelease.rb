@@ -17,12 +17,6 @@ module Scenarios
         exit
       end
 
-
-      # if !params.filter && !params.tasks
-      #   LOGGER.error 'No necessary params - filter of tasks'
-      #   exit
-      # end
-
       filter_config = JSON.parse(params[:filter])
       project_name  = params[:project]
       release_name  = params[:name].upcase
@@ -34,7 +28,7 @@ module Scenarios
         raise 'Project not found'
       end
 
-      LOGGER.info "Linking tickets to release '#{params[:name]}'"
+      LOGGER.info "Linking tickets to release '#{release_name}'"
 
       # Check release type
       case
@@ -59,19 +53,6 @@ module Scenarios
       client = JIRA::Client.new SimpleConfig.jira.to_h
 
       issues = release_filter && find_by_filter(client.Issue, release_filter)
-
-      # if params.tasks && !params.tasks.empty?
-      #   issues_from_string = find_by_tasks(client.Issue, params.tasks)
-      #   issues             = issues_from_string unless issues_from_string.empty?
-      # end
-
-      # begin
-      #   release = create_release_issue(client.Project, client.Issue, params[:project], params[:name])
-      # rescue RuntimeError => e
-      #   puts e.message
-      #   puts e.backtrace.inspect
-      #   raise
-      # end
 
       release_labels = []
       issues.each do |issue|
