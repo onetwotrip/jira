@@ -32,14 +32,13 @@ module Scenarios
       LOGGER.info "Linking tickets to release '#{release_name}'"
 
       # Check release type
-      release_type = if ['_BE_', '_BE', 'BE_', 'BE'].any? { |str| release_name.include?(str) }
+      release_type = if %w(_BE_ _BE BE_ BE).any? { |str| release_name.include?(str) }
                        'backend'
-                     elsif ['_FE_', '_FE', 'FE_', 'FE'].any? { |str| release_name.include?(str) }
+                     elsif %w(_FE_ _FE FE_ FE).any? { |str| release_name.include?(str) }
                        'frontend'
                      else
                        'common'
                      end
-
 
       LOGGER.info "Release type: #{release_type}"
       release_filter = filter_config[project_name][release_type]
@@ -73,18 +72,5 @@ module Scenarios
       LOGGER.info "Storing '#{release_issue}' to file, to refresh buildname in Jenkins"
       Ott::Helpers.export_to_file(release_issue, 'release_name.txt')
     end
-  end
-end
-
-
-if $LOADED_FEATURES.any? { |f| f.include? 'debase' }
-  module Timeout
-    ##
-    # kill Timeout module for debug bug in Rubymine
-    def timeout(sec, klass = nil)
-      yield(sec)
-    end
-
-    module_function :timeout
   end
 end
