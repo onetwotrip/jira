@@ -1,6 +1,7 @@
 module Scenarios
+  ##
+  # Link tickets to release issue
   class LinkToRelease
-
     def find_by_filter(issue, filter)
       issue.jql("filter=#{filter}")
     rescue JIRA::HTTPError => jira_error
@@ -31,14 +32,14 @@ module Scenarios
       LOGGER.info "Linking tickets to release '#{release_name}'"
 
       # Check release type
-      case
-        when ['_BE_', '_BE', 'BE_', 'BE'].any? { |str| release_name.include?(str) }
-          release_type = 'backend'
-        when ['_FE_', '_FE', 'FE_', 'FE'].any? { |str| release_name.include?(str) }
-          release_type = 'frontend'
-        else
-          release_type = 'common'
-      end
+      release_type = if ['_BE_', '_BE', 'BE_', 'BE'].any? { |str| release_name.include?(str) }
+                       'backend'
+                     elsif ['_FE_', '_FE', 'FE_', 'FE'].any? { |str| release_name.include?(str) }
+                       'frontend'
+                     else
+                       'common'
+                     end
+
 
       LOGGER.info "Release type: #{release_type}"
       release_filter = filter_config[project_name][release_type]
@@ -75,10 +76,12 @@ module Scenarios
   end
 end
 
-# kill Timeout module for debug bug in Rubymine
+
 if $LOADED_FEATURES.any? { |f| f.include? 'debase' }
   module Timeout
-    def timeout(sec, klass=nil)
+    ##
+    # kill Timeout module for debug bug in Rubymine
+    def timeout(sec, klass = nil)
       yield(sec)
     end
 
