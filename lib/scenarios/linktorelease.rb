@@ -18,12 +18,12 @@ module Scenarios
         exit
       end
 
-      filter_config = JSON.parse(params[:filter])
-      project_name  = params[:project]
-      release_name  = params[:name].upcase
+      filter_config        = JSON.parse(params[:filter])
+      project_name         = params[:project]
+      release_name         = params[:name].upcase
       release_issue_number = params[:issue]
 
-      client = JIRA::Client.new SimpleConfig.jira.to_h
+      client        = JIRA::Client.new SimpleConfig.jira.to_h
       release_issue = client.Issue.find(params[:issue])
 
       # Check project exist in filter_config
