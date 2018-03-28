@@ -67,8 +67,10 @@ module Scenarios
 
       begin
         release = create_release_issue(client.Project, client.Issue, params[:project], params[:name])
-      rescue RuntimeError
-        exit
+      rescue RuntimeError => e
+        puts e.message
+        puts e.backtrace.inspect
+        raise
       end
 
       LOGGER.info "Start to link issues to release #{release.key}"
