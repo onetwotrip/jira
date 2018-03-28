@@ -73,7 +73,7 @@ module Scenarios
           next if prop_values['PROJECTS'][proj]
           prop_values['PROJECTS'][proj] = {}
           prop_values['PROJECTS'][proj]['ENABLE'] = true
-          prop_values['PROJECTS'][proj]['BRANCH'] = ''
+          prop_values['PROJECTS'][proj]['BRANCH'] = 'master'
         end
       end
 
