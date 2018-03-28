@@ -62,7 +62,7 @@ module Scenarios
       # Message about count of release candidate issues
       release_issue.post_comment("Тикетов будет прилинковано: #{issues.count}")
 
-      release_labels = []
+       release_labels = []
       issues.each do |issue|
         issue.link(release_issue_number)
         issue.related['branches'].each do |branch|
@@ -78,7 +78,6 @@ module Scenarios
 
       # Message about done
       release_issue.post_comment('Формирование релиза закончено')
-
       LOGGER.info "Storing '#{release_issue}' to file, to refresh buildname in Jenkins"
       Ott::Helpers.export_to_file(release_issue, 'release_name.txt')
     end
