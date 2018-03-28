@@ -62,7 +62,7 @@ module Scenarios
       # Message about count of release candidate issues
       release_issue.post_comment("Тикетов будет прилинковано: #{issues.count}")
 
-       release_labels = []
+      release_labels = []
       issues.each do |issue|
         issue.link(release_issue_number)
         issue.related['branches'].each do |branch|
