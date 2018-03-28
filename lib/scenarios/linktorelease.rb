@@ -11,6 +11,7 @@ module Scenarios
     end
 
     def run
+      LOGGER.info 'Start link ticket to release'
       params = SimpleConfig.release
 
       unless params
