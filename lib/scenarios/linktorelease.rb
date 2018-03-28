@@ -79,9 +79,6 @@ module Scenarios
 
       # Message about done
       release_issue.post_comment('Формирование релиза закончено')
-
-      LOGGER.info "Storing '#{release_issue}' to file, to refresh buildname in Jenkins"
-      Ott::Helpers.export_to_file(release_issue, 'release_name.txt')
     end
   end
 end
