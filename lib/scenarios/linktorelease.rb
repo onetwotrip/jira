@@ -21,15 +21,15 @@ module Scenarios
       filter_config = JSON.parse(params[:filter])
       project_name  = params[:project]
       release_name  = params[:name].upcase
-      release_issue = params[:issue]
+      release_issue_number = params[:issue]
 
       client = JIRA::Client.new SimpleConfig.jira.to_h
-      ticket = client.Issue.find(release_issue)
+      release_issue = client.Issue.find(params[:issue])
 
       # Check project exist in filter_config
       if filter_config[project_name].nil?
         message = "I can't work with project '#{project_name.upcase}'. Pls, contact administrator to feedback"
-        ticket.post_comment(message)
+        release_issue.post_comment(message)
         LOGGER.error message
         raise 'Project not found'
       end
@@ -50,7 +50,7 @@ module Scenarios
       # Check release filter
       if release_filter.nil? || release_filter.empty?
         message = "I don't find release filter for jira project: '#{project_name.upcase}' and release_type: #{release_type}"
-        ticket.post_comment(message)
+        release_issue.post_comment(message)
         LOGGER.error message
         raise 'Release_filter not found'
       end
@@ -60,11 +60,11 @@ module Scenarios
       issues = release_filter && find_by_filter(client.Issue, release_filter)
 
       # Message about count of release candidate issues
-      ticket.post_comment("Тикетов будет прилинковано: #{issues.count}")
+      release_issue.post_comment("Тикетов будет прилинковано: #{issues.count}")
 
       release_labels = []
       issues.each do |issue|
-        issue.link(release_issue)
+        issue.link(release_issue_number)
         issue.related['branches'].each do |branch|
           release_labels << branch['repository']['name'].to_s
         end
@@ -73,12 +73,11 @@ module Scenarios
       release_labels.uniq!
 
       LOGGER.info "Add labels: #{release_labels} to release #{release_name}"
-      release_issue = client.Issue.find(release_issue)
       release_issue.save(fields: { labels: release_labels })
       release_issue.fetch
 
       # Message about done
-      ticket.post_comment('Формирование релиза закончено')
+      release_issue.post_comment('Формирование релиза закончено')
 
       LOGGER.info "Storing '#{release_issue}' to file, to refresh buildname in Jenkins"
       Ott::Helpers.export_to_file(release_issue, 'release_name.txt')
