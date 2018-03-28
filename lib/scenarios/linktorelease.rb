@@ -23,9 +23,14 @@ module Scenarios
       release_name  = params[:name].upcase
       release_issue = params[:issue]
 
+      client = JIRA::Client.new SimpleConfig.jira.to_h
+      ticket = client.Issue.find(release_issue)
+
       # Check project exist in filter_config
       if filter_config[project_name].nil?
-        LOGGER.error "I can't work with project '#{project_name.upcase}'. Pls, contact administrator to feedback"
+        message = "I can't work with project '#{project_name.upcase}'. Pls, contact administrator to feedback"
+        ticket.post_comment(message)
+        LOGGER.error message
         raise 'Project not found'
       end
 
@@ -44,15 +49,18 @@ module Scenarios
       release_filter = filter_config[project_name][release_type]
       # Check release filter
       if release_filter.nil? || release_filter.empty?
-        LOGGER.error "I don't find release filter for project '#{project_name.upcase}' and release_type: #{release_type}"
+        message = "I don't find release filter for jira project: '#{project_name.upcase}' and release_type: #{release_type}"
+        ticket.post_comment(message)
+        LOGGER.error message
         raise 'Release_filter not found'
       end
 
       LOGGER.info "Release filter: #{release_filter}"
 
-      client = JIRA::Client.new SimpleConfig.jira.to_h
-
       issues = release_filter && find_by_filter(client.Issue, release_filter)
+
+      # Message about count of release candidate issues
+      ticket.post_comment("Тикетов будет прилинковано: #{issues.count}")
 
       release_labels = []
       issues.each do |issue|
@@ -68,6 +76,9 @@ module Scenarios
       release_issue = client.Issue.find(release_issue)
       release_issue.save(fields: { labels: release_labels })
       release_issue.fetch
+
+      # Message about done
+      ticket.post_comment('Формирование релиза закончено')
 
       LOGGER.info "Storing '#{release_issue}' to file, to refresh buildname in Jenkins"
       Ott::Helpers.export_to_file(release_issue, 'release_name.txt')
