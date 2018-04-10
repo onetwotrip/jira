@@ -51,14 +51,7 @@ module Scenarios
       end
 
       LOGGER.info 'Get all labels again'
-      release_labels = []
-      issue.linked_issues('deployes').each do |i|
-        i.related['branches'].each do |branch|
-          release_labels << branch['repository']['name'].to_s
-        end
-      end
-
-      release_labels.uniq!
+      release_labels = issue.all_labels
       LOGGER.info "Add labels: #{release_labels} to release #{issue.key}"
       issue.save(fields: { labels: release_labels })
       issue.fetch

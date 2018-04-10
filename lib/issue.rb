@@ -156,6 +156,17 @@ module JIRA
         dig_deployes(&filter)
       end
 
+      def all_labels
+        release_labels = []
+        self.linked_issues('deployes').each do |i|
+          i.related['branches'].each do |branch|
+            release_labels << branch['repository']['name'].to_s
+          end
+        end
+
+        release_labels.uniq!
+      end
+
       def tags?(fkey, val)
         unless fields[fkey].nil?
           fields[fkey].each do |customfield|
