@@ -52,8 +52,8 @@ module Scenarios
 
       LOGGER.info 'Get all labels again'
       release_labels = []
-      issue.linked_issues('deployes').each do |issue|
-        issue.related['branches'].each do |branch|
+      issue.linked_issues('deployes').each do |i|
+        i.related['branches'].each do |branch|
           release_labels << branch['repository']['name'].to_s
         end
       end
