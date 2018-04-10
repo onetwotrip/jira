@@ -158,7 +158,7 @@ module JIRA
 
       def all_labels
         release_labels = []
-        self.linked_issues('deployes').each do |i|
+        linked_issues('deployes').each do |i|
           i.related['branches'].each do |branch|
             release_labels << branch['repository']['name'].to_s
           end
