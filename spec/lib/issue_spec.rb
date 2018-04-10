@@ -141,6 +141,23 @@ describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
     expect(issue.all_deployes).to include issue1, issue2, sub_issue
   end
 
+  it '.all_labels should return all labels' do
+    issue = JIRA::Resource::Issue.new(@jira)
+    issue1    = issue.dup
+    issue2    = issue.dup
+    issue.instance_variable_set(:@attrs, fields: { key: 'ISSUE' }, 'key' => 'ISSUE-001')
+    issue1.instance_variable_set(:@attrs, fields: { key: 'ISSUE_1' }, 'key' => 'ISSUE_1')
+    issue2.instance_variable_set(:@attrs, fields: { key: 'ISSUE_2' }, 'key' => 'ISSUE_2')
+    allow(issue).to receive(:linked_issues).with('deployes').and_return [issue1, issue2]
+    allow_any_instance_of(JIRA::Resource::Issue).to receive(:related).and_return(
+      open_pr = { 'branches' => [
+        { 'repository' => { 'name' => 'avia' }},
+        { 'repository' => { 'name' => 'railways' }}
+      ] }
+    )
+    expect(issue.all_labels).to eq(%w(avia railways))
+  end
+
   it '.all_deployes should returns filtered issues' do # rubocop:disable Metrics/BlockLength
     issue     = JIRA::Resource::Issue.new(@jira)
     issue1    = issue.dup
