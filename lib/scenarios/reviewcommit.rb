@@ -3,7 +3,8 @@ module Scenarios
   # ReviewRelease scenario
   class ReviewCommit
     def run
-      post_to_ticket = ENV.fetch('ROOT_BUILD_CAUSE_REMOTECAUSE', nil) == 'true' ? true : false
+      # post_to_ticket = ENV.fetch('ROOT_BUILD_CAUSE_REMOTECAUSE', nil) == 'true' ? true : false
+      post_to_ticket = ENV.fetch('ROOT_BUILD_CAUSE_REMOTECAUSE', nil) == 'true'
 
       fail_on_jscs = ENV.fetch('FAIL_ON_JSCS', false)
       fail_on_jshint = ENV.fetch('FAIL_ON_JSHINT', false)
@@ -64,7 +65,7 @@ module Scenarios
           pr.run_tests(name: :npm, dryrun: npm_dryrun, scope: 'commit')
         end
       end
-      comment_text = <<EOS
+      comment_text = <<COMMENT_TEXT
       Automatic code review complete.
       Merge master: #{ENV['NO_MERGE'] ? 'SKIPPED' : 'PASSED'}
       JSCS:     #{if ENV['NO_JSCS']
@@ -82,7 +83,7 @@ module Scenarios
                   else
                     pullrequests.tests_status_string(:npm)
                   end}
-EOS
+COMMENT_TEXT
       # If something failed:
       unless pullrequests.tests_status
         comment_text << "There were some errors:\n\t#{pullrequests.tests_fails.join("\n\t")}\n"

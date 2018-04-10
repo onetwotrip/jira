@@ -14,16 +14,16 @@ module JIRA
       end
     end
 
-    def add(pr)
-      raise TypeError, "Expected PullRequest value. Got #{pr.class}" unless pr.instance_of?(PullRequest)
-      @prs.push pr
+    def add(pullreq)
+      raise TypeError, "Expected PullRequest value. Got #{pullreq.class}" unless pullreq.instance_of?(PullRequest)
+      @prs.push pullreq
     end
 
     def valid?
       !empty? && !duplicates?
-    rescue => e
+    rescue StandardError => e
       @valid_msg = p(e)
-      return false
+      false
     end
 
     def empty?
@@ -97,10 +97,10 @@ module JIRA
       end
     end
 
-    def method_missing(m, *args, &block)
-      if (key = m[/filter_by_(\w+)/, 1])
+    def method_missing(method, *args, &block)
+      if (key = method[/filter_by_(\w+)/, 1])
         filter_by(key, *args)
-      elsif (key = m[/grep_by_(\w+)/, 1])
+      elsif (key = method[/grep_by_(\w+)/, 1])
         grep_by(key, *args)
       else
         super

@@ -37,9 +37,9 @@ module Scenarios
       LOGGER.info "Linking tickets to release '#{release_name}'"
 
       # Check release type
-      release_type = if %w(_BE_ _BE BE_ BE).any? { |str| release_name.include?(str) }
+      release_type = if %w[_BE_ _BE BE_ BE].any? { |str| release_name.include?(str) }
                        'backend'
-                     elsif %w(_FE_ _FE FE_ FE).any? { |str| release_name.include?(str) }
+                     elsif %w[_FE_ _FE FE_ FE].any? { |str| release_name.include?(str) }
                        'frontend'
                      else
                        'common'

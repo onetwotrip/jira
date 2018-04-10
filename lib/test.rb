@@ -17,7 +17,7 @@ module Ott
       @dryrun ? true : code
     end
 
-    def code
+    def code # rubocop:disable Lint/DuplicateMethods
       @code ? @code.zero? : nil
     end
 
@@ -100,9 +100,7 @@ module Ott
     end
 
     def run_command(command)
-      if command.nil? || command.empty?
-        raise ArgumentError.new, 'Empty or nil command!'
-      end
+      raise ArgumentError.new, 'Empty or nil command!' if command.nil? || command.empty?
       Open3.capture2e(command)
     end
     # :nocov:

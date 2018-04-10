@@ -1,5 +1,5 @@
 require 'spec_helper'
-describe JIRA::PullRequests do
+describe JIRA::PullRequests do # rubocop:disable Metrics/BlockLength
   before :each do
     @pullreq_double = double(:pullreq_double)
     allow(@pullreq_double).to receive(:instance_of?).with(JIRA::PullRequest) { true }

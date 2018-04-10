@@ -49,9 +49,7 @@ module Ott
             LOGGER.info "Branch #{branch_path} state INPROGRESS. Waiting..."
             sleep 60
           end
-          if branch_states(branch).delete_if { |s| s == 'SUCCESSFUL' }.any?
-            LOGGER.error "Branch #{branch_path} has no successful status"
-          end
+          LOGGER.error "Branch #{branch_path} has no successful status" if branch_states(branch).delete_if { |s| s == 'SUCCESSFUL' }.any?
         end
       end
     end

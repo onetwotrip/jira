@@ -17,7 +17,7 @@ module Git
       begin
         url = "https://#{username}:#{password}@api.bitbucket.org/2.0/repositories/#{repo}/pullrequests"
         RestClient.post url, request.to_json, content_type: :json
-      rescue => e
+      rescue StandardError => e
         puts "Error: #{e}; URL: #{url}; PARAMS: #{request}"
       end
     end

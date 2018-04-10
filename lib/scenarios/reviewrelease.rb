@@ -13,17 +13,13 @@ module Scenarios
       # Check branches name
       issue.branches.each do |branch|
         branch_path = "#{branch.repo_owner}/#{branch.repo_slug}/#{branch.name}"
-        unless branch.name.match "^#{issue.key}-pre"
-          LOGGER.error "Incorrect branch name: #{branch_path}"
-        end
+        LOGGER.error "Incorrect branch name: #{branch_path}" unless branch.name.match "^#{issue.key}-pre"
       end
 
       # Check pullrequests name
       issue.api_pullrequests.select { |pr| pr.state == 'OPEN' }.each do |pr|
         LOGGER.info "Check PR: #{pr.title}"
-        unless pr.title.match "^#{issue.key}"
-          LOGGER.error "Incorrect PullRequest name: #{pr.title}"
-        end
+        LOGGER.error "Incorrect PullRequest name: #{pr.title}" unless pr.title.match "^#{issue.key}"
       end
 
       # Check builds status

@@ -12,7 +12,7 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
 
-      issue.related['branches'].each do |branch|
+      issue.related['branches'].each do |branch| # rubocop:disable Metrics/BlockLength
         unless branch['name'].match "^#{SimpleConfig.jira.issue}-pre"
           LOGGER.error "[SKIP] #{branch['repository']['name']}/#{branch['name']} - incorrect branch name"
           exit(1)
