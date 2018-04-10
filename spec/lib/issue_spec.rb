@@ -151,11 +151,11 @@ describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
     allow(issue).to receive(:linked_issues).with('deployes').and_return [issue1, issue2]
     allow_any_instance_of(JIRA::Resource::Issue).to receive(:related).and_return(
       open_pr = { 'branches' => [
-        { 'repository' => { 'name' => 'avia' }},
-        { 'repository' => { 'name' => 'railways' }}
+        { 'repository' => { 'name' => 'avia' } },
+        { 'repository' => { 'name' => 'railways' } }
       ] }
     )
-    expect(issue.all_labels).to eq(%w(avia railways))
+    expect(issue.all_labels).to eq(%w[avia railways])
   end
 
   it '.all_deployes should returns filtered issues' do # rubocop:disable Metrics/BlockLength
