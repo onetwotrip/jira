@@ -8,7 +8,7 @@ def create_test_object!
   GitRepo.new 'git@git:some/repo.git'
 end
 
-describe 'GitRepo' do
+describe 'GitRepo' do # rubocop:disable Metrics/BlockLength
   before :each do
     @git_double = double(:git_double)
     @git_repo = create_test_object!
@@ -31,11 +31,11 @@ describe 'GitRepo' do
   describe 'prepare_branch' do
     it 'should attempt to prepare branch' do
       src_bd = double(:src_branch_double)
-      expect(@git_double).to receive(:branch).with('src-branch').twice { src_bd }
+      expect(@git_double).to(receive(:branch).with('src-branch').twice { src_bd })
       expect(src_bd).to receive(:checkout).twice
 
       dst_bd = double(:dst_branch_double)
-      expect(@git_double).to receive(:branch).with('dst-branch').exactly(3).times { dst_bd }
+      expect(@git_double).to(receive(:branch).with('dst-branch').exactly(3).times { dst_bd })
       expect(dst_bd).to receive(:checkout).twice
 
       expect(@git_double).to receive(:merge)
@@ -51,6 +51,7 @@ describe 'GitRepo' do
       @git_repo.merge! 'branch'
     end
   end
+
   describe 'abort_merge!' do
     it 'should call git merge --abort' do
       lib = double(:lib)
@@ -82,7 +83,7 @@ describe 'GitRepo' do
     it 'should check diff' do
       file = double(:file)
       expect(file).to receive(:patch) { 'patch_line' }
-      expect(file).to receive(:path).exactly(3).times { '/path.js' }
+      expect(file).to(receive(:path).exactly(3).times { '/path.js' })
 
       expect(@git_double).to receive(:merge_base).with('new_commit', 'master') { 'master' }
       expect(@git_double).to receive(:diff).with('master', 'new_commit') { [file] }
@@ -138,35 +139,35 @@ describe 'GitRepo' do
       @git_repo.check_jshint 'some/file.js'
     end
     it 'should run commands if flags are not dropped' do
-      expect(@git_repo).to receive(:has_jscs?).ordered { true }
-      expect(@git_repo).to receive(:run_check)
+      expect(@git_repo).to(receive(:has_jscs?).ordered { true })
+      expect(@git_repo).to(receive(:run_check)
         .with('jscs -c \'.//.jscsrc\' -r inline .//some/file.js', 'some/file.js', [])
-        .ordered { '' }
-      expect(@git_repo).to receive(:has_jshint?).ordered { true }
-      expect(@git_repo).to receive(:run_check)
+        .ordered { '' })
+      expect(@git_repo).to(receive(:has_jshint?).ordered { true })
+      expect(@git_repo).to(receive(:run_check)
         .with('jshint -c \'.//.jshintrc\' .//some/file.js', 'some/file.js', [])
-        .ordered { '' }
+        .ordered { '' })
       @git_repo.check_jscs 'some/file.js'
       @git_repo.check_jshint 'some/file.js'
     end
   end
   describe 'has_jscs? has_jshint?' do
     it 'should check only once and answer false' do
-      expect(File).to receive(:readable?).with('.//.jscsrc').once { false }
-      expect(File).to receive(:readable?).with('.//.jshintrc').once { false }
+      expect(File).to(receive(:readable?).with('.//.jscsrc').once { false })
+      expect(File).to(receive(:readable?).with('.//.jshintrc').once { false })
       expect(@git_repo).not_to have_jscs
       expect(@git_repo).not_to have_jscs
       expect(@git_repo).not_to have_jshint
       expect(@git_repo).not_to have_jshint
     end
     it 'should answer true' do
-      expect(File).to receive(:readable?).with('.//.jscsrc').once { true }
-      expect(File).to receive(:readable?).with('.//.jshintrc').once { true }
+      expect(File).to(receive(:readable?).with('.//.jscsrc').once { true })
+      expect(File).to(receive(:readable?).with('.//.jshintrc').once { true })
       expect(@git_repo).to have_jscs
       expect(@git_repo).to have_jshint
     end
   end
-  describe 'format line' do
+  describe 'format line' do # rubocop:disable Metrics/BlockLength
     it 'should skip lines' do
       text = ['some line',
               'some else line',
@@ -203,8 +204,8 @@ describe 'GitRepo' do
       expect(result).to eq "10,20: some fail\n40,20: some more fail\n"
     end
   end
-  describe 'diffed_lines' do
-    it 'should parse diff' do
+  describe 'diffed_lines' do # rubocop:disable Metrics/BlockLength
+    it 'should parse diff' do # rubocop:disable Metrics/BlockLength
       # rubocop:disable Metrics/LineLength
       diff = "diff --git a/src/tw_shared_types/DAL/buyermanager/riak.js b/src/tw_shared_types/DAL/buyermanager/riak.js
 index 7b85bc4..c8d6996 100644
@@ -258,7 +259,7 @@ index 7b85bc4..c8d6996 100644
       res = @git_repo.send :diffed_lines, diff
       expect(res).to eq []
     end
-    it 'should not raise error if diff contains no "diff" line marks' do
+    it 'should not raise error if diff contains no "diff" line marks' do # rubocop:disable Metrics/BlockLength
       # rubocop:disable Metrics/LineLength
       diff = "diff --git a/src/tw_shared_types/DAL/buyermanager/riak.js b/src/tw_shared_types/DAL/buyermanager/riak.js
 index 7b85bc4..c8d6996 100644
@@ -311,7 +312,7 @@ index 7b85bc4..c8d6996 100644
     end
   end
 
-  describe 'run command' do
+  describe 'run command' do # rubocop:disable Metrics/BlockLength
     let(:text) { "line1\nline2\nline3" }
     it 'should run commands' do
       expect(Open3).to receive(:capture2e).with('cmd') { ['', nil] }

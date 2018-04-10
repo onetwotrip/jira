@@ -56,13 +56,13 @@ class GitRepo
       yield self if block_given?
       return
     end
+
     current = @git.revparse 'HEAD'
-    if block_given?
-      @git.checkout commit
+    @git.checkout commit
+
+    if block_given? # rubocop:disable Style/GuardClause
       yield self
       @git.checkout current
-    else
-      @git.checkout commit
     end
   end
 
@@ -81,7 +81,7 @@ class GitRepo
   end
 
   def get_diff(new_commit, old_commit = nil)
-    old_commit = @git.merge_base new_commit, 'master' unless old_commit
+    old_commit ||= @git.merge_base new_commit, 'master'
     @git.diff old_commit, new_commit
   end
 
@@ -117,13 +117,15 @@ class GitRepo
   def abort_merge!
     begin
       mergehead = @git.revparse 'MERGE_HEAD'
-    rescue
+    rescue StandardError
       Git::GitExecuteError
     end
+
     return unless mergehead
+
     begin
       @git.lib.send(:command, 'merge', '--abort')
-    rescue
+    rescue StandardError
       Git::GitExecuteError
     end
   end
@@ -195,9 +197,8 @@ class GitRepo
   end
 
   def run_command(command, commit = nil)
-    if command.nil? || command.empty?
-      raise ArgumentError.new, 'Empty or nil command!'
-    end
+    raise ArgumentError.new, 'Empty or nil command!' if command.nil? || command.empty?
+
     out = ''
     if commit
       checkout commit do |_|

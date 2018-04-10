@@ -6,7 +6,7 @@ module Scenarios
       email_from = SimpleConfig.sendgrid.from
       sg_user = SimpleConfig.sendgrid.user
       sg_key = SimpleConfig.sendgrid.pass
-      skipped_emails = %w(services@onetwotrip.com default@default.com).freeze
+      skipped_emails = %w[services@onetwotrip.com default@default.com].freeze
 
       if !ENV['payload'] || ENV['payload'].empty?
         print "No payload - no result\n"

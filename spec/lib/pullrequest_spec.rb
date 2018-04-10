@@ -1,13 +1,13 @@
 require 'spec_helper'
-describe JIRA::PullRequest do
+describe JIRA::PullRequest do # rubocop:disable Metrics/BlockLength
   def create_test_object!(data)
     git_double = double(:git_double).as_null_object
     allow(Git).to receive(:get_branch) { git_double }
     allow(git_double.gtree.diff.stats).to receive(:keys) do
-      %w(file1 file2 file3)
+      %w[file1 file2 file3]
     end
     allow(git_double).to receive(:get_attrs).with('file1').and_return(Hash('reviewer.mail' => ['name1']))
-    allow(git_double).to receive(:get_attrs).with('file2').and_return(Hash('reviewer.mail' => %w(name1 name2)))
+    allow(git_double).to receive(:get_attrs).with('file2').and_return(Hash('reviewer.mail' => %w[name1 name2]))
     allow(git_double).to receive(:get_attrs).with('file3').and_return(Hash.new([]))
 
     allow(git_double).to receive(:fetch)
@@ -44,8 +44,8 @@ describe JIRA::PullRequest do
   end
 
   it '.get_reviewers parse git attrs' do
-    expect(@pr.reviewers).to eq %w(name1 name2)
-    expect(@pr.changed_files).to eq %w(file1 file2)
+    expect(@pr.reviewers).to eq %w[name1 name2]
+    expect(@pr.changed_files).to eq %w[file1 file2]
   end
 
   it '.tests_fails returns failed name' do

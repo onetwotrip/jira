@@ -10,6 +10,6 @@ namespace :test do
 end
 
 task :test do
-  %w(rubocop spec).each { |task| Rake::Task["test:#{task}"].invoke }
+  %w[rubocop spec].each { |task| Rake::Task["test:#{task}"].invoke }
 end
 task default: 'test'

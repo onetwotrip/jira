@@ -3,7 +3,7 @@ require 'simple_config'
 
 require 'scenarios/createrelease'
 
-describe Scenarios::CreateRelease do
+describe Scenarios::CreateRelease do # rubocop:disable Metrics/BlockLength
   let(:jira_filter) { '12341' }
   let(:jira_tasks) { 'XXX-100,XYZ-101' }
   response = Struct.new('JiraError', :body, :message, :body_exists).new('NOT_FOUND', 'Message', true)

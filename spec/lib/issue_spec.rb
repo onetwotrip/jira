@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe JIRA::Resource::Issue do
+describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
   let(:model) do
     client_options = {
       username: 'User',
@@ -140,10 +140,11 @@ describe JIRA::Resource::Issue do
     expect(issue.all_deployes.class.name).to eq 'Array'
     expect(issue.all_deployes).to include issue1, issue2, sub_issue
   end
-  it '.all_deployes should returns filtered issues' do
-    issue = JIRA::Resource::Issue.new(@jira)
-    issue1 = issue.dup
-    issue2 = issue.dup
+
+  it '.all_deployes should returns filtered issues' do # rubocop:disable Metrics/BlockLength
+    issue     = JIRA::Resource::Issue.new(@jira)
+    issue1    = issue.dup
+    issue2    = issue.dup
     sub_issue = issue.dup
     issue.instance_variable_set(:@attrs, fields: { key: 'ISSUE' }, 'key' => 'ISSUE')
     issue1.instance_variable_set(:@attrs, fields: { key: 'ISSUE_1' }, 'key' => 'ISSUE_1')
@@ -176,6 +177,7 @@ describe JIRA::Resource::Issue do
 
     expect(issue.all_deployes { |i| !i.tags?('customtags', 'value') }).to contain_exactly issue2
   end
+
   it '.tags? return true if tag available' do
     issue = JIRA::Resource::Issue.new(@jira)
     issue.instance_variable_set(:@attrs, 'fields' => {

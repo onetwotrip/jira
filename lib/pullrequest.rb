@@ -11,13 +11,15 @@ module JIRA
 
     def initialize(git_config, hash)
       raise ArgumentError, 'Missing git config' unless git_config
+
       begin
         valid?(hash)
-      rescue => e
+      rescue StandardError => e
         puts e
         @pr = {}
         return false
       end
+
       @pr = hash
       @tests = []
       @git_config = git_config
@@ -30,7 +32,7 @@ module JIRA
     end
 
     def tests_fails
-      @tests.select { |test| !test.status }
+      @tests.reject(&:status)
     end
 
     def test(name)
@@ -49,11 +51,11 @@ module JIRA
       parse_url @pr['destination']['url']
     end
 
-    def reviewers
+    def reviewers # rubocop:disable Lint/DuplicateMethods
       @reviewers ||= reviewers_by_files(changed_files)
     end
 
-    def changed_files
+    def changed_files # rubocop:disable Lint/DuplicateMethods
       @changed_files ||= files
     end
 

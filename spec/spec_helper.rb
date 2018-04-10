@@ -3,8 +3,6 @@ require 'simplecov'
 SimpleCov.start do
   SimpleCov.minimum_coverage_by_file 95
 end
-require 'codeclimate-test-reporter'
-CodeClimate::TestReporter.start
 
 require 'issue'
 require 'repo'

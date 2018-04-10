@@ -11,14 +11,14 @@ def check_diff(git_repo, new_commit, old_commit = nil)
     return ''
   end
 
-  old_commit = git_repo.merge_base new_commit, 'master' unless old_commit
+  old_commit ||= git_repo.merge_base new_commit, 'master'
 
   print "Will use JSCS\n" if has_jscs
   print "Will use JSHint\n" if has_jshint
 
   puts "Diff #{old_commit} with #{new_commit}"
   puts 'Commits:'
-  puts git_repo.log.between(old_commit, new_commit).collect { |commit| "#{commit.sha}: #{commit.message}\n" }
+  puts(git_repo.log.between(old_commit, new_commit).collect { |commit| "#{commit.sha}: #{commit.message}\n" })
 
   diff = git_repo.diff old_commit, new_commit
 

@@ -22,9 +22,7 @@ module Scenarios
 
         prs.each do |pr|
           prname = pr['name'].dup
-          unless pr['name'].strip!.nil?
-            puts "[#{prname}] - WRONG! Stripped. Bad guy: #{pr['author']['name']}"
-          end
+          puts "[#{prname}] - WRONG! Stripped. Bad guy: #{pr['author']['name']}" unless pr['name'].strip!.nil?
         end
 
         git_style_release = SimpleConfig.jira.issue.tr('-', ' ').downcase.capitalize
@@ -53,7 +51,7 @@ module Scenarios
 
         puts Terminal::Table.new(
           title:    'Pullrequests status',
-          headings: %w(status author url),
+          headings: %w[status author url],
           rows:     prs.map { |v| [v['reject'] || v['status'].green, v['author']['name'], v['url']] }
         )
 
@@ -79,7 +77,7 @@ module Scenarios
 
       puts Terminal::Table.new(
         title:    'Deploy projects',
-        headings: %w(Project branch),
+        headings: %w[Project branch],
         rows:      prop_values['PROJECTS'].map { |k, v| [k, v['BRANCH']] }
       )
       JavaProperties.write({ 'DEPLOY' => prop_values.to_json }, './env.properties')
