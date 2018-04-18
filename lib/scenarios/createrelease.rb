@@ -30,14 +30,25 @@ module Scenarios
     def create_release_issue(project, issue, project_key = 'OTT', release_name = 'Release')
       project = project.find(project_key)
       release = issue.build
-      release.save(fields: { summary: release_name, project: { id: project.id },
-                             issuetype: { name: 'Release' } })
+      release.save(
+        fields: {
+          summary: release_name,
+          project: { id: project.id },
+          issuetype: { name: 'Release' },
+        }
+      )
       release.fetch
       release
     rescue JIRA::HTTPError => jira_error
-      error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
-      LOGGER.error "Creation of release was failed with error #{error_message}"
-      raise error_message
+      error_code = ''
+      if jira_error.response['body_exists']
+        error_message = jira_error.message
+      else
+        error_message = jira_error.response.body
+        error_code    = jira_error.response.code
+      end
+
+      LOGGER.error "Creation of release was failed with code #{error_code} and error #{error_message}"
     end
 
     # :nocov:
