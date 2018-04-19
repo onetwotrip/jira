@@ -5,7 +5,7 @@ module Scenarios
     def find_by_filter(issue, filter)
       issue.jql("filter=#{filter}")
     rescue JIRA::HTTPError => jira_error
-      error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
+      error_message = jira_error.response['body_exists'] ? jira_error.response.body : jira_error.message
       puts "Error in JIRA with the search by filter #{error_message}".red
       []
     end

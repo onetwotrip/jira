@@ -5,7 +5,7 @@ module Scenarios
     def find_by_filter(issue, filter)
       issue.jql("filter=#{filter}")
     rescue JIRA::HTTPError => jira_error
-      error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
+      error_message = jira_error.response['body_exists'] ? jira_error.response.body : jira_error.message
       LOGGER.error "Error in JIRA with the search by filter #{error_message}"
       []
     end
@@ -18,7 +18,7 @@ module Scenarios
         begin
           issues_from_string << issue.find(issue_key)
         rescue JIRA::HTTPError => jira_error
-          error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
+          error_message = jira_error.response['body_exists'] ? jira_error.response.body : jira_error.message
 
           LOGGER.error "Error in JIRA with the search by issue key #{error_message}"
         end
@@ -35,7 +35,7 @@ module Scenarios
       release.fetch
       release
     rescue JIRA::HTTPError => jira_error
-      error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
+      error_message = jira_error.response['body_exists'] ? jira_error.response.body : jira_error.message
       LOGGER.error "Creation of release was failed with error #{error_message}"
       raise error_message
     end
