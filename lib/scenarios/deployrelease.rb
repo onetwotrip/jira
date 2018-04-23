@@ -18,6 +18,11 @@ module Scenarios
         issue = jira.Issue.find SimpleConfig.jira.issue
         prs = issue.related['pullRequests']
 
+        if prs.empty?
+          LOGGER.error "Error: no pull requests found for the issue #{SimpleConfig.jira.issue}"
+          exit 1
+        end
+
         puts 'Checking for wrong PRs names:'
 
         prs.each do |pr|

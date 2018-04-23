@@ -69,15 +69,24 @@ module Ott
       issue.api_pullrequests.select { |pr| pr.state == 'OPEN' }.each do |pr|
         LOGGER.info "Check PR: #{pr.title}"
         repo = issue.repo pr.destination['repository']['links']['html']['href']
-        pr.commits.each do |commit|
-          GitDiffParser.parse(repo.diff(commit.hash)).each do |patch|
-            JSON.parse(ENV.fetch('STRICT_FILES', '{}')).each do |strict_path|
-              next unless patch.file.start_with?(strict_path)
-              strict_control.push(author: commit.author['raw'].html_safe,
-                                  url: commit.links['html']['href'].html_safe,
-                                  file: patch.file.html_safe)
-              LOGGER.info "StrictControl: #{patch.file}"
+
+        GitDiffParser.parse(pr.diff).each do |patch|
+          JSON.parse(ENV.fetch('STRICT_FILES', '{}')).each do |strict_path|
+            next unless patch.file.start_with?(strict_path)
+
+            pr.commits.each do |commit|
+              GitDiffParser.parse(repo.diff(commit.hash)).each do |p|
+                next unless p.file.start_with?(strict_path)
+
+                strict_control.push(
+                  author: commit.author['raw'].html_safe,
+                  url:    commit.links['html']['href'].html_safe,
+                  file:   patch.file.html_safe
+                )
+              end
             end
+
+            LOGGER.info "StrictControl: #{patch.file}"
           end
         end
       end
