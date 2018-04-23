@@ -32,10 +32,8 @@ module Scenarios
             LOGGER.info "Finished writing merge conflict message in #{issue_task.key}"
           end
 
-          log_string += conflict_flag_log + " with link https://bitbucket.org/OneTwoTrip/#{pr.repo_slug}/".green +
-            "pull-requests/#{pr.id}".green
+          log_string += conflict_flag_log + " with link https://bitbucket.org/OneTwoTrip/#{pr.repo_slug}/pull-requests/#{pr.id}".green
           LOGGER.info log_string
-
         rescue StandardError => error
           LOGGER.info "There is error occured with ticket #{issue_task.key}: #{error.message}".red
         end
