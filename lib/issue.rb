@@ -164,7 +164,7 @@ module JIRA
           end
         end
 
-        release_labels.uniq!
+        release_labels.uniq
       end
 
       def tags?(fkey, val)
