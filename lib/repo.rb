@@ -260,5 +260,3 @@ def prepare_branch(repo, source, destination, clean = false)
              "CI: merge source branch #{source} to release #{destination}")
 end
 # :nocov:
-
-
