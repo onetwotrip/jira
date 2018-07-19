@@ -40,7 +40,7 @@ module Scenarios
       repos = {}
 
       pre_release_branch = "#{opts[:release]}-#{opts[:postfix]}"
-      release_branch = "#{opts[:release]}-release-#{DateTime.now.strftime "%d.%m.%Y"}"
+      release_branch = "#{opts[:release]}-release-#{DateTime.now.strftime '%d.%m.%Y'}"
       source = opts[:source]
 
       LOGGER.info "Number of issues: #{release.linked_issues('deployes').size}"
