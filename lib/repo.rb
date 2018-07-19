@@ -222,6 +222,9 @@ def git_repo(url, opts = {})
   # Removal of existing branches
   opts[:delete_branches].to_a.each do |branch|
     next unless git_repo.find_branch? branch
+    git_repo.chdir do
+      `git fetch --prune`
+    end
     if git_repo.is_local_branch? branch
       puts "Found pre release branch: #{branch}. Deleting local...".red
       git_repo.lib.branch_delete branch
@@ -257,3 +260,5 @@ def prepare_branch(repo, source, destination, clean = false)
              "CI: merge source branch #{source} to release #{destination}")
 end
 # :nocov:
+
+
