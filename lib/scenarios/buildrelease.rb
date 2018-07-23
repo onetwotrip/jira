@@ -40,8 +40,18 @@ module Scenarios
       repos = {}
 
       pre_release_branch = "#{opts[:release]}-#{opts[:postfix]}"
-      release_branch = "#{opts[:release]}-release-#{Time.now.strftime '%d.%m.%Y'}"
+      release_branch = "#{opts[:release]}-release"
       source = opts[:source]
+      delete_branches = []
+      delete_branches << pre_release_branch
+
+      # Get release branch if exist for feature deleting
+      release.related['branches'].each do |branch|
+        if branch['name'].include?(release_branch)
+          puts "Found release branch: #{branch['name']}. It's going to be delete".red
+          delete_branches << branch['name']
+        end
+      end
 
       LOGGER.info "Number of issues: #{release.linked_issues('deployes').size}"
       release.linked_issues('deployes').each do |issue| # rubocop:disable Metrics/BlockLength
@@ -82,7 +92,7 @@ module Scenarios
                 # }
                 repos[repo_name] ||= { url: repo_url, branches: [] }
                 repos[repo_name][:repo_base] ||= git_repo(repo_url,
-                                                          delete_branches: [pre_release_branch, release_branch])
+                                                          delete_branches: delete_branches)
                 repos[repo_name][:branches].push(issue: issue,
                                                  pullrequest: pullrequest,
                                                  branch: branch)
