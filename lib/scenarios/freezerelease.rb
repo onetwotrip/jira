@@ -35,7 +35,7 @@ module Scenarios
         exit(1)
       end
 
-      release_issues.each do |branch| # rubocop:disable Metrics/BlockLength
+      release_issues.each do |branch|
         today = Time.new.strftime('%d.%m.%Y')
         old_branch = branch['name']
         new_branch = "#{SimpleConfig.jira.issue}-release-#{today}"
