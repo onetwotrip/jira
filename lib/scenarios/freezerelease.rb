@@ -12,20 +12,37 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
 
-      issue.related['branches'].each do |branch| # rubocop:disable Metrics/BlockLength
-        unless branch['name'].match "^#{SimpleConfig.jira.issue}-pre"
-          LOGGER.error "[SKIP] #{branch['repository']['name']}/#{branch['name']} - incorrect branch name"
-          exit(1)
+      release_issues = []
+      # prepare release candidate branches
+      issue.related['branches'].each do |branch|
+        repo_path = git_repo(branch['repository']['url'])
+        repo_path.chdir do
+          `git fetch --prune`
         end
+        unless branch['name'].match "^#{SimpleConfig.jira.issue}-pre"
+          unless repo_path.is_branch? branch['name']
+            LOGGER.error "[SKIP] #{branch['repository']['name']}/#{branch['name']} - branch doesn't exist"
+            next
+          end
+          LOGGER.error "[SKIP] #{branch['repository']['name']}/#{branch['name']} - incorrect branch name"
+          next
+        end
+        release_issues << branch
+      end
+
+      if release_issues.empty?
+        LOGGER.error 'There is no -pre branches in release ticket'
+        exit(1)
+      end
+
+      release_issues.each do |branch| # rubocop:disable Metrics/BlockLength
         today = Time.new.strftime('%d.%m.%Y')
         old_branch = branch['name']
         new_branch = "#{SimpleConfig.jira.issue}-release-#{today}"
-
         repo_path = git_repo(branch['repository']['url'])
 
         # copy -pre to -release
         LOGGER.info "Working with #{repo_path.remote.url.repo}"
-        repo_path.fetch
         unless repo_path.is_branch? old_branch
           LOGGER.error "Branch #{old_branch} doesn't exists"
           exit(1)
