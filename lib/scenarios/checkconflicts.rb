@@ -12,28 +12,51 @@ module Scenarios
 
     def check_issue(issue_task)
       LOGGER.info "Start check #{issue_task.key} issue".green
-      issue_task.api_pullrequests.each do |pr|
+      is_already_reopen = false
+      issue_task.api_pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
+        next unless pr.state == 'OPEN'
         begin
           diff_in_pr      = pr.diff
           commit_id       = pr.source['commit']['hash']
           commit          = BITBUCKET.repo(pr.repo_owner, pr.repo_slug).commit(commit_id)
           status_of_build = commit.build_statuses.collect.last
+
           if status_of_build.state.upcase.include? 'FAILED'
             puts "Detected build status error in #{issue_task.key}. Writing comment in ticket...".red
             puts "#{issue_task.key}: https://bitbucket.org/OneTwoTrip/#{pr.repo_slug}/pull-requests/#{pr.id}".red
             puts "Writing message in #{issue_task.key}".red
-            issue_task.post_comment 'Ticket has build error status, pls check it'
+            issue_task.post_comment <<-BODY
+              {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
+                  [~#{issue_task.assignee.key}]
+                  Repo: #{pr.source['repository']['name']}
+                  Author: #{pr.author['display_name']}
+                  Branch: https://bitbucket.org/OneTwoTrip/#{pr.repo_slug}/branch/#{pr.source['branch']['name']}
+                  PR: https://bitbucket.org/OneTwoTrip/#{pr.repo_slug}/pull-requests/#{pr.id}
+              {panel}
+                  Проверьте почему билд в ветке не собрался и исправьте проблему
+            BODY
             puts "Reopen ticket: #{issue_task.key}".red
-            issue_task.transition 'Reopen' if issue_task.status.name != 'Reopen'
+            issue_task.transition 'Reopen' unless is_already_reopen
+            is_already_reopen = true
           end
-          conflict_flag     = diff_in_pr.include? '<<<<<<<'
+          conflict_flag = diff_in_pr.include? '<<<<<<<'
           if conflict_flag
             puts "Find conflicts in #{issue_task.key}. Writing comment in ticket...".red
             puts "#{issue_task.key}: https://bitbucket.org/OneTwoTrip/#{pr.repo_slug}/pull-requests/#{pr.id}".red
             puts "Writing message in #{issue_task.key}".red
-            issue_task.post_comment 'After last release this issue started to have merge conflicts. Please fix it'
+            issue_task.post_comment <<-BODY
+              {panel:title=Find conflict with master|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
+                  [~#{issue_task.assignee.key}]
+                  Repo: #{pr.source['repository']['name']}
+                  Author: #{pr.author['display_name']}
+                  Branch: https://bitbucket.org/OneTwoTrip/#{pr.repo_slug}/branch/#{pr.source['branch']['name']}
+                  PR: https://bitbucket.org/OneTwoTrip/#{pr.repo_slug}/pull-requests/#{pr.id}
+              {panel}
+                  После последнего релиза в этой ветке найдены конфликты с мастером. Исправьте их
+            BODY
             puts "Reopen ticket: #{issue_task.key}".red
-            issue_task.transition 'Reopen' if issue_task.status.name != 'Reopen'
+            issue_task.transition 'Reopen' unless is_already_reopen
+            is_already_reopen = true
           end
         rescue StandardError => error
           puts "There is error occurred with ticket #{issue_task.key}: #{error.message}".red
