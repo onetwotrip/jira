@@ -8,8 +8,9 @@ module Scenarios
       issue = jira.Issue.find(SimpleConfig.jira.issue)
 
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
-                       .filter_by_status('OPEN')
-                       .filter_by_source_url(SimpleConfig.jira.issue)
+                          .filter_by_status('OPEN')
+                          .filter_by_source_url(SimpleConfig.jira.issue)
+
       unless pullrequests.valid?
         issue.post_comment p("ReviewRelease: #{pullrequests.valid_msg}")
         exit
@@ -27,19 +28,9 @@ module Scenarios
       end
 
       issue.linked_issues('deployes').each do |subissue|
-        begin
-          puts subissue.key
-          # Transition to DONE
-          subissue.transition 'To master' if subissue.get_transition_by_name 'To master'
-          # Delete branches from linked issues
-          issue.related['branches'].each do |branch|
-            puts "Repo: #{branch['repository']['name']},delete branch #{branch['url']}"
-            # puts "Repo: #{branch['repository']['name']}, branch #{branch['url']} already deleted".orange
-            branch.destroy
-          end
-        rescue StandardError => error
-          puts "There is error occurred with ticket #{subissue.key}: #{error.message}".red
-        end
+        puts subissue.key
+        # Transition to DONE
+        subissue.transition 'To master' if subissue.get_transition_by_name 'To master'
       end
     end
   end
