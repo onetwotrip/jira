@@ -20,11 +20,12 @@ module Scenarios
           `git fetch --prune`
         end
         unless branch['name'].match "^#{SimpleConfig.jira.issue}-pre"
-          unless repo_path.is_branch? branch['name']
-            LOGGER.error "[SKIP] #{branch['repository']['name']}/#{branch['name']} - branch doesn't exist"
-            next
-          end
           LOGGER.error "[SKIP] #{branch['repository']['name']}/#{branch['name']} - incorrect branch name"
+          next
+        end
+        # Check for case when issue has correct name, but was deleted from issue
+        unless repo_path.is_branch? branch['name']
+          LOGGER.error "[SKIP] #{branch['repository']['name']}/#{branch['name']} - branch doesn't exist"
           next
         end
         release_issues << branch
