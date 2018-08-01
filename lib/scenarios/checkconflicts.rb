@@ -36,7 +36,7 @@ module Scenarios
                   Проверьте почему билд в ветке не собрался и исправьте проблему
             BODY
             puts "Reopen ticket: #{issue_task.key}".red
-            issue_task.transition 'Reopen' unless is_already_reopen
+            issue_task.transition 'Reopened' unless is_already_reopen
             is_already_reopen = true
           end
           conflict_flag = diff_in_pr.include? '<<<<<<<'
@@ -55,7 +55,7 @@ module Scenarios
                   После последнего релиза в этой ветке найдены конфликты с мастером. Исправьте их
             BODY
             puts "Reopen ticket: #{issue_task.key}".red
-            issue_task.transition 'Reopen' unless is_already_reopen
+            issue_task.transition 'Reopened' unless is_already_reopen
             is_already_reopen = true
           end
         rescue StandardError => error
