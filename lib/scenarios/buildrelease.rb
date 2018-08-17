@@ -8,7 +8,7 @@ module Scenarios
       @opts = opts
     end
 
-    def run # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/AbcSize
+    def run # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/AbcSize, Layout/MultilineOperationIndentation
       LOGGER.info "Build release #{opts[:release]}"
 
       options = { auth_type: :basic }.merge(opts.to_hash)
@@ -36,7 +36,7 @@ module Scenarios
         release.issuelinks.each do |issuelink|
           next unless issuelink.type.name == 'Deployed' &&
             issuelink.outwardIssue &&
-            issuelink.outwardIssue.linked_issues('is blocked by').any? { |i| !good_statuses.include? i.status.name }
+            issuelink.outwardIssue.linked_issues('is blocked by').any? { |i| !good_statuses.include? i.status.name } # rubocop:disable Layout/MultilineOperationIndentation
           comment = "#{issuelink.outwardIssue.key} blocked. Unlink from release #{release.key}"
           release.post_comment comment
           issuelink.outwardIssue.post_comment comment
