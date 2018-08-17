@@ -36,7 +36,7 @@ module Scenarios
         release.issuelinks.each do |issuelink|
           next unless issuelink.type.name == 'Deployed' &&
             issuelink.outwardIssue && # rubocop:disable Layout/MultilineOperationIndentation
-            issuelink.outwardIssue.linked_issues('is blocked by').any? { |i| !good_statuses.include? i.status.name } # rubocop:disable Layout/MultilineOperationIndentation
+            issuelink.outwardIssue.linked_issues('is blocked by').any? { |i| !good_statuses.include? i.status.name } # rubocop:disable Layout/MultilineOperationIndentation, Metrics/LineLength
           comment = "#{issuelink.outwardIssue.key} blocked. Unlink from release #{release.key}"
           release.post_comment comment
           issuelink.outwardIssue.post_comment comment
