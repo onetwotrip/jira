@@ -17,6 +17,7 @@ module Scenarios
         Ожидайте сообщение о завершении
       {panel}
       BODY
+
       begin
       release_issues = []
       # prepare release candidate branches

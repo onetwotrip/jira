@@ -21,6 +21,7 @@ module Scenarios
         Ожидайте сообщение о завершении
       {panel}
       BODY
+
       begin
       if release.linked_issues('deployes').empty? || opts[:ignorelinks]
         LOGGER.warn 'Deploys issue not found or ignored. Force JQL.'
