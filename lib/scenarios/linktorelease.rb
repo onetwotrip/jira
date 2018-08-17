@@ -29,7 +29,11 @@ module Scenarios
       # Check project exist in filter_config
       if filter_config[project_name].nil?
         message = "I can't work with project '#{project_name.upcase}'. Pls, contact administrator to feedback"
-        release_issue.post_comment(message)
+        release_issue.post_comment <<-BODY
+          {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+            #{message} (x)
+          {panel}
+        BODY
         LOGGER.error message
         raise 'Project not found'
       end
@@ -50,7 +54,11 @@ module Scenarios
       # Check release filter
       if release_filter.nil? || release_filter.empty?
         message = "I don't find release filter for jira project: '#{project_name.upcase}' and release_type: #{release_type}"
-        release_issue.post_comment(message)
+        release_issue.post_comment <<-BODY
+          {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+            #{message} (x)
+          {panel}
+        BODY
         LOGGER.error message
         raise 'Release_filter not found'
       end
@@ -60,7 +68,11 @@ module Scenarios
       issues = release_filter && find_by_filter(client.Issue, release_filter)
 
       # Message about count of release candidate issues
-      release_issue.post_comment("Тикетов будет прилинковано: #{issues.count}")
+      release_issue.post_comment <<-BODY
+          {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+            Тикетов будет прилинковано: #{issues.count} (!)
+          {panel}
+        BODY
 
       release_labels = []
       issues.each do |issue|
@@ -77,7 +89,11 @@ module Scenarios
       release_issue.fetch
 
       # Message about done
-      release_issue.post_comment('Формирование релиза закончено')
+      release_issue.post_comment <<-BODY
+          {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+            Формирование релиза закончено (/)
+          {panel}
+        BODY
     end
   end
 end

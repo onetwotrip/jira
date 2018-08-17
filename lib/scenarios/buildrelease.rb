@@ -15,6 +15,13 @@ module Scenarios
       client  = JIRA::Client.new(options)
       release = client.Issue.find(opts[:release])
 
+      release.post_comment <<-BODY
+      {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+        Запущено формирование -pre веток (!)
+        Ожидайте сообщение о завершении
+      {panel}
+      BODY
+      begin
       if release.linked_issues('deployes').empty? || opts[:ignorelinks]
         LOGGER.warn 'Deploys issue not found or ignored. Force JQL.'
         release.search_deployes.each { |issue| issue.link(opts[:release]) }
@@ -140,7 +147,7 @@ module Scenarios
           end
         end
 
-        if !merge_fail && issue.status.name != 'In Release' && has_merges
+        if !merge_fail && has_merges
           issue.transition 'Merge to release'
         elsif merge_fail
           issue.transition 'Merge Fail'
@@ -162,6 +169,20 @@ module Scenarios
         LOGGER.fatal "#{status}: #{keys.size}"
         keys.each { |i| LOGGER.fatal i[:key] }
       end
+      rescue StandardError
+        release.post_comment <<-BODY
+        {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+         Не удалось собрать -pre ветки (x)
+         Подробности в логе таски https://jenkins.twiket.com/view/RELEASE/job/build_release/
+        {panel}
+        BODY
+        exit(1)
+      end
+      release.post_comment <<-BODY
+      {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+        Сборка -pre веток завершена (/)
+      {panel}
+      BODY
     end
   end
 end
