@@ -81,13 +81,17 @@ module Scenarios
 
         LOGGER.info 'Get all labels again'
         release_labels = []
-        issue.branches.each do |br|
+        issue.api_pullrequests.each do |br|
           LOGGER.info("Repo: #{br.repo_slug}")
           release_labels << br.repo_slug
         end
-        LOGGER.info "Add labels: #{release_labels} to release #{issue.key}"
-        issue.save(fields: { labels: release_labels })
-        issue.fetch
+        if release_labels.empty?
+          LOGGER.info 'Made empty labels array! I will skip set up new labels step'
+        else
+          LOGGER.info "Add labels: #{release_labels} to release #{issue.key}"
+          issue.save(fields: { labels: release_labels })
+          issue.fetch
+        end
       rescue StandardError => e
         issue.post_comment <<-BODY
         {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
@@ -104,5 +108,16 @@ module Scenarios
       {panel}
       BODY
     end
+  end
+end
+
+# kill Timeout module for debug bug in Rubymine
+if $LOADED_FEATURES.any? {|f| f.include? 'debase'}
+  module Timeout
+    def timeout(sec, klass = nil)
+      yield(sec)
+    end
+
+    module_function :timeout
   end
 end
