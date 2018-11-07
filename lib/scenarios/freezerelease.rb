@@ -110,14 +110,3 @@ module Scenarios
     end
   end
 end
-
-# kill Timeout module for debug bug in Rubymine
-if $LOADED_FEATURES.any? {|f| f.include? 'debase'}
-  module Timeout
-    def timeout(sec, klass = nil)
-      yield(sec)
-    end
-
-    module_function :timeout
-  end
-end
