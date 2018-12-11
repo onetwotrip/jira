@@ -24,7 +24,7 @@ module Scenarios
 
       begin
         if release.linked_issues('deployes').empty? || opts[:ignorelinks]
-          LOGGER.warn 'Deploys issue not found or ignored. Force JQL.'
+          LOGGER.warn "I can't found ticket linked with type 'deployes'"
           release.search_deployes.each { |issue| issue.link(opts[:release]) }
         end
 
