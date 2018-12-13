@@ -34,16 +34,17 @@ module Scenarios
           LOGGER.info "Working on #{issue.key}"
           has_merges = false
           merge_fail = false
+          valid_pr = []
           # Check ticket status
           LOGGER.info "Ticket #{issue.key} has status: #{issue.status.name}, but should 'Merge ready'" if issue.status.name != 'Merge ready'
 
           # Check PR exist in ticket
           if issue.related['pullRequests'].empty?
             if !issue.related['branches'].empty?
-              body               = "#{issue.key}: There is no pullrequest, but there is branhes. I'm afraid of changes is not at develop"
+              body               = "#{issue.key}: There is no pullrequest, but there is branhes. I'm afraid of changes are not at develop"
               badissues[:absent] = [] unless badissues.key?(:absent)
               badissues[:absent].push(key: issue.key, body: body)
-              LOGGER.info body
+              LOGGER.fatal body
               issue.post_comment body
               merge_fail = true
             else
@@ -52,10 +53,11 @@ module Scenarios
               next
             end
           else
-
+            valid_pr << false
             issue.related['pullRequests'].each do |pullrequest|
               # Check PR match with ticket number
-              if pullrequest['source']['branch'].match "^#{issue.key}"
+              if pullrequest['source']['branch'].include? issue.key
+                valid_pr << true
                 # Check PR status: open, merged
                 if pullrequest['status'] != 'MERGED'
                   LOGGER.fatal "#{issue.key}: PR with task number not merged in develop"
@@ -70,13 +72,22 @@ module Scenarios
                 badissues[:badname].push(key: issue.key, body: "Found PR with doesn't contains task number")
               end
             end
+            # if ticket doesn't have valid pr (valid means contain issue number)
+            unless valid_pr.include?(true)
+              body               = "#{issue.key}: There is no pullrequest contains issue number. I'm afraid of changes from ticket are not at develop"
+              badissues[:absent] = [] unless badissues.key?(:absent)
+              badissues[:absent].push(key: issue.key, body: body)
+              LOGGER.fatal body
+              #issue.post_comment body
+              merge_fail = true
+            end
           end
 
           # Change issue status
           if !merge_fail && has_merges
             issue.transition 'Merge to release'
           elsif merge_fail
-            issue.transition 'Merge Fail'
+            #issue.transition 'Merge Fail'
             LOGGER.fatal "#{issue.key} was not merged!"
           end
         end
