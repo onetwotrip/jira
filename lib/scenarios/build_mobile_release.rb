@@ -79,7 +79,7 @@ module Scenarios
             if !issue.related['branches'].empty?
               body               = "#{issue.key}: There is no pullrequest, but there is branhes. I'm afraid of changes are not at develop"
               badissues[:absent] = [] unless badissues.key?(:absent)
-              badissues[:absent].push(key: issue.key, body: body)
+              badissues[:absent].push(issue.key)
               LOGGER.fatal body
               #issue.post_comment body
               merge_fail = true
@@ -105,14 +105,14 @@ module Scenarios
               else
                 LOGGER.warn "#{issue.key}: Found PR with doesn't contains task number"
                 badissues[:badname] = [] unless badissues.key?(:badname)
-                badissues[:badname].push(key: issue.key, body: "Found PR with doesn't contains task number")
+                badissues[:badname].push(issue.key)
               end
             end
             # if ticket doesn't have valid pr (valid means contain issue number)
             unless valid_pr.include?(true)
               body               = "#{issue.key}: There is no pullrequest contains issue number. I'm afraid of changes from ticket are not at develop"
               badissues[:absent] = [] unless badissues.key?(:absent)
-              badissues[:absent].push(key: issue.key, body: body)
+              badissues[:absent].push(issue.key)
               LOGGER.fatal body
               #issue.post_comment body
               merge_fail = true
@@ -155,7 +155,7 @@ module Scenarios
         LOGGER.fatal 'Not Merged:' unless badissues.empty?
         badissues.each_pair do |status, keys|
           LOGGER.fatal "#{status}: #{keys.size}"
-          keys.each { |i| LOGGER.fatal i[:key] }
+          keys.uniq.each { |i| LOGGER.fatal i }
         end
 
       rescue StandardError => e
