@@ -24,7 +24,6 @@ require 'common/util.rb'
 
 # Scenarios
 Dir[__dir__ + '/scenarios/*.rb'].each { |file| require file }
-#Dir[__dir__ + '/scenarios/mobile/*.rb'].each { |file| require file }
 
 # kill Timeout module for debug bug in Rubymine
 if $LOADED_FEATURES.any? {|f| f.include? 'debase'}
