@@ -105,7 +105,7 @@ module Scenarios
                   LOGGER.info "#{issue.key}: PR already merged in develop"
                 end
               else
-                LOGGER.info "#{issue.key}: Found PR with doesn't contains task number"
+                LOGGER.warn "#{issue.key}: Found PR with doesn't contains task number"
                 badissues[:badname] = [] unless badissues.key?(:badname)
                 badissues[:badname].push(key: issue.key, body: "Found PR with doesn't contains task number")
               end
