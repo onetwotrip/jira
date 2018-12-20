@@ -249,7 +249,7 @@ end
 def prepare_branch(repo, source, destination, clean = false)
   repo.fetch
   repo.branch(source).checkout
-  repo.pull
+  repo.pull('origin', source)
   # destination branch should be checked out or has no effect on actual FS
   if clean
     repo.branch(destination).checkout
