@@ -12,7 +12,7 @@ module Scenarios
       @repo_prepare = false
     end
 
-    def run # rubocop:disable Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
+    def run # rubocop:disable Metrics/PerceivedComplexity
       LOGGER.info("Build mobile release from ticket #{opts[:release]}")
 
       # Start
@@ -63,9 +63,7 @@ module Scenarios
         LOGGER.info "Number of issues: #{release.linked_issues('deployes').size}"
 
         badissues    = {}
-        repositories = %w(ios-12trip android_ott)
         repos        = {}
-
 
         # Check linked issues for merged PR
         release.linked_issues('deployes').each do |issue| # rubocop:disable Metrics/BlockLength
@@ -129,14 +127,13 @@ module Scenarios
             LOGGER.fatal "#{issue.key} was not merged!"
           end
 
-
-          # Prepare develop branch to create -pre
-
+          # Prepare repo object
           @repo_obj = prepare_repos(issue) unless repo_prepare
 
         end
 
-        repos[@repo_obj[:name]]             = { url: @repo_obj[:url], branches: [] }
+        # Prepare develop branch to create -pre
+        repos[@repo_obj[:name]] = { url: @repo_obj[:url], branches: [] }
         repos[@repo_obj[:name]][:repo_base] ||= git_repo(@repo_obj[:url], delete_branches: delete_branches)
 
         repo_path = repos[@repo_obj[:name]][:repo_base]
@@ -145,14 +142,20 @@ module Scenarios
         prepare_branch(repo_path, 'develop', pre_release_branch, opts[:clean])
 
         # Create -pre branch and with PR to develop and master
-        LOGGER.info 'Repos:' unless repos.empty?
-        repos.each do |name, repo|
-          LOGGER.info "Push '#{pre_release_branch}' to '#{name}' repo"
-          if opts[:push]
+        if opts[:push]
+          LOGGER.info 'Repos:' unless repos.empty?
+          repos.each do |name, repo|
+            LOGGER.info "Push '#{pre_release_branch}' to '#{name}' repo"
             LOGGER.info 'Push to remote'
             local_repo = repo[:repo_base]
             local_repo.push('origin', pre_release_branch)
           end
+        end
+
+        LOGGER.fatal 'Not Merged:' unless badissues.empty?
+        badissues.each_pair do |status, keys|
+          LOGGER.fatal "#{status}: #{keys.size}"
+          keys.each { |i| LOGGER.fatal i[:key] }
         end
 
       rescue StandardError => e
@@ -167,7 +170,7 @@ module Scenarios
     end
 
     def prepare_repos(issue)
-      repositories = %w(ios-12trip android_ott)
+      repositories = %w(ios-12trip android_ott) # rubocop:disable Style/PercentLiteralDelimiters
       issue.related['branches'].each do |branch|
         next unless branch['name'].include? issue.key
 
