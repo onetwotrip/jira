@@ -128,7 +128,6 @@ module Scenarios
 
           # Prepare repo object
           @repo_obj = prepare_repos(issue) unless repo_prepare
-
         end
 
         # Prepare develop branch to create -pre
