@@ -19,12 +19,12 @@ module Scenarios
       options = { auth_type: :basic }.merge(opts.to_hash)
       jira    = JIRA::Client.new(options)
       release = jira.Issue.find(opts[:release])
-      # release.post_comment <<-BODY
-      # {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
-      #   Запущено формирование -pre веток(!)
-      #   Ожидайте сообщение о завершении
-      # {panel}
-      # BODY
+      release.post_comment <<-BODY
+      {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+        Запущено формирование -pre веток(!)
+        Ожидайте сообщение о завершении
+      {panel}
+      BODY
 
       begin
         fix_version = release.fields['fixVersions']
@@ -81,12 +81,11 @@ module Scenarios
               badissues[:absent] = [] unless badissues.key?(:absent)
               badissues[:absent].push(issue.key)
               LOGGER.fatal body
-              #issue.post_comment body
+              issue.post_comment body
               merge_fail = true
             else
               LOGGER.info "#{issue.key}: ticket without PR and branches"
               has_merges = true
-              next
             end
           else
             valid_pr << false
@@ -97,7 +96,7 @@ module Scenarios
                 # Check PR status: open, merged
                 if pullrequest['status'] != 'MERGED'
                   LOGGER.fatal "#{issue.key}: PR with task number not merged in develop"
-                  #issue.post_comment 'Not merged PR found. Please merge it into develop and update -pre branch before go next step'
+                  issue.post_comment 'Not merged PR found. Please merge it into develop and update -pre branch before go next step'
                   merge_fail = true
                 else
                   LOGGER.info "#{issue.key}: PR already merged in develop"
@@ -114,7 +113,7 @@ module Scenarios
               badissues[:absent] = [] unless badissues.key?(:absent)
               badissues[:absent].push(issue.key)
               LOGGER.fatal body
-              #issue.post_comment body
+              issue.post_comment body
               merge_fail = true
             end
           end
@@ -123,7 +122,7 @@ module Scenarios
           if !merge_fail && has_merges
             issue.transition 'Merge to release'
           elsif merge_fail
-            #issue.transition 'Merge Fail'
+            issue.transition 'Merge Fail'
             LOGGER.fatal "#{issue.key} was not merged!"
           end
 
@@ -162,11 +161,11 @@ module Scenarios
         LOGGER.error "Не удалось собрать -pre ветки, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
         exit(1)
       end
-      # release.post_comment <<-BODY
-      # {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#10B924|bgColor=#F1F3F1}
-      #   Сборка -pre веток завершена (/)
-      # {panel}
-      # BODY
+      release.post_comment <<-BODY
+      {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#10B924|bgColor=#F1F3F1}
+        Сборка -pre веток завершена (/)
+      {panel}
+      BODY
     end
 
     def prepare_repos(issue)
