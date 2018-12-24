@@ -26,9 +26,10 @@ require 'common/util.rb'
 Dir[__dir__ + '/scenarios/*.rb'].each { |file| require file }
 
 # kill Timeout module for debug bug in Rubymine
-if $LOADED_FEATURES.any? {|f| f.include? 'debase'}
+if $LOADED_FEATURES.any? { |f| f.include? 'debase' }
+  # Add timeout for debug mode
   module Timeout
-    def timeout(sec, klass = nil)
+    def timeout(sec, _klass = nil)
       yield(sec)
     end
 

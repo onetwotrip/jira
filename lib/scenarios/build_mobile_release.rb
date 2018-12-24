@@ -1,10 +1,8 @@
 module Scenarios
-
   # Build mobile release
   # From develop
   # PR to develop and master
   class BuildMobileRelease
-
     attr_accessor :opts, :repo_prepare
 
     def initialize(opts)
@@ -12,7 +10,7 @@ module Scenarios
       @repo_prepare = false
     end
 
-    def run # rubocop:disable Metrics/PerceivedComplexity
+    def run # rubocop:disable Metrics/PerceivedComplexity, Metrics/MethodLength
       LOGGER.info("Build mobile release from ticket #{opts[:release]}")
 
       # Start
@@ -109,7 +107,7 @@ module Scenarios
             end
             # if ticket doesn't have valid pr (valid means contain issue number)
             unless valid_pr.include?(true)
-              body               = "#{issue.key}: There is no pullrequest contains issue number. I'm afraid of changes from ticket are not at develop"
+              body               = "#{issue.key}: There is no pullrequest contains issue number. I'm afraid of changes from ticket are not at develop" # rubocop:disable Metrics/LineLength
               badissues[:absent] = [] unless badissues.key?(:absent)
               badissues[:absent].push(issue.key)
               LOGGER.fatal body
@@ -155,7 +153,6 @@ module Scenarios
           LOGGER.fatal "#{status}: #{keys.size}"
           keys.uniq.each { |i| LOGGER.fatal i }
         end
-
       rescue StandardError => e
         LOGGER.error "Не удалось собрать -pre ветки, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
         exit(1)
