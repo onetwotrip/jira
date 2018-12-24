@@ -110,7 +110,7 @@ module JIRA
     private
 
     def duplicates?
-      urls = @prs.map { |i| i.pr['source']['url'] }
+      urls = @prs.map { |i| [i.pr['destination']['branch'], i.pr['source']['url']] }
       raise "PullRequests has duplication: #{urls.join ','}" if urls.uniq.length != urls.length
     end
   end

@@ -23,6 +23,13 @@ module Scenarios
           pr.repo.push
         rescue Git::GitExecuteError => e
           puts e.message.red
+          issue.post_comment <<-BODY
+              {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
+                  Не удалось замержить PR: #{pr.pr['url']}
+                  Подробности: https://jenkins.twiket.com/view/RELEASE/job/postaction_release/
+              {panel}
+
+          BODY
           next
         end
       end
