@@ -146,7 +146,7 @@ module Scenarios
             local_repo = repo[:repo_base]
             local_repo.push('origin', pre_release_branch)
             tag = "release/#{@fix_version.first['name']}"
-            local_repo.add_tag(tag, pre_release_branch, messsage: 'Add TestTag', f: true)
+            local_repo.add_tag(tag, pre_release_branch, messsage: 'Add tag to -pre branch', f: true)
             local_repo.push('origin', "refs/tags/#{tag}", f: true)
           end
         end
