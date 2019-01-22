@@ -25,9 +25,9 @@ module Scenarios
       BODY
 
       begin
-        fix_version = release.fields['fixVersions']
+        @fix_version = release.fields['fixVersions']
         # Check fix Version exist
-        if fix_version.empty?
+        if @fix_version.empty?
           release.post_comment <<-BODY
             {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F04D2A|bgColor=#F1F3F1}
               У релизного тикета не выставлен 'Fix Version/s'(!)
@@ -145,6 +145,9 @@ module Scenarios
             LOGGER.info 'Push to remote'
             local_repo = repo[:repo_base]
             local_repo.push('origin', pre_release_branch)
+            tag = "release/#{@fix_version.first['name']}"
+            local_repo.add_tag(tag, pre_release_branch, messsage: 'Add TestTag', f: true)
+            local_repo.push('origin', "refs/tags/#{tag}", f: true)
           end
         end
 
