@@ -135,6 +135,7 @@ module Scenarios
         repo_path = repos[@repo_obj[:name]][:repo_base]
 
         repo_path.checkout('master')
+        repo_path.pull
         prepare_branch(repo_path, 'develop', pre_release_branch, opts[:clean])
 
         # Create -pre branch and with PR to develop and master
