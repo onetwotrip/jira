@@ -19,6 +19,15 @@ module Scenarios
       BODY
 
       begin
+
+        fix_version = issue.fields['fixVersions'].first['name']
+        if fix_version.empty?
+          issue.post_comment <<-BODY
+      {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+        Не возможно начать формировать релизные ветки. У тикета нет fixVersion.
+      {panel}
+          BODY
+        end
         release_issues = []
         # prepare release candidate branches
         issue.related['branches'].each do |branch|
@@ -44,9 +53,10 @@ module Scenarios
         end
 
         release_issues.each do |branch| # rubocop:disable Metrics/BlockLength
-          old_branch = branch['name']
-          new_branch = "release/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}"
-          repo_path  = git_repo(branch['repository']['url'])
+          old_branch  = branch['name']
+          new_branch  = "release/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}"
+          repo_path   = git_repo(branch['repository']['url'])
+          hash_commit = branch['lastCommit']['id']
 
           # copy -pre to -release
           LOGGER.info "Working with #{repo_path.remote.url.repo}"
@@ -60,34 +70,35 @@ module Scenarios
           with repo_path do
             checkout(old_branch)
             pull
+            merge 'master'
             branch(new_branch).delete if is_branch?(new_branch)
             branch(new_branch).create
             checkout cur_branch
           end
 
-          LOGGER.info "Pushing #{new_branch} and deleting #{old_branch} branch"
-          with repo_path do
-            push(repo_path.remote('origin'), new_branch) # push -release to origin
-            branch(old_branch).delete_both if old_branch != 'master' # delete -pre from local/remote
-            LOGGER.info "Creating PR from #{new_branch} to 'master'"
-            create_pullrequest(
-              SimpleConfig.bitbucket[:username],
-              SimpleConfig.bitbucket[:password],
-              new_branch,
-              'master'
-            )
-            LOGGER.info "Creating PR from #{new_branch} to 'develop'"
-            create_pullrequest(
-              SimpleConfig.bitbucket[:username],
-              SimpleConfig.bitbucket[:password],
-              new_branch,
-              'develop'
-            )
-          end
+          # LOGGER.info "Pushing #{new_branch} and deleting #{old_branch} branch"
+          # with repo_path do
+          #   push(repo_path.remote('origin'), new_branch) # push -release to origin
+          #   branch(old_branch).delete_both if old_branch != 'master' # delete -pre from local/remote
+          #   LOGGER.info "Creating PR from #{new_branch} to 'master'"
+          #   create_pullrequest(
+          #     SimpleConfig.bitbucket[:username],
+          #     SimpleConfig.bitbucket[:password],
+          #     new_branch,
+          #     'master'
+          #   )
+          #   LOGGER.info "Creating PR from #{new_branch} to 'develop'"
+          #   create_pullrequest(
+          #     SimpleConfig.bitbucket[:username],
+          #     SimpleConfig.bitbucket[:password],
+          #     new_branch,
+          #     'develop'
+          #   )
+          # end
         end
 
         LOGGER.info 'Get all labels again'
-        issue = jira.Issue.find(SimpleConfig.jira.issue)
+        issue          = jira.Issue.find(SimpleConfig.jira.issue)
         release_labels = []
         issue.api_pullrequests.each do |br|
           LOGGER.info("Repo: #{br.repo_slug}")
