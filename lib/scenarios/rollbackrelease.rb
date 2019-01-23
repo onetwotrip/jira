@@ -23,13 +23,14 @@ module Scenarios
             LOGGER.warn "Rollback issue '#{issue.key}': transition '#{trans}' not found"
           end
         end
-      rescue StandardError
+      rescue StandardError => e
         release.post_comment <<-BODY
         {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
          Не удалось откатить релиз (x)
          Подробности в логе таски https://jenkins.twiket.com/view/RELEASE/job/rollback_release/
         {panel}
         BODY
+        LOGGER.error "Не удалось откатить релиз, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
         exit(1)
       end
       # Write message in release ticket
