@@ -39,6 +39,8 @@ module Ott
   # :nocov:
   module CheckBranchesBuildStatuses
     def self.run(issue)
+      counter = 1
+      sleep_time = 60
       issue.branches.each do |branch|
         branch_path = "#{branch.repo_owner}/#{branch.repo_slug}/#{branch.name}"
         LOGGER.info "Check Branch: #{branch_path}"
@@ -47,7 +49,20 @@ module Ott
         else
           while branch_states(branch).select { |s| s == 'INPROGRESS' }.any?
             LOGGER.info "Branch #{branch_path} state INPROGRESS. Waiting..."
-            sleep 60
+            if counter == 5
+              issue.post_comment <<-BODY
+      {panel:title=Build notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+        Не удалось дождаться окончания сборки билда
+      {panel}
+              BODY
+              LOGGER.error "Build for #{branch_path} has no successful status"
+              LOGGER.error "Move to 'WAIT FOR REPLY' status"
+              issue.transition 'Needs reply'
+              exit(1)
+            end
+            sleep sleep_time
+            counter += 1
+            sleep_time *= 2
           end
           LOGGER.error "Branch #{branch_path} has no successful status" if branch_states(branch).delete_if { |s| s == 'SUCCESSFUL' }.any?
         end
