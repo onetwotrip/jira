@@ -60,6 +60,11 @@ module Scenarios
 
       issues = params.filter && find_by_filter(client.Issue, params.filter)
 
+      if issues.empty?
+        LOGGER.info "Filter #{params.filter} doesn't contains tickets"
+        exit(1)
+      end
+
       if params.tasks && !params.tasks.empty?
         issues_from_string = find_by_tasks(client.Issue, params.tasks)
         issues = issues_from_string unless issues_from_string.empty?
