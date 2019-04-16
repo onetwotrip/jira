@@ -16,7 +16,7 @@ opts = Slop.parse do |o|
   o.string '-gu', '--gitusername', 'username', default: 'jenkins_ott'
   o.string '-gp', '--gitpassword', 'password', default: SimpleConfig.jira.password
 
-  o.bool '--push', 'push to remote', default: false
+  o.bool '--push', 'push to remote', default: true
   o.bool '--clean', 'clean local and remote branches', default: false
   o.bool '--dryrun', 'do not post comments to Jira', default: false
   o.bool '--ignorelinks', 'honor linked issues', default: false
@@ -27,4 +27,4 @@ opts = Slop.parse do |o|
   end
 end
 
-Scenarios::BuildRelease.new(opts).run
+Scenarios::BuildInfraRelease.new(opts).run
