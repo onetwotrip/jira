@@ -20,11 +20,11 @@ module Scenarios
       LOGGER.info "Check build status #{@opts[:release]}"
       Ott::CheckBranchesBuildStatuses.run(issue)
       LOGGER.info "Freeze release #{@opts[:release]}"
-      Scenarios::FreezeRelease.new.run
+     # Scenarios::FreezeRelease.new.run
       LOGGER.info 'Wait while build will start'
-      sleep 45
+    #  sleep 45
       LOGGER.info "Review release #{@opts[:release]}"
-      Scenarios::ReviewRelease.new.run
+    #  Scenarios::ReviewRelease.new.run
     end
   end
 end
