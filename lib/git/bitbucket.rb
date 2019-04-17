@@ -18,7 +18,9 @@ module Git
         url = "https://#{username}:#{password}@api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests"
         RestClient.post url, request.to_json, content_type: :json
       rescue StandardError => e
+        puts "Pullrequest didn't create".red
         puts "Error: #{e}; URL: #{url}; PARAMS: #{request}".red
+        exit(1)
       end
     end
 
@@ -26,7 +28,9 @@ module Git
       url = "https://#{username}:#{password}@api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests/#{pull_request_id}/decline" # rubocop:disable Metrics/LineLength
       RestClient.post url, content_type: :json
     rescue StandardError => e
+      puts "Pullrequest didn't decline".red
       puts "Error: #{e}; URL: #{url}".red
+      exit(1)
     end
   end
 end
