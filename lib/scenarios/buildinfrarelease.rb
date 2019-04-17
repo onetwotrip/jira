@@ -17,13 +17,13 @@ module Scenarios
       Scenarios::BuildRelease.new(@opts).run(true)
       LOGGER.info 'Wait while build will start'
       sleep 45
-      LOGGER.info "Check build status #{@opts[:issue]}"
+      LOGGER.info "Check build status #{@opts[:release]}"
       Ott::CheckBranchesBuildStatuses.run(issue)
-      LOGGER.info "Freeze release #{@opts[:issue]}"
+      LOGGER.info "Freeze release #{@opts[:release]}"
       Scenarios::FreezeRelease.new.run
       LOGGER.info 'Wait while build will start'
       sleep 45
-      LOGGER.info "Review release #{@opts[:issue]}"
+      LOGGER.info "Review release #{@opts[:release]}"
       Scenarios::ReviewRelease.new.run
     end
   end
