@@ -10,11 +10,11 @@ module Scenarios
 
     def run(is_only_one_branch = false) # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/AbcSize
 
-      LOGGER.info "Build release #{opts[:release]}"
+      LOGGER.info "Build release #{opts[:issue]}"
 
       options = { auth_type: :basic }.merge(opts.to_hash)
       client  = JIRA::Client.new(options)
-      release = client.Issue.find(opts[:release])
+      release = client.Issue.find(opts[:issue])
 
       release.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
@@ -26,7 +26,7 @@ module Scenarios
       begin
         if release.linked_issues('deployes').empty? || opts[:ignorelinks]
           LOGGER.warn "I can't found ticket linked with type 'deployes'"
-          release.search_deployes.each { |issue| issue.link(opts[:release]) }
+          release.search_deployes.each { |issue| issue.link(opts[:issue]) }
         end
 
         # Unlink blocked issues:
@@ -63,8 +63,8 @@ module Scenarios
         badissues = {}
         repos     = {}
 
-        pre_release_branch = "#{opts[:release]}-#{opts[:postfix]}"
-        release_branch     = "#{opts[:release]}-release"
+        pre_release_branch = "#{opts[:issue]}-#{opts[:postfix]}"
+        release_branch     = "#{opts[:issue]}-release"
         source             = opts[:source]
         delete_branches    = []
         delete_branches << pre_release_branch
@@ -130,14 +130,14 @@ module Scenarios
                   end
                   begin
                     merge_message = "CI: merge branch #{branch['name']} to release "\
-                                  " #{opts[:release]}.  (pull request #{pullrequest['id']}) "
+                                  " #{opts[:issue]}.  (pull request #{pullrequest['id']}) "
                     # Merge origin/branch (ex FE-429-Auth-Popup-fix) to pre_release_branch (ex OTT-8703-pre)
                     repo_path.merge("origin/#{branch['name']}", merge_message)
                     LOGGER.info "#{branch['name']} merged"
                     has_merges = true
                   rescue Git::GitExecuteError => e
                     body = <<-BODY
-                  CI: Error while merging to release #{opts[:release]}
+                  CI: Error while merging to release #{opts[:issue]}
                   [~#{issue.assignee.key}]
                   Repo: #{repo_name}
                   Author: #{pullrequest['author']['name']}
