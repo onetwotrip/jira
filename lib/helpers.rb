@@ -70,7 +70,11 @@ module Ott
     end
 
     def self.branch_states(branch)
-      branch.commits.take(1).first.build_statuses.collect.map(&:state)
+      result = []
+      branch.commits.take(1).first.build_statuses.collect.each do |s|
+        result << s.state if s.name.include?(branch.name)
+      end
+      result
     end
   end
   # This module represents StrictControl
