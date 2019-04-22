@@ -89,7 +89,7 @@ module Scenarios
         if release_labels.empty?
           LOGGER.error 'Made empty labels array! I will skip set up new labels step'
         else
-          LOGGER.info "Add labels: #{release_labels} to release #{issue.key}"
+          LOGGER.info "Add labels: #{release_labels.uniq} to release #{issue.key}"
           issue.save(fields: { labels: release_labels })
           issue.fetch
         end
