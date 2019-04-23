@@ -183,6 +183,7 @@ module Scenarios
           if opts[:push]
             local_repo = repo[:repo_base]
             local_repo.push('origin', pre_release_branch)
+            local_repo.checkout('master')
           end
         end
 
