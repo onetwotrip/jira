@@ -17,8 +17,8 @@ module Scenarios
     end
 
     def run
-      jira  = JIRA::Client.new SimpleConfig.jira.to_h
-      issue = jira.Issue.find(SimpleConfig.jira.issue)
+      # jira  = JIRA::Client.new SimpleConfig.jira.to_h
+      # issue = jira.Issue.find(SimpleConfig.jira.issue)
 
       # Build release for INFRA team specific
       begin
@@ -29,7 +29,7 @@ module Scenarios
         # Ott::CheckBranchesBuildStatuses.run(issue)
 
         LOGGER.info "Freeze release #{@opts[:release]}"
-       # Scenarios::FreezeRelease.new.run
+        Scenarios::FreezeRelease.new.run
         LOGGER.info 'Wait while build will start'
        # sleep 45
         LOGGER.info "Review release #{@opts[:release]}"
