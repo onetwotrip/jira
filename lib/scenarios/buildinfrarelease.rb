@@ -17,24 +17,22 @@ module Scenarios
     end
 
     def run
-      # jira  = JIRA::Client.new SimpleConfig.jira.to_h
-      # issue = jira.Issue.find(SimpleConfig.jira.issue)
+      jira  = JIRA::Client.new SimpleConfig.jira.to_h
+      issue = jira.Issue.find(SimpleConfig.jira.issue)
 
       # Build release for INFRA team specific
       begin
         Scenarios::BuildRelease.new(@opts).run(true)
         LOGGER.info 'Wait while build will start'
-        # sleep 45
+        sleep 45
         LOGGER.info "Check build status #{@opts[:release]}"
-        # Ott::CheckBranchesBuildStatuses.run(issue)
-
+        Ott::CheckBranchesBuildStatuses.run(issue)
         LOGGER.info "Freeze release #{@opts[:release]}"
         Scenarios::FreezeRelease.new.run
         LOGGER.info 'Wait while build will start'
-       # sleep 45
+        sleep 45
         LOGGER.info "Review release #{@opts[:release]}"
-       # Scenarios::ReviewRelease.new.run
-
+        Scenarios::ReviewRelease.new.run
       rescue StandardError => _
         issue.post_comment @error_comment
         issue.transition 'Build Failed'
