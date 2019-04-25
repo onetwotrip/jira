@@ -50,12 +50,11 @@ module Scenarios
           branches.each do |branch|
             branches_list << branch['repository']['name']
           end
-          if (branches_list.uniq - ['avia_api_rspec']).size > 1
-            comment = "Remove issue #{issuelink.outwardIssue.key} from release. Reason: issue has more than 1 product branch"
-            release.post_comment comment
-            issuelink.delete
-            LOGGER.fatal comment
-          end
+          next unless (branches_list.uniq - ['avia_api_rspec']).size > 1
+          comment = "Remove issue #{issuelink.outwardIssue.key} from release. Reason: issue has more than 1 product branch"
+          release.post_comment comment
+          issuelink.delete
+          LOGGER.fatal comment
         end
 
         badissues = {}
@@ -178,11 +177,10 @@ module Scenarios
         LOGGER.info 'Repos:' unless repos.empty?
         repos.each do |name, repo|
           LOGGER.info "Push '#{pre_release_branch}' to '#{name}' repo"
-          if opts[:push]
-            local_repo = repo[:repo_base]
-            local_repo.push('origin', pre_release_branch)
-            local_repo.checkout('master')
-          end
+          next unless opts[:push]
+          local_repo = repo[:repo_base]
+          local_repo.push('origin', pre_release_branch)
+          local_repo.checkout('master')
         end
 
         LOGGER.fatal 'Not Merged:' unless badissues.empty?
