@@ -8,8 +8,7 @@ module Scenarios
       @opts = opts
     end
 
-    def run(is_only_one_branch = false) # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/AbcSize
-
+    def run(is_only_one_branch = false) # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/AbcSize, Metrics/LineLength
       LOGGER.info "Build release #{opts[:release]}"
 
       options = { auth_type: :basic }.merge(opts.to_hash)
@@ -45,18 +44,17 @@ module Scenarios
             LOGGER.fatal comment
           end
           # Unlink issue with more than one product branches. Test is skipped
-          if is_only_one_branch
-            branches      = issuelink.outwardIssue.related['branches']
-            branches_list = []
-            branches.each do |branch|
-              branches_list << branch['repository']['name']
-            end
-            if (branches_list.uniq - ['avia_api_rspec']).size > 1
-              comment = "Remove issue #{issuelink.outwardIssue.key} from release. Reason: issue has more than 1 product branch"
-              release.post_comment comment
-              issuelink.delete
-              LOGGER.fatal comment
-            end
+          next unless is_only_one_branch
+          branches      = issuelink.outwardIssue.related['branches']
+          branches_list = []
+          branches.each do |branch|
+            branches_list << branch['repository']['name']
+          end
+          if (branches_list.uniq - ['avia_api_rspec']).size > 1
+            comment = "Remove issue #{issuelink.outwardIssue.key} from release. Reason: issue has more than 1 product branch"
+            release.post_comment comment
+            issuelink.delete
+            LOGGER.fatal comment
           end
         end
 
@@ -202,6 +200,7 @@ module Scenarios
         LOGGER.error "Не удалось собрать -pre ветки, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
         exit(1)
       end
+
       release.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
         Сборка -pre веток завершена (/)
