@@ -17,26 +17,40 @@ module Scenarios
     end
 
     def run
-      jira  = JIRA::Client.new SimpleConfig.jira.to_h
-      issue = jira.Issue.find(SimpleConfig.jira.issue)
-
       # Build release for INFRA team specific
-      begin
+      step_id = (ENV['STEP_ID'] || 0).to_i
+      flag    = false
+      jira    = JIRA::Client.new SimpleConfig.jira.to_h
+      issue   = jira.Issue.find(SimpleConfig.jira.issue)
+
+      if flag || step_id.zero?
         Scenarios::BuildRelease.new(@opts).run(true)
         LOGGER.info 'Wait while build will start'
         sleep 45
+        flag = true
+      end
+
+      if flag || (step_id == 1)
         LOGGER.info "Check build status #{@opts[:release]}"
         Ott::CheckBranchesBuildStatuses.run(issue)
+        flag = true
+      end
+
+      if flag || (step_id == 2)
         LOGGER.info "Freeze release #{@opts[:release]}"
         Scenarios::FreezeRelease.new.run
         LOGGER.info 'Wait while build will start'
         sleep 45
+        flag = true
+      end
+
+      if flag || (step_id == 3)
         LOGGER.info "Review release #{@opts[:release]}"
         Scenarios::ReviewRelease.new.run
-      rescue StandardError => _
-        issue.post_comment @error_comment
-        issue.transition 'Build Failed'
       end
+    rescue StandardError => _
+      issue.post_comment @error_comment
+      issue.transition 'Build Failed'
     end
   end
 end
