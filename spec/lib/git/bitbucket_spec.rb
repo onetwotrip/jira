@@ -5,7 +5,6 @@ describe Git::Base do
     remote = double(:remote).as_null_object
     allow(Git::Remote).to receive(:new) { remote }
     allow_any_instance_of(Git::Base).to receive(:current_branch) { 'branch' }
-    expect(described_class.new.create_pullrequest).to be_nil
 
     response = double(:resp_double)
     allow(response).to receive(:code) { 200 }
