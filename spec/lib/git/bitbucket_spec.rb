@@ -5,7 +5,7 @@ describe Git::Base do # rubocop:disable Metrics/BlockLength
     remote = double(:remote).as_null_object
     allow(Git::Remote).to receive(:new) { remote }
     allow_any_instance_of(Git::Base).to receive(:current_branch) { 'branch' }
-    expect(described_class.new.decline_pullrequest).to raise_error(StandardError)
+    expect(described_class.new.create_pullrequest).to raise_error(StandardError)
   end
   it 'create pullrequests - success' do
     remote = double(:remote).as_null_object
