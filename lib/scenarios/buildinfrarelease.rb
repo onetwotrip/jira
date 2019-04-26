@@ -46,12 +46,13 @@ module Scenarios
 
       if flag || (step_id == 3)
         LOGGER.info "Review release #{@opts[:release]}"
-        Scenarios::ReviewRelease.new.run
+        Scenarios::ReviewRelease.new.run(true)
       end
 
       LOGGER.info "Move ticket #{@opts[:release]} to Testing status"
       issue.transition 'Test Ready'
-    rescue StandardError => _
+    rescue StandardError, SystemExit => _
+      LOGGER.error "Found some errors while release #{@opts[:release]} was building"
       issue.post_comment @error_comment
       issue.transition 'Build Failed'
     end

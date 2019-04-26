@@ -43,7 +43,7 @@ module Ott
       sleep_time = 60
       issue.branches.each do |branch|
         branch_path = "#{branch.repo_owner}/#{branch.repo_slug}/#{branch.name}"
-        LOGGER.info "Check Branch: #{branch_path}"
+        LOGGER.info "Check Build Branch Status: #{branch_path}"
         if branch_states(branch).empty?
           LOGGER.warn "Branch #{branch_path} doesn't have builds"
         else
