@@ -17,4 +17,11 @@ RSpec.configure do |config|
   config.mock_with :rspec do |mocks|
     mocks.verify_partial_doubles = true
   end
+  config.around(:example) do |ex|
+    begin
+      ex.run
+    rescue SystemExit => e
+      puts "Got SystemExit: #{e.inspect}. Ignoring"
+    end
+  end
 end
