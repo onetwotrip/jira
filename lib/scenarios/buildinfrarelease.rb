@@ -26,7 +26,7 @@ module Scenarios
       if flag || step_id.zero?
         Scenarios::BuildRelease.new(@opts).run(true)
         LOGGER.info 'Wait while build will start'
-        sleep 30
+        sleep 20
         flag = true
       end
 
@@ -40,7 +40,7 @@ module Scenarios
         LOGGER.info "Freeze release #{@opts[:release]}"
         Scenarios::FreezeRelease.new.run
         LOGGER.info 'Wait while build will start'
-        sleep 30
+        sleep 20
         flag = true
       end
 
