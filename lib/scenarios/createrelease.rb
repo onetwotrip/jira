@@ -79,7 +79,7 @@ module Scenarios
       end
 
       LOGGER.info "Start to link issues to release #{release.key}"
-      ENV['ISSUE'] = release.key
+
       release_labels = []
       issues.each do |issue|
         issue.link(release.key)
