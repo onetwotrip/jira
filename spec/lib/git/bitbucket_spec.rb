@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Git::Base do
+describe Git::Base do # rubocop:disable Metrics/BlockLength
   it 'create pullrequests - fail' do
     remote = double(:remote).as_null_object
     allow(Git::Remote).to receive(:new) { remote }
@@ -18,7 +18,6 @@ describe Git::Base do
     expect(described_class.new.create_pullrequest.code).to eq 200
   end
 
-  # Test disabled cause by decline_pullrequest execute exit(1) call when fail
   it 'decline pullrequests - fail' do
     remote = double(:remote).as_null_object
     allow(Git::Remote).to receive(:new) { remote }
