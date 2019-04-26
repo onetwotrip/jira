@@ -7,7 +7,7 @@ module Scenarios
       instance
     end
 
-    def run
+    def run # rubocop:disable Metrics/MethodLength
       LOGGER.info "Starting freeze_release for #{SimpleConfig.jira.issue}"
       jira  = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
