@@ -48,6 +48,9 @@ module Scenarios
         LOGGER.info "Review release #{@opts[:release]}"
         Scenarios::ReviewRelease.new.run
       end
+
+      LOGGER.info "Move ticket #{@opts[:release]} to Testing status"
+      issue.transition 'Test Ready'
     rescue StandardError => _
       issue.post_comment @error_comment
       issue.transition 'Build Failed'
