@@ -81,12 +81,12 @@ module Scenarios
       LOGGER.info "Start to link issues to release #{release.key}"
 
       release_labels = []
-      # issues.each do |issue|
-      #   issue.link(release.key)
-      #   issue.related['branches'].each do |branch|
-      #     release_labels << branch['repository']['name'].to_s
-      #   end
-      # end
+      issues.each do |issue|
+        issue.link(release.key)
+        issue.related['branches'].each do |branch|
+          release_labels << branch['repository']['name'].to_s
+        end
+      end
 
       release_labels.uniq!
 
