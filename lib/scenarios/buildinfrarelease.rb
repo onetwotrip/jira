@@ -19,9 +19,12 @@ module Scenarios
     def run
       # Build release for INFRA team specific
       step_id = (ENV['STEP_ID'] || 0).to_i
+      is_cd_build = ENV['CD_BUILD'] || false
       flag    = false
       jira    = JIRA::Client.new SimpleConfig.jira.to_h
       issue   = jira.Issue.find(SimpleConfig.jira.issue)
+
+      issue.transition 'Build Release' if is_cd_build
 
       if flag || step_id.zero?
         Scenarios::BuildRelease.new(@opts).run(true)
