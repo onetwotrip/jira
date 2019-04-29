@@ -50,7 +50,7 @@ module Scenarios
           branches.each do |branch|
             branches_list << branch.repo_slug
           end
-          next unless (branches_list.uniq - ['avia_api_rspec']).size > 1
+          next unless (branches_list.uniq - ['avia_api_rspec', 'back-components']).size > 1
           comment = "Remove issue #{issuelink.outwardIssue.key} from release. Reason: issue has more than 1 product branch"
           release.post_comment comment
           issuelink.delete

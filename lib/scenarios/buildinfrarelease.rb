@@ -24,7 +24,7 @@ module Scenarios
       jira    = JIRA::Client.new SimpleConfig.jira.to_h
       issue   = jira.Issue.find(SimpleConfig.jira.issue)
 
-      issue.transition 'Build Release' if is_cd_build
+      issue.transition 'CI Build' if is_cd_build
 
       if flag || step_id.zero?
         Scenarios::BuildRelease.new(@opts).run(true)
