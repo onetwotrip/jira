@@ -94,7 +94,7 @@ describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
   end
 
   it '.related returns related data' do
-    expected = { 'detail' => [{ 'pullRequests' => [] }] }
+    expected = { 'detail' => [{ 'pullRequests' => [], 'branches' => [] }] }
     issue = JIRA::Resource::Issue.new(@jira)
     allow(RestClient).to receive(:get).and_return(expected.to_json)
     expect(issue.related).to eq(expected['detail'].first)
