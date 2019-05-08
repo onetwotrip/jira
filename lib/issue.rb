@@ -108,6 +108,24 @@ module JIRA
         @related ||= JSON.parse(
           RestClient.get(create_endpoint('rest/dev-status/1.0/issue/detail').to_s, params: params)
         )['detail'].first
+
+        unless @related['branches'].empty?
+          @related['branches'].each do |branch|
+            url = "https://bitbucket.org/OneTwoTrip/#{branch['repository']['name']}"
+            branch['url'] = "#{url}/branch/#{branch['name']}"
+            branch['createPullRequestUrl'] = "#{url}/pull-requests/new?source=#{branch['name']}"
+            branch['repository']['url'] = url
+          end
+        end
+
+        unless @related['pullRequests'].empty?
+          @related['pullRequests'].each do |pr|
+            repos_name = pr['url'][pr['url'].index('OneTwoTrip') + 11..pr['url'].index('/pull-requests') - 1]
+            pr['source']['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}/branch/#{pr['source']['branch']}"
+            pr['destination']['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}/branch/#{pr['destination']['branch']}"
+          end
+        end
+        @related
       end
 
       def create_endpoint(path)
