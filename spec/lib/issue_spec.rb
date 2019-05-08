@@ -110,7 +110,7 @@ describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
   end
 
   it '.related returns related data with not empty_branches' do
-    expected = { 'detail' => [{ 'pullRequests' => [], 'branches' => ['repository' => { 'name' => 'test'}] }] }
+    expected = { 'detail' => [{ 'pullRequests' => [], 'branches' => ['repository' => { 'name' => 'test' }] }] }
     issue = JIRA::Resource::Issue.new(@jira)
     allow(RestClient).to receive(:get).and_return(expected.to_json)
     expect(issue.related['branches'].first['url']).to eq('https://bitbucket.org/OneTwoTrip/test/branch/')
