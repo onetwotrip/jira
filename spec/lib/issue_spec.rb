@@ -100,6 +100,22 @@ describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
     expect(issue.related).to eq(expected['detail'].first)
   end
 
+  it '.related returns related data with not empty_pr' do
+    expected = { 'detail' => [{ 'pullRequests' => ['url' => 'https://bitbucket.org/OneTwoTrip/test/pull-requests',
+                                                   'source' => { 'url' => 'test' },
+                                                   'destination' => { 'url' => 'dasdasd' }], 'branches' => [] }] }
+    issue = JIRA::Resource::Issue.new(@jira)
+    allow(RestClient).to receive(:get).and_return(expected.to_json)
+    expect(issue.related['pullRequests'].first['source']['url']).to eq('https://bitbucket.org/OneTwoTrip/test/branch/')
+  end
+
+  it '.related returns related data with not empty_branches' do
+    expected = { 'detail' => [{ 'pullRequests' => [], 'branches' => ['repository' => { 'name' => 'test'}] }] }
+    issue = JIRA::Resource::Issue.new(@jira)
+    allow(RestClient).to receive(:get).and_return(expected.to_json)
+    expect(issue.related['branches'].first['url']).to eq('https://bitbucket.org/OneTwoTrip/test/branch/')
+  end
+
   it '.post_comment calls comment.save' do
     expect_any_instance_of(JIRA::Base).to receive(:save).and_return(true)
     transition = double(JIRA::Resource::Transition, name: 'name', id: 1234)
