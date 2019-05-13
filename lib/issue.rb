@@ -109,8 +109,12 @@ module JIRA
           RestClient.get(create_endpoint('rest/dev-status/1.0/issue/detail').to_s, params: params)
         )['detail'].first
 
+        repos_id_list = {}
         unless @related['branches'].empty?
           @related['branches'].each do |branch|
+            url = branch['repository']['url']
+            repo_id = url[url.rindex('{') + 1..url.size - 2].to_sym
+            repos_id_list[repo_id] = branch['repository']['name']
             url = "https://bitbucket.org/OneTwoTrip/#{branch['repository']['name']}"
             branch['url'] = "#{url}/branch/#{branch['name']}"
             branch['createPullRequestUrl'] = "#{url}/pull-requests/new?source=#{branch['name']}"
@@ -120,10 +124,12 @@ module JIRA
 
         unless @related['pullRequests'].empty?
           @related['pullRequests'].each do |pr|
-            repos_name = pr['name'][pr['name'].index('OneTwoTrip/')..pr['name'].size]
-            pr['url'] = "https://bitbucket.org/#{repos_name}#{pr['url'][pr['url'].index('/pull-requests')..pr['url'].size]}"
-            pr['source']['url'] = "https://bitbucket.org/#{repos_name}/branch/#{pr['source']['branch']}"
-            pr['destination']['url'] = "https://bitbucket.org/#{repos_name}/branch/#{pr['destination']['branch']}"
+            url = pr['source']['url']
+            repo_id = url[url.rindex('{') + 1..url.rindex('}') - 1].to_sym
+            repos_name = repos_id_list[repo_id]
+            pr['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}#{pr['url'][pr['url'].index('/pull-requests')..pr['url'].size]}"
+            pr['source']['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}/branch/#{pr['source']['branch']}"
+            pr['destination']['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}/branch/#{pr['destination']['branch']}"
           end
         end
         @related
