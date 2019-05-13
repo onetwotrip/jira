@@ -102,6 +102,7 @@ describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
 
   it '.related returns related data with not empty_pr' do
     expected = { 'detail' => [{ 'pullRequests' => ['url' => 'https://bitbucket.org/OneTwoTrip/test/pull-requests',
+                                                   'name' => 'OneTwoTrip/test',
                                                    'source' => { 'url' => 'test' },
                                                    'destination' => { 'url' => 'dasdasd' }], 'branches' => [] }] }
     issue = JIRA::Resource::Issue.new(@jira)
