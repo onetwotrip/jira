@@ -120,9 +120,10 @@ module JIRA
 
         unless @related['pullRequests'].empty?
           @related['pullRequests'].each do |pr|
-            repos_name = pr['url'][pr['url'].index('OneTwoTrip') + 11..pr['url'].index('/pull-requests') - 1]
-            pr['source']['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}/branch/#{pr['source']['branch']}"
-            pr['destination']['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}/branch/#{pr['destination']['branch']}"
+            repos_name = pr['name'][pr['name'].index('OneTwoTrip/')..pr['name'].size]
+            pr['url'] = "https://bitbucket.org/#{repos_name}#{pr['url'][pr['url'].index('/pull-requests')..pr['url'].size]}"
+            pr['source']['url'] = "https://bitbucket.org/#{repos_name}/branch/#{pr['source']['branch']}"
+            pr['destination']['url'] = "https://bitbucket.org/#{repos_name}/branch/#{pr['destination']['branch']}"
           end
         end
         @related
