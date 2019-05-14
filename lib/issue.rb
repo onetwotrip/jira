@@ -113,6 +113,7 @@ module JIRA
         unless @related['branches'].empty?
           @related['branches'].each do |branch|
             url = branch['repository']['url']
+            next unless url.include?('{')
             repo_id = url[url.rindex('{') + 1..url.size - 2].to_sym
             repos_id_list[repo_id] = branch['repository']['name']
             url = "https://bitbucket.org/OneTwoTrip/#{branch['repository']['name']}"
@@ -125,6 +126,7 @@ module JIRA
         unless @related['pullRequests'].empty?
           @related['pullRequests'].each do |pr|
             url = pr['source']['url']
+            next unless url.include?('{')
             repo_id = url[url.rindex('{') + 1..url.rindex('}') - 1].to_sym
             repos_name = repos_id_list[repo_id]
             pr['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}#{pr['url'][pr['url'].index('/pull-requests')..pr['url'].size]}"
