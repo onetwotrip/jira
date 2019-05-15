@@ -3,8 +3,8 @@ require 'spec_helper'
 describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
   let(:model) do
     client_options = {
-      username: 'User',
-      password: 'Pass',
+      useremail: 'User',
+      token: 'Pass',
       site: 'http://site.org',
       context_path: '/context'
     }
@@ -28,8 +28,8 @@ describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
                  workdir: './workdir' }
   before :each do
     client_options = {
-      username: 'User',
-      password: 'Pass',
+      useremail: 'User',
+      token: 'Pass',
       site: 'http://site.org',
       context_path: '/context'
     }
@@ -71,7 +71,7 @@ describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
     issue = JIRA::Resource::Issue.new(@jira)
     subj = issue.create_endpoint('path')
     expect(subj.class).to eq Addressable::URI
-    expect(subj.to_s).to eq 'http://User:Pass@site.org/context/path'
+    expect(subj.to_s).to eq 'http://site.org/context/path'
   end
 
   it '.get_transition_by_name should returns transition' do
@@ -96,7 +96,7 @@ describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
   it '.related returns related data' do
     expected = { 'detail' => [{ 'pullRequests' => [], 'branches' => [] }] }
     issue = JIRA::Resource::Issue.new(@jira)
-    allow(RestClient).to receive(:get).and_return(expected.to_json)
+    allow(RestClient::Request).to receive(:execute).and_return(expected.to_json)
     expect(issue.related).to eq(expected['detail'].first)
   end
 
@@ -108,7 +108,7 @@ describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
                                 'branches' => ['repository' => { 'name' => 'test',
                                                                  'url' => 'https://bb.org/{}/{test}' }] }] }
     issue = JIRA::Resource::Issue.new(@jira)
-    allow(RestClient).to receive(:get).and_return(expected.to_json)
+    allow(RestClient::Request).to receive(:execute).and_return(expected.to_json)
     expect(issue.related['pullRequests'].first['source']['url']).to eq('https://bitbucket.org/OneTwoTrip/test/branch/')
   end
 
@@ -117,7 +117,7 @@ describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
                                                                  'url' => 'https://bb.org/{}/{test}' }],
                                 'pullRequests' => [] }] }
     issue = JIRA::Resource::Issue.new(@jira)
-    allow(RestClient).to receive(:get).and_return(expected.to_json)
+    allow(RestClient::Request).to receive(:execute).and_return(expected.to_json)
     expect(issue.related['branches'].first['url']).to eq('https://bitbucket.org/OneTwoTrip/test/branch/')
   end
 

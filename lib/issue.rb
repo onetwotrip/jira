@@ -103,10 +103,16 @@ module JIRA
         params = {
           issueId: id,
           applicationType: 'bitbucket',
-          dataType: 'pullrequest',
+          dataType: 'pullrequest'
         }
         @related ||= JSON.parse(
-          RestClient.get(create_endpoint('rest/dev-status/1.0/issue/detail').to_s, params: params)
+          RestClient::Request.execute(
+            method: :get,
+            url: create_endpoint('rest/dev-status/1.0/issue/detail').to_s,
+            headers: { params: params },
+            user: opts[:useremail],
+            password: opts[:token]
+          )
         )['detail'].first
 
         repos_id_list = {}
@@ -139,10 +145,7 @@ module JIRA
 
       def create_endpoint(path)
         uri = "#{opts[:site]}#{opts[:context_path]}/#{path}"
-        endpoint = Addressable::URI.parse(uri)
-        endpoint.user = opts[:username]
-        endpoint.password = opts[:password]
-        endpoint
+        Addressable::URI.parse(uri)
       end
 
       def pullrequests(git_config = nil)
