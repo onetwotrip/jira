@@ -114,7 +114,7 @@ module JIRA
             password: opts[:token]
           )
         )['detail'].first
-
+        LOGGER.info "Issue detail for #{id}: #{@related}"
         repos_id_list = {}
         unless @related['branches'].empty?
           @related['branches'].each do |branch|
