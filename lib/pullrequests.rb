@@ -33,7 +33,9 @@ module JIRA
     def filter_by(key, *args)
       @prs.keep_if do |pr|
         LOGGER.info "Start filter pr with name: #{pr.pr['name']}"
+        LOGGER.info "Key is: #{key}, args: #{args}"
         value = key.split('_').inject(pr.pr) { |a, e| a[e] }
+        LOGGER.info "Value is: #{value}"
         args.any? { |word| value.include?(word) }
       end
       self
