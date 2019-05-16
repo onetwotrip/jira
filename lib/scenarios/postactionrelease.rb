@@ -14,8 +14,14 @@ module Scenarios
                           .filter_by_source_url(SimpleConfig.jira.issue)
 
       unless pullrequests.valid?
-        issue.post_comment p("ReviewRelease: #{pullrequests.valid_msg}")
-        exit
+        issue.post_comment <<-BODY
+              {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
+                  Не удалось замержить PR
+                  *Причина:* Нет валидных PR(Статус: Open и с номером задачи в названии)
+              {panel}
+
+        BODY
+        exit(1)
       end
 
       pullrequests.each do |pr|
