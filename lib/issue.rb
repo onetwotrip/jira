@@ -103,7 +103,7 @@ module JIRA
         params = {
           issueId: id,
           applicationType: 'bitbucket',
-          dataType: 'pullrequest'
+          dataType: 'pullrequest',
         }
         @related ||= JSON.parse(
           RestClient::Request.execute(
@@ -151,9 +151,9 @@ module JIRA
 
       def pullrequests(git_config = nil)
         JIRA::PullRequests.new(
-          *related['pullRequests'].map { |i|
+          *related['pullRequests'].map do |i|
             JIRA::PullRequest.new(git_config, i)
-          }
+          end
         )
       end
 
