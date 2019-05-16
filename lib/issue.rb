@@ -121,7 +121,7 @@ module JIRA
             url = branch['repository']['url']
             next unless url.include?('{')
             repo_id = url[url.rindex('{') + 1..url.size - 2].to_sym
-            repos_id_list[repo_id] = branch['repository']['name']
+            repos_id_list[repo_id] = branch['repository']['name'] if repos_id_list[repo_id].nil?
             url = "https://bitbucket.org/OneTwoTrip/#{branch['repository']['name']}"
             branch['url'] = "#{url}/branch/#{branch['name']}"
             branch['createPullRequestUrl'] = "#{url}/pull-requests/new?source=#{branch['name']}"
@@ -151,7 +151,9 @@ module JIRA
 
       def pullrequests(git_config = nil)
         JIRA::PullRequests.new(
-          *related['pullRequests'].map { |i| JIRA::PullRequest.new(git_config, i) }
+          *related['pullRequests'].map { |i|
+            JIRA::PullRequest.new(git_config, i)
+          }
         )
       end
 
