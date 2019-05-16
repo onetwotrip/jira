@@ -114,7 +114,7 @@ module JIRA
             password: opts[:token]
           )
         )['detail'].first
-        LOGGER.info "Issue detail for #{id}: #{@related}"
+
         repos_id_list = {}
         unless @related['branches'].empty?
           @related['branches'].each do |branch|
@@ -140,6 +140,7 @@ module JIRA
             pr['destination']['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}/branch/#{pr['destination']['branch']}"
           end
         end
+        LOGGER.info "Issue detail for #{id}: #{@related}"
         @related
       end
 
