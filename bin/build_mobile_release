@@ -7,6 +7,8 @@ opts = Slop.parse do |o|
   # Connection settings
   o.string '-u', '--username', 'username', default: SimpleConfig.jira.username
   o.string '-p', '--password', 'password', default: SimpleConfig.jira.password
+  o.string '-e', '--useremail', 'useremail', default: SimpleConfig.jira.useremail
+  o.string '-t', '--token', 'token', default: SimpleConfig.jira.token
   o.string '--site', 'site', default: SimpleConfig.jira.site
   o.string '--context_path', 'context path', default: ''
   o.string '--release', 'release', default: 'IOS-4475'
