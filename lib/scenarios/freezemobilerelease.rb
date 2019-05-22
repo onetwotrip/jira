@@ -125,6 +125,19 @@ module Scenarios
           issue.save(fields: { labels: release_labels.uniq })
           issue.fetch
         end
+
+        LOGGER.info "Start to set Fix Versions: #{fix_version} to tickets"
+        issue.linked_issues('deployes').each do |subissue|
+          result = subissue.save(fields: { fixVersions: [{ name: fix_version }] })
+          if result
+            subissue.fetch
+            LOGGER.info "Set Fix Versions: #{fix_version} Ticket: #{subissue.key}"
+          else
+            LOGGER.error "Cant'set Fix Versions: #{fix_version} Ticket: #{subissue.key}"
+            next
+          end
+        end
+
       rescue StandardError => e
         issue.post_comment <<-BODY
         {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
