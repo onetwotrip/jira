@@ -137,7 +137,6 @@ module Scenarios
             next
           end
         end
-
       rescue StandardError => e
         issue.post_comment <<-BODY
         {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
