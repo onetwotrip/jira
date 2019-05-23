@@ -38,7 +38,7 @@ module Scenarios
         #   1) Get deployes issues of release
         #   2) Check status of blocked tasks of issues.
         #   3) If task hasn't necessary status - unlink issue from release
-        good_statuses = %w[Done Closed Fixed Rejected]
+        good_statuses = %w[Done Closed Fixed Rejected Published]
         release.issuelinks.each do |issuelink|
           if issuelink.type.name == 'Deployed' &&
             issuelink.outwardIssue && # rubocop:disable Layout/MultilineOperationIndentation
