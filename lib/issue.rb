@@ -122,7 +122,7 @@ module JIRA
             next unless url.include?('{')
             repo_id = url[url.rindex('{') + 1..url.size - 2].to_sym
             repos_id_list[repo_id] = branch['repository']['name'] if repos_id_list[repo_id].nil?
-            url = "https://bitbucket.org/OneTwoTrip/#{branch['repository']['name']}"
+            url = "https://bitbucket.org/OneTwoTrip/#{repos_id_list[repo_id]}"
             branch['url'] = "#{url}/branch/#{branch['name']}"
             branch['createPullRequestUrl'] = "#{url}/pull-requests/new?source=#{branch['name']}"
             branch['repository']['url'] = url
