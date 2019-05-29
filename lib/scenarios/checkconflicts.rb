@@ -15,6 +15,10 @@ module Scenarios
       is_already_reopen = false
       issue_task.api_pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
         next unless pr.state == 'OPEN'
+        if pr.repo_slug.include?('rspec') || pr.repo_slug.include?('autotest')
+          LOGGER.info 'Find autotest branch. Skip check conflict'
+          next
+        end
         begin
           diff_in_pr      = pr.diff
           commit_id       = pr.source['commit']['hash']

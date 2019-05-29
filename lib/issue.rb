@@ -157,7 +157,7 @@ module JIRA
       end
 
       def linked_issues(param)
-        client.Issue.jql(%(issue in linkedIssues(#{key},"#{param}")))
+        client.Issue.jql(%(issue in linkedIssues(#{key},"#{param}")), max_results: 100)
       end
 
       def search_deployes
