@@ -56,8 +56,10 @@ module Scenarios
       issue.transition 'Test Ready'
     rescue StandardError, SystemExit => _
       LOGGER.error "Found some errors while release #{@opts[:release]} was building"
-      issue.post_comment @error_comment
-      issue.transition 'Build Failed'
+      if issue
+        issue.post_comment @error_comment
+        issue.transition 'Build Failed'
+      end
     end
   end
 end
