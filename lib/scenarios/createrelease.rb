@@ -62,7 +62,7 @@ module Scenarios
 
       if issues.empty?
         LOGGER.info "Filter #{params.filter} doesn't contains tickets"
-        exit(1)
+        exit(127)
       end
 
       if params.tasks && !params.tasks.empty?
