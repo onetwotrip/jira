@@ -14,9 +14,9 @@ module Scenarios
 
       is_error = false
 
-      pullrequests = issue.pullrequests(SimpleConfig.git.to_h).filter_by_source_url(SimpleConfig.jira.issue)
-                          #.filter_by_status('OPEN')
-                          #.filter_by_source_url(SimpleConfig.jira.issue)
+      pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
+                          .filter_by_status('OPEN')
+                          .filter_by_source_url(SimpleConfig.jira.issue)
 
       unless pullrequests.valid?
         issue.post_comment p("ReviewRelease: #{pullrequests.valid_msg}")
