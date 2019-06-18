@@ -80,7 +80,12 @@ module Scenarios
           end
         end
 
-        LOGGER.info "Number of issues: #{release.linked_issues('deployes').size}"
+        issues_count = release.linked_issues('deployes').size
+
+        LOGGER.info "Number of issues: #{issues_count}"
+
+        exit(1) if issues_count.zero?
+
         release.linked_issues('deployes').each do |issue| # rubocop:disable Metrics/BlockLength
           LOGGER.info "Working on #{issue.key}"
           issue.transition 'Not merged' if issue.has_transition? 'Not merged'
@@ -108,15 +113,7 @@ module Scenarios
 
                   repo_name = branch['repository']['name']
                   repo_url  = branch['repository']['url']
-                  # Example of repos variable:
-                  # {
-                  #   "RepoName" => {
-                  #     :url=>"https://github.com/Vendor/RepoName/",
-                  #     :branches=>[],
-                  #     :repo_base=> Git::Object
-                  #   },
-                  #   ...
-                  # }
+
                   repos[repo_name]             ||= { url: repo_url, branches: [] }
                   repos[repo_name][:repo_base] ||= git_repo(repo_url,
                                                             delete_branches: delete_branches)
