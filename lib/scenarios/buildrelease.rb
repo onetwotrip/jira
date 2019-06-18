@@ -51,10 +51,10 @@ module Scenarios
           end
           # Unlink issue with more than one product branches. Test is skipped
           next unless is_only_one_branch
-          branches      = issuelink.outwardIssue.branches
+          branches      = issuelink.outwardIssue.api_pullrequests
           branches_list = []
           branches.each do |branch|
-            branches_list << branch.repo_slug
+            branches_list << branch.repo_slug if branch.state.include?('OPEN')
           end
           next unless (branches_list.uniq - ['avia_api_rspec', 'back-components']).size > 1
           comment = "Remove issue #{issuelink.outwardIssue.key} from release. Reason: issue has more than 1 product branch"
@@ -80,7 +80,6 @@ module Scenarios
           end
         end
 
-        release = client.Issue.find(opts[:release])
         issues_count = release.linked_issues('deployes').size
 
         LOGGER.info "Number of issues: #{issues_count}"
