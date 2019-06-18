@@ -80,6 +80,7 @@ module Scenarios
           end
         end
 
+        release = client.Issue.find(opts[:release])
         issues_count = release.linked_issues('deployes').size
 
         LOGGER.info "Number of issues: #{issues_count}"
