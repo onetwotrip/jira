@@ -18,3 +18,4 @@ coverage/
 /repos/
 *.sublime-*
 env.properties
+/bin/.SimpleConfig.yml
