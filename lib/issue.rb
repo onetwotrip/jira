@@ -10,7 +10,8 @@ require 'common/bitbucket'
 
 module JIRA
   module Resource
-    class Issue < JIRA::Base # :nodoc:
+    # Issue methods
+    class Issue < JIRA::Base # rubocop:disable Metrics/ClassLength
       # Link current issue to release_key
       # :nocov:
       def link(release_key)
@@ -66,12 +67,12 @@ module JIRA
       def destroy(branch)
         LOGGER.info "Delete branch #{branch.name} from #{branch.repo_slug} repo"
         begin
-        RestClient::Request.execute(
-          method:   :delete,
-          url:      "https://bitbucket.org/!api/2.0/repositories/#{branch.repo_owner}/#{branch.repo_slug}/refs/branches/#{branch.name}",
-          user:     opts[:useremail],
-          password: opts[:password]
-        )
+          RestClient::Request.execute(
+            method:   :delete,
+            url:      "https://bitbucket.org/!api/2.0/repositories/#{branch.repo_owner}/#{branch.repo_slug}/refs/branches/#{branch.name}",
+            user:     opts[:useremail],
+            password: opts[:password]
+          )
         rescue RestClient::ExceptionWithResponse => e
           LOGGER.error "Got error when try to delete branch #{branch.name}: #{e}"
         end
