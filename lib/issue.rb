@@ -10,7 +10,8 @@ require 'common/bitbucket'
 
 module JIRA
   module Resource
-    class Issue < JIRA::Base # :nodoc:
+    # Issue methods
+    class Issue < JIRA::Base # rubocop:disable Metrics/ClassLength
       # Link current issue to release_key
       # :nocov:
       def link(release_key)
@@ -52,7 +53,7 @@ module JIRA
         branches.each do |branch|
           if branch.name =~ /^#{SimpleConfig.jira.issue}-(pre|release-[0-9]{2}\.[0-9]{2}\.[0-9]{4})$/
             LOGGER.info "Rollback branch '#{branch.name}' from '#{branch.target['repository']['full_name']}'"
-            branch.destroy
+            destroy(branch)
           end
         end
         api_pullrequests.each do |pr|
@@ -60,6 +61,20 @@ module JIRA
             LOGGER.info "Decline pullrequest '#{pr.title}' from '#{pr.destination['repository']['full_name']}'"
             pr.decline
           end
+        end
+      end
+
+      def destroy(branch)
+        LOGGER.info "Delete branch #{branch.name} from #{branch.repo_slug} repo"
+        begin
+          RestClient::Request.execute(
+            method:   :delete,
+            url:      "https://bitbucket.org/!api/2.0/repositories/#{branch.repo_owner}/#{branch.repo_slug}/refs/branches/#{branch.name}",
+            user:     opts[:useremail],
+            password: opts[:password]
+          )
+        rescue RestClient::ExceptionWithResponse => e
+          LOGGER.error "Got error when try to delete branch #{branch.name}: #{e}"
         end
       end
 
