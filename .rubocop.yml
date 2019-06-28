@@ -11,5 +11,6 @@ AllCops:
   Exclude:
     - repos/**/*
     - vendor/**/*
+    - bin/**/*
 Lint/ReturnInVoidContext:
   Enabled: false
