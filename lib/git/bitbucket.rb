@@ -36,7 +36,6 @@ module Git
     def delete_branch(branch = current_branch)
       url = "https://bitbucket.org/!api/2.0/repositories/#{branch.repo_owner}/#{branch.repo_slug}/refs/branches/#{branch.name}" # rubocop:disable Metrics/LineLength
       LOGGER.info "DELETE #{url}"
-      # RestClient.delete(url, content_type: :json)
       RestClient::Request.execute(
         method:   :delete,
         url:      url,

@@ -40,7 +40,7 @@ describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
     )
   end
   # Turn off the test cause rollback method now
-  describe 'rollback' do
+  describe 'rollback' do # rubocop:disable Metrics/BlockLength
     subject { model.rollback }
     it do
       allow(model).to receive(:has_transition?).and_return(true)
@@ -57,9 +57,19 @@ describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
                                                   decline: true)
       allow(model).to receive(:api_pullrequests).and_return([pr])
       expect(subject)
-      # Switch off expects cause rollback logic changes
       expect(branch).to have_received(:destroy)
       expect(pr).to     have_received(:decline)
+    end
+
+    it 'api_pullrequests' do
+      allow(model).to receive(:branches).and_return([])
+      pr = double(Tinybucket::Model::PullRequest,
+                  title: 'Test PR',
+                  state: 'OPEN',
+                  destination: { 'repository' => { 'full_name' => 'owner/repo' } },
+                  decline: true)
+      allow(model).to receive(:api_pullrequests).and_return([pr])
+      expect(subject)
     end
   end
 
