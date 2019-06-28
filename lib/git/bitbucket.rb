@@ -18,8 +18,8 @@ module Git
         url = "https://#{username}:#{password}@api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests"
         RestClient.post url, request.to_json, content_type: :json
       rescue StandardError => e
-        puts "Pullrequest didn't create".red
-        puts "Error: #{e}; URL: #{url}; PARAMS: #{request}".red
+        LOGGER.fatal "Pullrequest didn't create"
+        LOGGER.fatal "Error: #{e}; URL: #{url}; PARAMS: #{request}"
         exit(1)
       end
     end
@@ -28,8 +28,23 @@ module Git
       url = "https://#{username}:#{password}@api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests/#{pull_request_id}/decline" # rubocop:disable Metrics/LineLength
       RestClient.post url, content_type: :json
     rescue StandardError => e
-      puts "Pullrequest didn't decline".red
-      puts "Error: #{e}; URL: #{url}".red
+      LOGGER.fatal "Pullrequest didn't decline"
+      LOGGER.fatal "Error: #{e}; URL: #{url}"
+      exit(1)
+    end
+
+    def delete_branch(branch = current_branch)
+      url = "https://bitbucket.org/!api/2.0/repositories/#{branch.repo_owner}/#{branch.repo_slug}/refs/branches/#{branch.name}" # rubocop:disable Metrics/LineLength
+      LOGGER.info "DELETE #{url}"
+      # RestClient.delete(url, content_type: :json)
+      RestClient::Request.execute(
+        method:   :delete,
+        url:      url,
+        user: SimpleConfig.bitbucket[:username],
+        password: SimpleConfig.bitbucket[:password]
+      )
+    rescue StandardError => e
+      LOGGER.fatal "Got error when try to delete branch #{branch.name}: #{e}"
       exit(1)
     end
   end
