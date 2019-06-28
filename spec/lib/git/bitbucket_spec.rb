@@ -38,10 +38,10 @@ describe Git::Base do # rubocop:disable Metrics/BlockLength
     remote = double(:remote).as_null_object
     response = double(:resp_double)
     branch = double(Tinybucket::Model::Branch, name: '-pre',
-                    target: { 'repository' => { 'full_name' => 'owner/repo' } },
-                    destroy: true,
-                    repo_slug: 'Test',
-                    repo_owner: 'god')
+                                               target: { 'repository' => { 'full_name' => 'owner/repo' } },
+                                               destroy: true,
+                                               repo_slug: 'Test',
+                                               repo_owner: 'god')
     allow(response).to receive(:code) { 200 }
     allow(Git::Remote).to receive(:new) { remote }
     allow_any_instance_of(Git::Base).to receive(:current_branch) { branch }
@@ -52,10 +52,10 @@ describe Git::Base do # rubocop:disable Metrics/BlockLength
 
   it 'delete branch - error' do
     branch = double(Tinybucket::Model::Branch, name: '-pre',
-                    target: { 'repository' => { 'full_name' => 'owner/repo' } },
-                    destroy: true,
-                    repo_slug: 'Test',
-                    repo_owner: 'god')
+                                               target: { 'repository' => { 'full_name' => 'owner/repo' } },
+                                               destroy: true,
+                                               repo_slug: 'Test',
+                                               repo_owner: 'god')
     remote = double(:remote).as_null_object
     allow(Git::Remote).to receive(:new) { remote }
     allow_any_instance_of(Git::Base).to receive(:current_branch) { branch }
