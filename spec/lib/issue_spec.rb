@@ -56,8 +56,10 @@ describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
                                                   destination: { 'repository' => { 'full_name' => 'owner/repo' } },
                                                   decline: true)
       allow(model).to receive(:api_pullrequests).and_return([pr])
-      allow(model).to receive(:rollback).and_return(true)
       expect(subject)
+      # Switch off expects cause rollback logic changes
+      expect(branch).to have_received(:destroy)
+      expect(pr).to     have_received(:decline)
     end
   end
 
