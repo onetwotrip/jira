@@ -66,10 +66,10 @@ module JIRA
 
       def destroy(branch)
         LOGGER.info "Delete branch #{branch.name} from #{branch.repo_slug} repo"
-        LOGGER.info "DELETE #{url}"
         user = SimpleConfig.bitbucket[:username]
         password = SimpleConfig.bitbucket[:password]
         url = "https://#{user}:#{password}@api.bitbucket.org/2.0/repositories/#{branch.repo_owner}/#{branch.repo_slug}/refs/branches/#{branch.name}" # rubocop:disable Metrics/LineLength
+        LOGGER.info "DELETE #{url}"
         begin
           RestClient::Request.execute(
             method:   :delete,
