@@ -70,8 +70,8 @@ module JIRA
           RestClient::Request.execute(
             method:   :delete,
             url:      "https://bitbucket.org/!api/2.0/repositories/#{branch.repo_owner}/#{branch.repo_slug}/refs/branches/#{branch.name}",
-            user:     opts[:useremail],
-            password: opts[:password]
+            user:     SimpleConfig.bitbucket[:username],
+            password: SimpleConfig.bitbucket[:password]
           )
         rescue RestClient::ExceptionWithResponse => e
           LOGGER.error "Got error when try to delete branch #{branch.name}: #{e}"
