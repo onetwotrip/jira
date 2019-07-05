@@ -16,8 +16,8 @@ module Scenarios
 
       LOGGER.info 'Try to get all PR in status OPEN'
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
-                       .filter_by_status('OPEN')
-                       .filter_by_source_url(SimpleConfig.jira.issue)
+                          .filter_by_status('OPEN')
+                          .filter_by_source_url(SimpleConfig.jira.issue)
 
       unless pullrequests.valid?
         issue.post_comment p("ReviewRelease: #{pullrequests.valid_msg}")
@@ -89,8 +89,8 @@ module Scenarios
       # Work with feature branch, if exist
       LOGGER.info 'Try to get all PR in status OPEN'
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
-                       .filter_by_status('OPEN')
-                       .filter_by_source_url(SimpleConfig.jira.issue)
+                          .filter_by_status('OPEN')
+                          .filter_by_source_url(SimpleConfig.jira.issue)
       LOGGER.info "Found #{pullrequests.prs.size} PR in status OPEN after release branch was merged"
       pullrequests.each do |pr|
         LOGGER.info 'Try to find feature PR for decline'
