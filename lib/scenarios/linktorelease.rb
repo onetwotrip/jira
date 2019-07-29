@@ -67,6 +67,17 @@ module Scenarios
 
       issues = release_filter && find_by_filter(client.Issue, release_filter)
 
+      # Check issues not empty
+      if issues.empty?
+        LOGGER.warn "Release filter: #{release_filter} doesn't contain any issues"
+        release_issue.post_comment <<-BODY
+          {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+            Фильтр #{release_filter} не содержит задач (x)
+          {panel}
+        BODY
+        exit
+      end
+
       # Message about count of release candidate issues
       release_issue.post_comment <<-BODY
           {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
