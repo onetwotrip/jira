@@ -102,6 +102,7 @@ module JIRA
         comment.save(body: body)
       end
 
+      # :nocov:
       def related
         params = {
           issueId: id,
@@ -119,6 +120,7 @@ module JIRA
         )['detail'].first
 
         repos_id_list = {}
+
         unless @related['branches'].empty?
           @related['branches'].each do |branch|
             url = branch['repository']['url']
@@ -131,6 +133,8 @@ module JIRA
             branch['repository']['url'] = url
           end
         end
+
+        @related['pullRequests'].delete_if { |h| !(h['status'].include?('OPEN') && h['name'].include?(key)) } # key - ticket number
 
         unless @related['pullRequests'].empty?
           @related['pullRequests'].each do |pr|
