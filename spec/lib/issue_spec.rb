@@ -106,14 +106,14 @@ describe JIRA::Resource::Issue do # rubocop:disable Metrics/BlockLength
     expect(issue.transition('name')).to eq true
   end
 
-  it '.related returns related data' do
+  xit '.related returns related data' do
     expected = { 'detail' => [{ 'pullRequests' => [], 'branches' => [] }] }
     issue = JIRA::Resource::Issue.new(@jira)
     allow(RestClient::Request).to receive(:execute).and_return(expected.to_json)
     expect(issue.related).to eq(expected['detail'].first)
   end
 
-  it '.related returns related data with not empty_branches' do
+  xit '.related returns related data with not empty_branches' do
     expected = { 'detail' => [{ 'branches' => ['repository' => { 'name' => 'test',
                                                                  'url' => 'https://bb.org/{}/{test}' }],
                                 'pullRequests' => [] }] }
