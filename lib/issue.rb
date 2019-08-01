@@ -109,6 +109,7 @@ module JIRA
           applicationType: 'bitbucket',
           dataType: 'pullrequest',
         }
+
         @related ||= JSON.parse(
           RestClient::Request.execute(
             method: :get,
@@ -134,7 +135,7 @@ module JIRA
           end
         end
 
-        @related['pullRequests'].delete_if { |h| !(h['status'].include?('OPEN') && h['name'].include?(key)) } # key - ticket number
+        @related['pullRequests'].delete_if { |h| !(h['status'].include?('OPEN') && h['name'].include?(key)) } unless %w[ADR IOS].any? { |i| key.include? i } # key - ticket number # rubocop:disable Metrics/LineLength
 
         unless @related['pullRequests'].empty?
           @related['pullRequests'].each do |pr|
