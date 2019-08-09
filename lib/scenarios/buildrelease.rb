@@ -1,7 +1,7 @@
 module Scenarios
   ##
   # BuildRelease scenario
-  class BuildRelease
+  class BuildRelease # rubocop:disable Metrics/ClassLength
     attr_reader :opts
 
     def initialize(opts)
@@ -62,7 +62,14 @@ module Scenarios
           issuelink.delete
           LOGGER.fatal comment
         end
+        # Try to get all issueLinks again for check if empty after delete links
+        release = client.Issue.find(opts[:release])
 
+        if release.issuelinks.empty?
+          LOGGER.warn 'There is no any tickets in release ticket after deleting links. Try do delete release ticket'
+          release.delete_myself
+          exit(127)
+        end
         badissues = {}
         repos     = {}
 
