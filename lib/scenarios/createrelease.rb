@@ -58,7 +58,7 @@ module Scenarios
 
       client = JIRA::Client.new SimpleConfig.jira.to_h
 
-      release_issues = {}
+      release_issues = []
 
       if params.filter
         LOGGER.info "Start search ticket from filter #{params.filter}"
