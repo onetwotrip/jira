@@ -18,11 +18,11 @@ module Scenarios
 
     def run
       # Build release for INFRA team specific
-      step_id = (ENV['STEP_ID'] || 0).to_i
+      step_id     = (ENV['STEP_ID'] || 0).to_i
       is_cd_build = ENV['CD_BUILD'] || false
-      flag    = false
-      jira    = JIRA::Client.new SimpleConfig.jira.to_h
-      issue   = jira.Issue.find(SimpleConfig.jira.issue)
+      flag        = false
+      jira        = JIRA::Client.new SimpleConfig.jira.to_h
+      issue       = jira.Issue.find(SimpleConfig.jira.issue)
 
       issue.transition 'CI Build' if is_cd_build
 
@@ -56,10 +56,23 @@ module Scenarios
       issue.transition 'Test Ready'
     rescue StandardError, SystemExit => _
       LOGGER.error "Found some errors while release #{@opts[:release]} was building"
-      if issue
+      if ticket_exist?(issue.key)
         issue.post_comment @error_comment
         issue.transition 'Build Failed'
       end
+    end
+
+    def ticket_exist?(key)
+      jira = JIRA::Client.new SimpleConfig.jira.to_h
+      jira.Issue.find(key)
+      true
+    rescue JIRA::HTTPError => e
+      if e.code == '404'
+        LOGGER.warn "Ticket #{key} doesn't exist"
+      else
+        LOGGER.warn "Can't check if ticket #{key} exist. Reason: #{e.response.body}"
+      end
+      false
     end
   end
 end
