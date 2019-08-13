@@ -12,7 +12,7 @@ require 'git/bitbucket'
 module JIRA
   module Resource
     # Issue methods
-    class Issue < JIRA::Base
+    class Issue < JIRA::Base # rubocop:disable Metrics/ClassLength
       # Link current issue to release_key
       # :nocov:
       def link(release_key)
@@ -149,6 +149,23 @@ module JIRA
           end
         end
         @related
+      end
+
+      def delete_myself
+        LOGGER.info "Start to delete issue #{key}"
+        r = RestClient::Request.execute(
+          method: :delete,
+          url: create_endpoint("rest/api/2/issue/#{key}").to_s,
+          user: opts[:useremail],
+          password: opts[:token],
+          raw_response: true
+        )
+        LOGGER.warn "Not 204 status code in response. Got: #{r.code}" if r.code != 204
+        if r.request.raw_response
+          LOGGER.info "Success delete issue #{key}"
+        else
+          LOGGER.error "Can't success delete issue #{key}. Response not 'true'. Got: #{r.request.raw_response}"
+        end
       end
 
       def create_endpoint(path)
