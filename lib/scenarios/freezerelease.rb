@@ -30,7 +30,7 @@ module Scenarios
             LOGGER.error "[SKIP] #{branch['repository']['name']}/#{branch['name']} - incorrect branch name"
             next
           end
-          # Check for case when issue has correct name, but was deleted from issue
+          # Check for case when branch has correct name, but was deleted from issue
           unless repo_path.is_branch? branch['name']
             LOGGER.error "[SKIP] #{branch['repository']['name']}/#{branch['name']} - branch doesn't exist"
             next
