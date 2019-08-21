@@ -14,7 +14,7 @@ module Scenarios
 
       is_error = false
 
-      LOGGER.info 'Try to get all PR in status OPEN'
+      LOGGER.info "Try to get all PR in status OPEN from #{issue.key}"
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
                           .filter_by_status('OPEN')
                           .filter_by_source_url(SimpleConfig.jira.issue)
@@ -88,6 +88,7 @@ module Scenarios
 
       # Work with feature branch, if exist
       LOGGER.info 'Try to get all PR in status OPEN'
+      issue = jira.Issue.find(SimpleConfig.jira.issue)
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
                           .filter_by_status('OPEN')
                           .filter_by_source_url(SimpleConfig.jira.issue)
