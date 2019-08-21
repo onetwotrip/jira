@@ -21,6 +21,7 @@ module Scenarios
         issue.related['branches'].each do |branch|
           LOGGER.info "Start work with branch: #{branch['name']}"
           repo_path = git_repo(branch['repository']['url'])
+          # Prepare repo
           repo_path.checkout('master')
           repo_path.pull
           repo_path.chdir do
@@ -33,8 +34,8 @@ module Scenarios
           end
           with repo_path do
             checkout branch['name']
+            pull('origin', branch['name'])
             pull('origin', 'master')
-            #merge('origin/master', "Merge master into #{branch['name']}")
             push(repo_path.remote('origin'), branch['name'])
           end
         end
