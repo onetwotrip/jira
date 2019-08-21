@@ -47,6 +47,7 @@ module Scenarios
         {panel}
         BODY
         LOGGER.error "Не подтянуть мастера, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
+        issue.transition 'Merge Fail'
         exit(1)
       end
       issue.post_comment <<-BODY
