@@ -19,11 +19,6 @@ module Scenarios
                           .filter_by_status('OPEN')
                           .filter_by_source_url(SimpleConfig.jira.issue)
 
-      unless pullrequests.valid?
-        issue.post_comment p("ReviewRelease: #{pullrequests.valid_msg}")
-        exit
-      end
-
       LOGGER.info "Found #{pullrequests.prs.size} PR in status OPEN"
 
       @fix_version = issue.fields['fixVersions']
