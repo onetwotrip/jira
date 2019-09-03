@@ -14,3 +14,5 @@ AllCops:
     - bin/**/*
 Lint/ReturnInVoidContext:
   Enabled: false
+Style/FrozenStringLiteralComment:
+  Enabled: false
