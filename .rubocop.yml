@@ -1,4 +1,6 @@
 inherit_from: .rubocop_todo.yml
+Style/FrozenStringLiteralComment:
+  Enabled: false
 Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: comma
 Style/TrailingCommaInHashLiteral:
@@ -13,6 +15,4 @@ AllCops:
     - vendor/**/*
     - bin/**/*
 Lint/ReturnInVoidContext:
-  Enabled: false
-Style/FrozenStringLiteralComment:
   Enabled: false
