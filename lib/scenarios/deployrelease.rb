@@ -12,6 +12,7 @@ module Scenarios
         'ROLES' => JSON.parse(ENV['USER_ROLES']),
         'STAGE' => ENV['STAGE'],
       }
+      additional_values = {}
 
       if SimpleConfig.jira.issue
         jira = JIRA::Client.new SimpleConfig.jira.to_h
@@ -94,12 +95,16 @@ module Scenarios
         end
       end
 
+      additional_values['KEEP_RELEASES'] = 1 if true? ENV['DYNAMIC_NODES_SYNC']
+
       puts Terminal::Table.new(
         title:    'Deploy projects',
         headings: %w[Project branch],
         rows:      prop_values['PROJECTS'].map { |k, v| [k, v['BRANCH']] }
       )
-      JavaProperties.write({ 'DEPLOY' => prop_values.to_json }, './env.properties')
+      properties = { 'DEPLOY' => prop_values.to_json }
+      properties = properties.merge(additional_values) unless additional_values.empty?
+      JavaProperties.write(properties, './env.properties')
 
       exit 0
     end

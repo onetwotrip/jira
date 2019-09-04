@@ -44,7 +44,7 @@ Style/MethodMissing:
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles.
 # SupportedStyles: space, no_space
-Style/SpaceBeforeBlockBraces:
+Layout/SpaceBeforeBlockBraces:
   Exclude:
     - 'lib/scenarios/buildrelease.rb'
 
@@ -52,7 +52,7 @@ Style/SpaceBeforeBlockBraces:
 # Cop supports --auto-correct.
 # Configuration parameters: EnforcedStyle, SupportedStyles, EnforcedStyleForEmptyBraces, SpaceBeforeBlockParameters.
 # SupportedStyles: space, no_space
-Style/SpaceInsideBlockBraces:
+Layout/SpaceInsideBlockBraces:
   Exclude:
     - 'lib/scenarios/buildrelease.rb'
 
@@ -67,5 +67,5 @@ Style/SpecialGlobalVars:
 # Offense count: 4
 # Configuration parameters: SupportedStyles.
 # SupportedStyles: snake_case, normalcase, non_integer
-Style/VariableNumber:
+Naming/VariableNumber:
   EnforcedStyle: normalcase
