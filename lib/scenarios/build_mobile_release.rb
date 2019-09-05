@@ -10,7 +10,7 @@ module Scenarios
       @repo_prepare = false
     end
 
-    def run # rubocop:disable Metrics/PerceivedComplexity, Metrics/MethodLength
+    def run # rubocop:disable Metrics/PerceivedComplexity, Metrics/MethodLength, Metrics/CyclomaticComplexity
       LOGGER.info("Build mobile release from ticket #{opts[:release]}")
 
       # Start
@@ -88,6 +88,7 @@ module Scenarios
           else
             valid_pr << false
             issue.related['pullRequests'].each do |pullrequest|
+              next if pullrequest['status'] == 'DECLINED'
               # Check PR match with ticket number
               if pullrequest['source']['branch'].include? issue.key
                 valid_pr << true
