@@ -93,6 +93,10 @@ module Scenarios
         next unless pr.pr['name'].include?('feature')
         begin
           LOGGER.info "Found feature PR: #{pr.pr['source']['branch']}"
+          if pr.pr['status'] == 'MERGED'
+            LOGGER.info "PR: #{pr.pr['source']['branch']} already MERGED"
+            next
+          end
           local_repo = pr.repo
 
           # Decline PR if destination branch is develop
