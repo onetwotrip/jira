@@ -38,6 +38,28 @@ module Scenarios
           exit(1)
         end
 
+        # Check release label exist and only one
+        @release_labels = release.fields['labels']
+        if @release_labels.empty?
+          release.post_comment <<-BODY
+            {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F04D2A|bgColor=#F1F3F1}
+              Релизный тикет не содержит label, указывающий тип сборки релиза
+              Сборка прекращена. Исправьте проблему и перезапустите сборку
+            {panel}
+          BODY
+          LOGGER.error 'Релизный тикет не содержит label, указывающий тип сборки релиза'
+          exit(1)
+        elsif @release_labels.size > 1
+          release.post_comment <<-BODY
+          {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F04D2A|bgColor=#F1F3F1}
+            Релизный тикет содержит больше чем 1 Label. Разрешено не более 1.
+            Сборка прекращена. Исправьте проблему и перезапустите сборку
+          {panel}
+          BODY
+          LOGGER.error "Релизный тикет содержит больше чем 1 Label: #{@release_labels}"
+          exit(1)
+        end
+
         # Clean old release branch if exist
         release_branch     = "#release/#{opts[:release]}"
         pre_release_branch = "#{opts[:release]}-pre"
