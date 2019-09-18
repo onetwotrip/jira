@@ -27,6 +27,9 @@ module Scenarios
       {panel}
           BODY
         end
+
+        release_label = issue.fields['labels'].first
+
         release_issues = []
         # prepare release candidate branches
         issue.related['branches'].each do |branch|
@@ -58,8 +61,8 @@ module Scenarios
 
         release_issues.each do |branch| # rubocop:disable Metrics/BlockLength
           old_branch = branch['name']
-          new_branch_dev = "feature/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}"
-          new_branch_master = "release/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}"
+          new_branch_dev = "feature/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}/#{release_label}"
+          new_branch_master = "release/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}/#{release_label}"
           repo_path = git_repo(branch['repository']['url'])
 
           # copy -pre to -release
@@ -95,35 +98,10 @@ module Scenarios
             push(repo_path.remote('origin'), new_branch_dev) # push -feature to origin
             branch(old_branch).delete_both if old_branch != 'master' # delete -pre from local/remote
             LOGGER.info "Creating PR from #{new_branch_master} to 'master'"
-            create_pullrequest(
-              SimpleConfig.bitbucket[:username],
-              SimpleConfig.bitbucket[:password],
-              new_branch_master,
-              'master'
-            )
+            new_create_pullrequest(new_branch_master, 'master')
             LOGGER.info "Creating PR from #{new_branch_dev} to 'master'"
-            create_pullrequest(
-              SimpleConfig.bitbucket[:username],
-              SimpleConfig.bitbucket[:password],
-              new_branch_dev,
-              'master'
-            )
+            new_create_pullrequest(new_branch_dev, 'master')
           end
-        end
-
-        LOGGER.info 'Get all labels again'
-        issue          = jira.Issue.find(SimpleConfig.jira.issue)
-        release_labels = []
-        issue.api_pullrequests.each do |br|
-          LOGGER.info("Repo: #{br.repo_slug}")
-          release_labels << br.repo_slug
-        end
-        if release_labels.empty?
-          LOGGER.error 'Made empty labels array! I will skip set up new labels step'
-        else
-          LOGGER.info "Add labels: #{release_labels.uniq} to release #{issue.key}"
-          issue.save(fields: { labels: release_labels.uniq })
-          issue.fetch
         end
 
         LOGGER.info "Start to set Fix Versions: #{fix_version} to tickets"
