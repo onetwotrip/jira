@@ -22,6 +22,9 @@ module Scenarios
       LOGGER.info "Found #{pullrequests.prs.size} PR in status OPEN"
 
       @fix_version = issue.fields['fixVersions']
+
+      release_label = issue.fields['labels'].first
+
       # If this are IOS or ANDROID project we need to add tag on merge commit
       tag_enable = issue.key.include?('IOS') || issue.key.include?('ADR')
       # Work with release branch
@@ -35,9 +38,9 @@ module Scenarios
           # Add tag on merge commit
           if tag_enable
             tag = @fix_version.first['name']
-            LOGGER.info "Try to add tag #{tag} to #{pr.pr['destination']['branch']}"
+            LOGGER.info "Try to add tag #{tag}-#{release_label} to #{pr.pr['destination']['branch']}"
             local_repo.add_tag(tag, pr.pr['destination']['branch'], messsage: 'Add tag to merge commit', f: true)
-            local_repo.push('origin', "refs/tags/#{tag}", f: true)
+            local_repo.push('origin', "refs/tags/#{tag}-#{release_label}", f: true)
             LOGGER.info 'Success!'
           end
           LOGGER.info "Try to merge #{pr.src.branch} in #{pr.dst}/#{pr.dst.branch}"
