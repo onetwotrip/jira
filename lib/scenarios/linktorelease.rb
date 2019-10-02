@@ -85,19 +85,21 @@ module Scenarios
           {panel}
         BODY
 
-      release_labels = []
-      issues.each do |issue|
-        issue.link(release_issue_number)
-        issue.related['branches'].each do |branch|
-          release_labels << branch['repository']['name'].to_s
+      unless %w[ADR IOS].any? { |p| release_issue_number.include? p }
+        release_labels = []
+        issues.each do |issue|
+          issue.link(release_issue_number)
+          issue.related['branches'].each do |branch|
+            release_labels << branch['repository']['name'].to_s
+          end
         end
+
+        release_labels.uniq!
+
+        LOGGER.info "Add labels: #{release_labels} to release #{release_name}"
+        release_issue.save(fields: { labels: release_labels })
+        release_issue.fetch
       end
-
-      release_labels.uniq!
-
-      LOGGER.info "Add labels: #{release_labels} to release #{release_name}"
-      release_issue.save(fields: { labels: release_labels })
-      release_issue.fetch
 
       # Message about done
       release_issue.post_comment <<-BODY
