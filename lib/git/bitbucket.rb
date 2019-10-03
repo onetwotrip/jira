@@ -70,5 +70,20 @@ module Git
       LOGGER.fatal "Got error when try to delete branch #{branch.name}: #{e}"
       exit(1)
     end
+
+    # :nocov:
+    def get_pullrequests_diffstats(id)
+      url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests/#{id}/diffstat" # rubocop:disable Metrics/LineLength
+      LOGGER.info "GET #{url}"
+      RestClient::Request.execute(
+        method:   :get,
+        url:      url,
+        user: SimpleConfig.bitbucket[:username],
+        password: SimpleConfig.bitbucket[:password]
+      )
+    rescue StandardError => e
+      LOGGER.fatal "Got error when try to get diff stats for PR:#{id} from #{remote.url.repo}"
+      exit(1)
+    end
   end
 end
