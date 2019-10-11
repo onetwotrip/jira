@@ -16,22 +16,21 @@ module Scenarios
     end
 
     def update_issue(issue)
-      # Получить ветки
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h).filter_by_status('OPEN')
       LOGGER.info "Found #{pullrequests.count} pullrequests".green
-      pullrequests.each do |pr|
+      pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
         next unless pr.pr['destination']['branch'].include? 'develop'
         begin
-        pr_repo = pr.repo
-        branch_name = pr.pr['source']['branch']
-        LOGGER.info "Try to update PR: #{branch_name}".green
-        with pr_repo do
-          checkout branch_name
-          pull('origin', branch_name)
-          pull('origin', 'develop')
-          push(pr_repo.remote('origin'), branch_name)
-        end
-        LOGGER.info "Successful update:  #{branch_name}"
+          pr_repo     = pr.repo
+          branch_name = pr.pr['source']['branch']
+          LOGGER.info "Try to update PR: #{branch_name}".green
+          with pr_repo do
+            checkout branch_name
+            pull('origin', branch_name)
+            pull('origin', 'develop')
+            push(pr_repo.remote('origin'), branch_name)
+          end
+          LOGGER.info "Successful update:  #{branch_name}"
         rescue StandardError => e
           if e.message.include?('Merge conflict')
             LOGGER.error 'Update PR failed. Reason: Merge Conflict'
@@ -72,9 +71,9 @@ module Scenarios
       LOGGER.info "Found #{issues.count} issues".green
       count_max = issues.count
       counter = 1
-      issues.each do |issue|
-        LOGGER.info "Work with #{issue.key} (#{counter}/#{count_max})"
-        update_issue(issue)
+      issues.each do |i|
+        LOGGER.info "Work with #{i.key} (#{counter}/#{count_max})"
+        update_issue(i)
         counter += 1
       end
     end
