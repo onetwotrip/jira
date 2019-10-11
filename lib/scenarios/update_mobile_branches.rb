@@ -17,13 +17,14 @@ module Scenarios
 
     def update_issue(issue)
       # Получить ветки
-      is_success = false
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h).filter_by_status('OPEN')
+      LOGGER.info "Found #{pullrequests.count} pullrequests".green
       pullrequests.each do |pr|
         next unless pr.pr['destination']['branch'].include? 'develop'
         begin
         pr_repo = pr.repo
         branch_name = pr.pr['source']['branch']
+        LOGGER.info "Try to update PR: #{branch_name}".green
         with pr_repo do
           checkout branch_name
           pull('origin', branch_name)
@@ -31,10 +32,9 @@ module Scenarios
           push(pr_repo.remote('origin'), branch_name)
         end
         LOGGER.info "Successful update:  #{branch_name}"
-        is_success = true
         rescue StandardError => e
-          LOGGER.error "Не удалось подтянуть develop, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
           if e.message.include?('Merge conflict')
+            LOGGER.error 'Update PR failed. Reason: Merge Conflict'
             issue.post_comment <<-BODY
               {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
                   Не удалось подмержить develop в PR: #{pr.pr['url']}
@@ -42,6 +42,7 @@ module Scenarios
               {panel}
             BODY
           else
+            LOGGER.error "Update PR failed. Reason: #{e.message}"
             issue.post_comment <<-BODY
               {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
                   *Не удалось подмержить develop в PR*: #{pr.pr['url']}
@@ -50,11 +51,9 @@ module Scenarios
             BODY
           end
           issue.transition 'Reopen'
-          is_success = false
           next
         end
       end
-      is_success
     end
 
     def run
@@ -75,12 +74,7 @@ module Scenarios
       counter = 1
       issues.each do |issue|
         LOGGER.info "Work with #{issue.key} (#{counter}/#{count_max})"
-        is_success = update_issue(issue)
-        if is_success
-          LOGGER.info "Successful update:  #{issue.key}"
-        else
-          LOGGER.error "Error update:  #{issue.key}"
-        end
+        update_issue(issue)
         counter += 1
       end
     end
