@@ -17,7 +17,7 @@ module Scenarios
 
     def update_issue(issue)
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h).filter_by_status('OPEN')
-      LOGGER.info "Found #{pullrequests.count} pullrequests".green
+      LOGGER.info "Found #{pullrequests.prs.count} pullrequests".green
       pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
         next unless pr.pr['destination']['branch'].include? 'develop'
         begin
