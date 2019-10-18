@@ -19,11 +19,11 @@ module Scenarios
       end
 
       filter_config = JSON.parse(ENV['RELEASE_FILTER'])
-      client = JIRA::Client.new SimpleConfig.jira.to_h
+      client        = JIRA::Client.new SimpleConfig.jira.to_h
       release_issue = client.Issue.find(SimpleConfig.jira.issue)
 
-      project_name  = release_issue.fields['project']['key']
-      release_name  = release_issue.fields['summary'].upcase
+      project_name         = release_issue.fields['project']['key']
+      release_name         = release_issue.fields['summary'].upcase
       release_issue_number = release_issue.key
 
       # Check project exist in filter_config
@@ -83,12 +83,15 @@ module Scenarios
           {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
             Тикетов будет прилинковано: #{issues.count} (!)
           {panel}
-        BODY
+      BODY
+
+      issues.each do |issue|
+        issue.link(release_issue_number)
+      end
 
       unless %w[ADR IOS].any? { |p| release_issue_number.include? p }
         release_labels = []
         issues.each do |issue|
-          issue.link(release_issue_number)
           issue.related['branches'].each do |branch|
             release_labels << branch['repository']['name'].to_s
           end
@@ -106,7 +109,7 @@ module Scenarios
           {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
             Формирование релиза закончено (/)
           {panel}
-        BODY
+      BODY
     end
   end
 end
