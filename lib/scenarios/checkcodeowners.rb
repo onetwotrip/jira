@@ -2,11 +2,17 @@ module Scenarios
   ##
   # Add code owners to PR
   class CheckCodeOwners
+
+    def with(instance, &block)
+      instance.instance_eval(&block)
+      instance
+    end
+
     def run
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       # noinspection RubyArgCount
+      abort('Only IOS project supports this feature') if SimpleConfig.jira.issue.include?('ADR')
       issue = jira.Issue.find(SimpleConfig.jira.issue)
-      diff = issue.api_pullrequests
       LOGGER.info "Try to get all PR in status OPEN from #{issue.key}"
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
                        .filter_by_status('OPEN')
@@ -23,7 +29,13 @@ module Scenarios
       LOGGER.info "Found #{pullrequests.prs.size} PR in status OPEN"
 
       pullrequests.each do |pr|
-        puts pr.pr['id']
+        LOGGER.info "Start work with PR: #{pr.pr['url']}"
+        pr_repo     = pr.repo
+        diff_stats = {}
+        with pr_repo do
+          diff_stats = get_pullrequests_diffstats(pr.pr['id'])
+        end
+        diff_stats
       end
     end
   end
