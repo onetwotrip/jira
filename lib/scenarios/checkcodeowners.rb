@@ -30,13 +30,38 @@ module Scenarios
 
       pullrequests.each do |pr|
         LOGGER.info "Start work with PR: #{pr.pr['url']}"
-        pr_repo     = pr.repo
-        diff_stats = {}
+        pr_repo           = pr.repo
+        pr_name           = pr.pr['name']
+        pr_id             = pr.pr['id']
+        reviewers         = pr.pr['reviewers']
+        reviewers_id_list = get_reviewers_id(reviewers, pr_repo)
+        diff_stats        = {}
         with pr_repo do
-          diff_stats = get_pullrequests_diffstats(pr.pr['id'])
+          diff_stats = get_pullrequests_diffstats(pr_id)
+          add_info_in_pullrequest(pr_id, 'Description without reviewers ok', nil, pr_name)
         end
-        diff_stats
+        modified_files = get_modified_links(diff_stats)
+        modified_files
       end
+    end
+
+    def get_modified_links(diff_stats)
+      result   = []
+      statuses = %w[modified removed]
+      diff_stats[:values].each do |diff|
+        result << diff[:old][:path] if statuses.include? diff[:status]
+      end
+      result
+    end
+
+    def get_reviewers_id(reviewers, pr_repo)
+      result = []
+      with pr_repo do
+        reviewers.each do |user|
+          result << get_reviewer_info(user['name']).first[:mention_id]
+        end
+      end
+      result
     end
   end
 end
