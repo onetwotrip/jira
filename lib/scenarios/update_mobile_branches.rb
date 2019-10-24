@@ -33,11 +33,12 @@ module Scenarios
           LOGGER.info "Successful update:  #{branch_name}"
         rescue StandardError => e
           if e.message.include?('Merge conflict')
-            LOGGER.error 'Update PR failed. Reason: Merge Conflict'
+            LOGGER.error "Update PR failed. Reason: Merge Conflict. LOG: #{e.message}"
             issue.post_comment <<-BODY
               {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
                   Не удалось подмержить develop в PR: #{pr.pr['url']}
                   *Причина:* Merge conflict
+                  LOG: #{e.message}
               {panel}
             BODY
           else
@@ -70,7 +71,7 @@ module Scenarios
       issues = find_by_filter(jira.Issue, adr_filter)
       LOGGER.info "Found #{issues.count} issues".green
       count_max = issues.count
-      counter = 1
+      counter   = 1
       issues.each do |i|
         LOGGER.info "Work with #{i.key} (#{counter}/#{count_max})"
         update_issue(i)
