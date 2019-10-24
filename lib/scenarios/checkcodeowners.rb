@@ -34,10 +34,13 @@ module Scenarios
         pr_name   = pr.pr['name']
         pr_id     = pr.pr['id']
         reviewers = pr.pr['reviewers']
+        pr_author = pr.pr['author']
         # Prepare account_id reviewers list from PR
-        reviewers_id_list = get_reviewers_id(reviewers, pr_repo)
-        diff_stats        = {}
-        owners_config     = {}
+        old_reviewers = get_reviewers_id(reviewers, pr_repo)
+        # Get author id for case when he will be one of owners
+        author_id = get_reviewers_id(pr_author, pr_repo)[:account_id]
+        diff_stats    = {}
+        owners_config = {}
         # Get PR diff
         with pr_repo do
           diff_stats         = get_pullrequests_diffstats(pr_id)
@@ -46,11 +49,15 @@ module Scenarios
         end
 
         modified_files = get_modified_links(diff_stats)
+        # Get codeOwners
+        new_reviewers = get_owners(owners_config, modified_files, author_id)
+        # Prepare new_reviewers_list
+        new_reviewers_list = prepare_new_reviewers_list(old_reviewers, new_reviewers)
+
         # Add info and new reviewers in PR
         with pr_repo do
-          add_info_in_pullrequest(pr_id, 'Description without reviewers ok', reviewers_id_list, pr_name)
+          add_info_in_pullrequest(pr_id, 'Description without reviewers ok', new_reviewers_list, pr_name)
         end
-        modified_files
       end
     end
 
@@ -65,11 +72,32 @@ module Scenarios
 
     def get_reviewers_id(reviewers, pr_repo)
       result = []
+      reviewers = [reviewers] unless reviewers.is_a? Array
       with pr_repo do
         reviewers.each do |user|
           # Name with space should replace with +
           result << { account_id: get_reviewer_info(user['name'].sub(' ', '+')).first[:mention_id] }
         end
+      end
+      result
+    end
+
+    def get_owners(owners_config, diff, author_id)
+      result = {}
+      diff.each do |item|
+        owners_config.each do |product|
+          if product[1]['files'].include? item
+            result[product[0]] = product[1]['owners']
+          end
+        end
+      end
+      result
+    end
+
+    def prepare_new_reviewers_list(old_reviewers, owners)
+      result = old_reviewers
+      owners.each do |owner|
+        result << { account_id: owner[1].first }
       end
       result
     end
