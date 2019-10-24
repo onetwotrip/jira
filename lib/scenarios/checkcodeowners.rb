@@ -2,12 +2,6 @@ module Scenarios
   ##
   # Add code owners to PR
   class CheckCodeOwners
-
-    def with(instance, &block)
-      instance.instance_eval(&block)
-      instance
-    end
-
     def run
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       # noinspection RubyArgCount
@@ -38,10 +32,10 @@ module Scenarios
         # Prepare account_id reviewers list from PR
         old_reviewers = get_reviewers_id(reviewers, pr_repo)
         # Get author id for case when he will be one of owners
-        author_id = get_reviewers_id(pr_author, pr_repo)[:account_id]
+        author_id     = get_reviewers_id(pr_author, pr_repo).first
         diff_stats    = {}
         owners_config = {}
-        # Get PR diff
+        # Get PR diff and owners_config
         with pr_repo do
           diff_stats         = get_pullrequests_diffstats(pr_id)
           owners_config_path = File.expand_path('../../../', __FILE__)
@@ -50,15 +44,20 @@ module Scenarios
 
         modified_files = get_modified_links(diff_stats)
         # Get codeOwners
-        new_reviewers = get_owners(owners_config, modified_files, author_id)
+        new_reviewers = get_owners(owners_config, modified_files)
         # Prepare new_reviewers_list
-        new_reviewers_list = prepare_new_reviewers_list(old_reviewers, new_reviewers)
+        new_reviewers_list = prepare_new_reviewers_list(old_reviewers, new_reviewers, author_id)
 
         # Add info and new reviewers in PR
         with pr_repo do
           add_info_in_pullrequest(pr_id, 'Description without reviewers ok', new_reviewers_list, pr_name)
         end
       end
+    end
+
+    def with(instance, &block)
+      instance.instance_eval(&block)
+      instance
     end
 
     def get_modified_links(diff_stats)
@@ -71,33 +70,34 @@ module Scenarios
     end
 
     def get_reviewers_id(reviewers, pr_repo)
-      result = []
+      result    = []
       reviewers = [reviewers] unless reviewers.is_a? Array
       with pr_repo do
         reviewers.each do |user|
           # Name with space should replace with +
-          result << { account_id: get_reviewer_info(user['name'].sub(' ', '+')).first[:mention_id] }
+          result << get_reviewer_info(user['name'].sub(' ', '+')).first[:mention_id]
         end
       end
       result
     end
 
-    def get_owners(owners_config, diff, author_id)
+    def get_owners(owners_config, diff)
       result = {}
       diff.each do |item|
         owners_config.each do |product|
-          if product[1]['files'].include? item
-            result[product[0]] = product[1]['owners']
-          end
+          result[product[0]] = product[1]['owners'] if product[1]['files'].include? item
         end
       end
       result
     end
 
-    def prepare_new_reviewers_list(old_reviewers, owners)
-      result = old_reviewers
+    def prepare_new_reviewers_list(old_reviewers, owners, author_id)
+      result = []
+      old_reviewers.each { |reviewer| result << { account_id: reviewer } }
       owners.each do |owner|
-        result << { account_id: owner[1].first }
+        owner[1].each do |id|
+          result << { account_id: id } unless id == author_id
+        end
       end
       result
     end
