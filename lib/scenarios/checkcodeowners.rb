@@ -30,17 +30,26 @@ module Scenarios
 
       pullrequests.each do |pr|
         LOGGER.info "Start work with PR: #{pr.pr['url']}"
-        pr_repo           = pr.repo
-        pr_name           = pr.pr['name']
-        pr_id             = pr.pr['id']
-        reviewers         = pr.pr['reviewers']
+        pr_repo   = pr.repo
+        pr_name   = pr.pr['name']
+        pr_id     = pr.pr['id']
+        reviewers = pr.pr['reviewers']
+        # Prepare account_id reviewers list from PR
         reviewers_id_list = get_reviewers_id(reviewers, pr_repo)
         diff_stats        = {}
+        owners_config     = {}
+        # Get PR diff
         with pr_repo do
-          diff_stats = get_pullrequests_diffstats(pr_id)
-          add_info_in_pullrequest(pr_id, 'Description without reviewers ok', nil, pr_name)
+          diff_stats         = get_pullrequests_diffstats(pr_id)
+          owners_config_path = File.expand_path('../../../', __FILE__)
+          owners_config      = YAML.load_file "#{owners_config_path}/bin/#{remote.url.repo}/owners.yml"
         end
+
         modified_files = get_modified_links(diff_stats)
+        # Add info and new reviewers in PR
+        with pr_repo do
+          add_info_in_pullrequest(pr_id, 'Description without reviewers ok', reviewers_id_list, pr_name)
+        end
         modified_files
       end
     end
@@ -58,7 +67,8 @@ module Scenarios
       result = []
       with pr_repo do
         reviewers.each do |user|
-          result << get_reviewer_info(user['name']).first[:mention_id]
+          # Name with space should replace with +
+          result << { account_id: get_reviewer_info(user['name'].sub(' ', '+')).first[:mention_id] }
         end
       end
       result
