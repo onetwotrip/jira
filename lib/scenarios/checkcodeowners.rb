@@ -49,13 +49,19 @@ module Scenarios
         modified_files = get_modified_links(diff_stats)
         # Get codeOwners
         new_reviewers = get_owners(owners_config, modified_files)
+
+        if new_reviewers.empty?
+          LOGGER.warn 'No need to add codeowners in reviewers'
+          exit(0)
+        end
         # Prepare new_reviewers_list
         new_reviewers_list = prepare_new_reviewers_list(old_reviewers, new_reviewers, author_id)
 
         # Add info and new reviewers in PR
+
         with pr_repo do
           LOGGER.info 'Try to add reviewers to PR'
-          add_info_in_pullrequest(pr_id, 'Description without reviewers ok', new_reviewers_list, pr_name)
+          add_info_in_pullrequest(pr_id, "Add codeowners next projects #{new_reviewers.keys} in reviewers ", new_reviewers_list, pr_name)
           LOGGER.info 'Success! Everything fine!'
         end
       end
