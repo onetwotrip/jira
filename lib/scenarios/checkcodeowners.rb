@@ -21,7 +21,6 @@ module Scenarios
       end
 
       LOGGER.info "Found #{pullrequests.prs.size} PR in status OPEN"
-
       pullrequests.each do |pr|
         LOGGER.info "Start work with PR: #{pr.pr['url']}"
         pr_repo   = pr.repo
@@ -65,6 +64,12 @@ module Scenarios
           LOGGER.info 'Success! Everything fine!'
         end
       end
+
+      issue.post_comment <<-BODY
+      {panel:title=CodeOwners checker!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#b8b8e8|bgColor=#d2d2d2}
+        Проверка codeowners завершена!(/)
+      {panel}
+      BODY
     end
 
     def with(instance, &block)
