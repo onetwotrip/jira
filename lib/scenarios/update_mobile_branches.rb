@@ -59,8 +59,7 @@ module Scenarios
     end
 
     def run
-      # adr_filter = 30_361
-      adr_filter = 30_362 # ADR-4901
+      adr_filter = 30_361
       # Get all tickets
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       # noinspection RubyArgCount
