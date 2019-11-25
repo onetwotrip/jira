@@ -21,7 +21,9 @@ module Scenarios
       pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
         next unless pr.pr['destination']['branch'].include? 'develop'
         begin
-          pr_repo     = pr.repo
+          pr_repo = git_repo(pr.pr['destination']['url'])
+          # Prepare repo
+          pr_repo.pull('origin', 'develop')
           branch_name = pr.pr['source']['branch']
           LOGGER.info "Try to update PR: #{branch_name}".green
           with pr_repo do
@@ -57,7 +59,8 @@ module Scenarios
     end
 
     def run
-      adr_filter = 30_361
+      # adr_filter = 30_361
+      adr_filter = 30_362 # ADR-4901
       # Get all tickets
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       # noinspection RubyArgCount
@@ -72,6 +75,7 @@ module Scenarios
       LOGGER.info "Found #{issues.count} issues".green
       count_max = issues.count
       counter   = 1
+
       issues.each do |i|
         LOGGER.info "Work with #{i.key} (#{counter}/#{count_max})"
         update_issue(i)
