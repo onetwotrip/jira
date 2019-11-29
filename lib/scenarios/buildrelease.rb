@@ -154,6 +154,7 @@ module Scenarios
                   {noformat}
                   Замержите мастер в ветку #{branch['name']} .
                   Затем замержите ветку #{branch['name']} в ветку релиза #{pre_release_branch}.
+                  Если конфликт не с мастером, а с веткой релиза, то конфликт надо править в *-pre ветке релиза* #{pre_release_branch}.
                   После этого переведите задачу в статус *In Release*
                     BODY
                     if opts[:push] # rubocop:disable Metrics/BlockNesting
