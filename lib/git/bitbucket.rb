@@ -67,7 +67,7 @@ module Git
         password: SimpleConfig.bitbucket[:password]
       )
     rescue StandardError => e
-      LOGGER.fatal "Got error when try to delete branch #{branch.name}: #{e}"
+      LOGGER.fatal "Got error when try to delete branch #{branch.name}: #{e.response}"
       exit(1)
     end
 
@@ -84,7 +84,7 @@ module Git
       JSON.parse(response, symbolize_names: true)
     rescue StandardError => e
       LOGGER.fatal "Got error when try to get diff stats for PR:#{id} from #{remote.url.repo}"
-      LOGGER.fatal "Error: #{e}"
+      LOGGER.fatal "Error: #{e.response}"
       exit(1)
     end
 
@@ -101,7 +101,7 @@ module Git
       JSON.parse(response, symbolize_names: true)
     rescue StandardError => e
       LOGGER.fatal "Got error when try to get reviewer info for name:#{part_of_name}"
-      LOGGER.fatal "Error: #{e}"
+      LOGGER.fatal "Error: #{e.response}"
       exit(1)
     end
 
@@ -126,7 +126,7 @@ module Git
       JSON.parse(response, symbolize_names: true)
     rescue StandardError => e
       LOGGER.fatal "Got error when try to put some info in PR:#{id} from #{remote.url.repo}"
-      LOGGER.fatal "Error: #{e}"
+      LOGGER.fatal "Error: #{e.response}"
       exit(1)
     end
   end

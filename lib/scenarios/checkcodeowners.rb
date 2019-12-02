@@ -40,7 +40,7 @@ module Scenarios
           diff_stats = get_pullrequests_diffstats(pr_id)
           LOGGER.info 'Success!'
           LOGGER.info "Try to get owners.yml file for project #{remote.url.repo}"
-          owners_config_path = "#{File.expand_path('../../../', __FILE__)}/bin/#{remote.url.repo}/owners.yml"
+          owners_config_path = "#{File.expand_path('../../../', __FILE__)}/bin/#{remote.url.repo}/FileOwners.yaml"
           owners_config      = YAML.load_file owners_config_path
           LOGGER.info "Success!Got file from #{owners_config_path}"
         end
@@ -51,13 +51,19 @@ module Scenarios
 
         if new_reviewers.empty?
           LOGGER.warn 'No need to add codeowners in reviewers'
-          exit(0)
+          if old_reviewers.empty?
+            LOGGER.info 'Need to add random code reviewers in PR'
+            new_reviewers_id   = random_reviewers_from_config(owners_config, author_id, 2)
+            new_reviewers_list = prepare_reviewers_list(new_reviewers_id, author_id)
+          else
+            LOGGER.info 'PR contains reviewers. Everything fine!'
+            exit(0)
+          end
+        else
+          # Prepare new_reviewers_list
+          new_reviewers_list = prepare_new_reviewers_list(old_reviewers, new_reviewers, author_id)
         end
-        # Prepare new_reviewers_list
-        new_reviewers_list = prepare_new_reviewers_list(old_reviewers, new_reviewers, author_id)
-
         # Add info and new reviewers in PR
-
         with pr_repo do
           LOGGER.info 'Try to add reviewers to PR'
           add_info_in_pullrequest(pr_id, "Add codeowners next projects #{new_reviewers.keys} in reviewers ", new_reviewers_list, pr_name)
@@ -107,8 +113,19 @@ module Scenarios
       result = {}
       diff.each do |item|
         owners_config.each do |product|
+          next if product[0] == 'reviewers'
           result[product[0]] = product[1]['owners'] if product[1]['files'].include? item
         end
+      end
+      LOGGER.info "Success! Result: #{result}"
+      result
+    end
+
+    def prepare_reviewers_list(reviewers_list, author_id)
+      LOGGER.info 'Try to prepare reviewers list for add to PR'
+      result = []
+      reviewers_list.each do |id|
+        result << { account_id: id } unless id == author_id
       end
       LOGGER.info "Success! Result: #{result}"
       result
@@ -125,6 +142,13 @@ module Scenarios
       end
       LOGGER.info "Success! Result: #{result}"
       result
+    end
+
+    def random_reviewers_from_config(config, author_id, count)
+      # Delete PR author from reviewers list
+      config['reviewers'].delete(author_id)
+      # Get random users from list
+      config['reviewers'].sample(count)
     end
   end
 end
