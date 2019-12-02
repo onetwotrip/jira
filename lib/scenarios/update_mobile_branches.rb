@@ -89,6 +89,10 @@ module Scenarios
 
       issues.each do |i|
         LOGGER.info "Work with #{i.key} (#{counter}/#{count_max})"
+        unless i.fields['fixVersions'].empty?
+          LOGGER.warn "Issue #{i.key} contains fixVersions, so this is release ticket and i will skip update branch"
+          next
+        end
         update_issue(i)
         counter += 1
       end
