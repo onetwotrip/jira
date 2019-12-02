@@ -60,6 +60,7 @@ module Scenarios
 
     def run
       adr_filter = 30_361
+      ios_filter = 30_421
       # Get all tickets
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       # noinspection RubyArgCount
@@ -67,10 +68,21 @@ module Scenarios
       LOGGER.info("Start work after #{issue.key} was merged")
       project_name = issue.fields['project']['key']
 
-      abort('IOS ticket was merged, so i will skip this task. Only ADR project supports this feature') if project_name.include?('IOS')
+      # abort('IOS ticket was merged, so i will skip this task. Only ADR project supports this feature') if project_name.include?('IOS')
 
-      LOGGER.info "Try to find all tasks from filter #{adr_filter}".green
-      issues = find_by_filter(jira.Issue, adr_filter)
+      filter = case project_name
+               when 'ADR'
+                 LOGGER.info "Took ADR filter: #{adr_filter}"
+                 adr_filter
+               when 'IOS'
+                 LOGGER.info "Took IOS filter: #{ios_filter}"
+                 ios_filter
+               else
+                 abort('Only IOS or ADR projects support this cool feature, so i will skip this task')
+               end
+
+      LOGGER.info "Try to find all tasks from filter #{filter}".green
+      issues = find_by_filter(jira.Issue, filter)
       LOGGER.info "Found #{issues.count} issues".green
       count_max = issues.count
       counter   = 1
