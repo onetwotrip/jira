@@ -67,7 +67,66 @@ module Git
         password: SimpleConfig.bitbucket[:password]
       )
     rescue StandardError => e
-      LOGGER.fatal "Got error when try to delete branch #{branch.name}: #{e}"
+      LOGGER.fatal "Got error when try to delete branch #{branch.name}: #{e.response}"
+      exit(1)
+    end
+
+    # :nocov:
+    def get_pullrequests_diffstats(id)
+      url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests/#{id}/diffstat" # rubocop:disable Metrics/LineLength
+      LOGGER.info "GET #{url}"
+      response = RestClient::Request.execute(
+        method:   :get,
+        url:      url,
+        user: SimpleConfig.bitbucket[:username],
+        password: SimpleConfig.bitbucket[:password]
+      )
+      JSON.parse(response, symbolize_names: true)
+    rescue StandardError => e
+      LOGGER.fatal "Got error when try to get diff stats for PR:#{id} from #{remote.url.repo}"
+      LOGGER.fatal "Error: #{e.response}"
+      exit(1)
+    end
+
+    # :nocov:
+    def get_reviewer_info(part_of_name)
+      url = "https://bitbucket.org/xhr/mentions/repositories/#{remote.url.repo}?term=#{part_of_name}"
+      LOGGER.info "GET #{url}"
+      response = RestClient::Request.execute(
+        method:   :get,
+        url:      url,
+        user: SimpleConfig.bitbucket[:username],
+        password: SimpleConfig.bitbucket[:password]
+      )
+      JSON.parse(response, symbolize_names: true)
+    rescue StandardError => e
+      LOGGER.fatal "Got error when try to get reviewer info for name:#{part_of_name}"
+      LOGGER.fatal "Error: #{e.response}"
+      exit(1)
+    end
+
+    # :nocov:
+    def add_info_in_pullrequest(id, description = nil, reviewers = nil, title = nil)
+      url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests/#{id}"
+      request = {
+        description: description,
+        title:       title,
+        reviewers:  reviewers,
+      }.compact
+
+      LOGGER.info "PUT #{url}"
+      response = RestClient::Request.execute(
+        method:   :put,
+        url:      url,
+        payload: request.to_json,
+        headers: { content_type: :json },
+        user: SimpleConfig.bitbucket[:username],
+        password: SimpleConfig.bitbucket[:password]
+      )
+      JSON.parse(response, symbolize_names: true)
+    rescue StandardError => e
+      LOGGER.fatal "Got error when try to put some info in PR:#{id} from #{remote.url.repo}"
+      LOGGER.fatal "Error: #{e.response}"
       exit(1)
     end
   end
