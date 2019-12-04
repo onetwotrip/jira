@@ -50,7 +50,7 @@ module Scenarios
         new_reviewers = get_owners(owners_config, modified_files)
 
         if new_reviewers.empty?
-          LOGGER.warn 'No need to add codeowners in reviewers'
+          LOGGER.warn 'No need to add code owners in reviewers'
           if old_reviewers.empty?
             LOGGER.info 'Need to add random code reviewers in PR'
             new_reviewers_id   = random_reviewers_from_config(owners_config, author_id, 2)
@@ -63,10 +63,16 @@ module Scenarios
           # Prepare new_reviewers_list
           new_reviewers_list = prepare_new_reviewers_list(old_reviewers, new_reviewers, author_id)
         end
+        message = case new_reviewers.empty?
+                  when true
+                    'Add random reviewers'
+                  when false
+                    "Add code owners next projects #{new_reviewers.keys} in reviewers"
+                  end
         # Add info and new reviewers in PR
         with pr_repo do
           LOGGER.info 'Try to add reviewers to PR'
-          add_info_in_pullrequest(pr_id, "Add codeowners next projects #{new_reviewers.keys} in reviewers ", new_reviewers_list, pr_name)
+          add_info_in_pullrequest(pr_id, message, new_reviewers_list, pr_name)
           LOGGER.info 'Success! Everything fine!'
         end
       end
