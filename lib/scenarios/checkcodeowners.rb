@@ -40,9 +40,9 @@ module Scenarios
           diff_stats = get_pullrequests_diffstats(pr_id)
           LOGGER.info 'Success!'
           LOGGER.info "Try to get owners.yml file for project #{remote.url.repo}"
-          owners_config_path = "#{File.expand_path('../../../', __FILE__)}/bin/#{remote.url.repo}/FileOwners.yaml" # rubocop:disable Style/ExpandPathArguments, Metrics/LineLength
+          owners_config_path = "#{File.expand_path('../../../', __FILE__)}/#{remote.url.repo}/FileOwners.yaml" # rubocop:disable Style/ExpandPathArguments, Metrics/LineLength
           owners_config      = YAML.load_file owners_config_path
-          LOGGER.info "Success!Got file from #{owners_config_path}"
+          LOGGER.info "Success! Got file from #{owners_config_path}"
         end
 
         modified_files = get_modified_links(diff_stats)
@@ -59,16 +59,19 @@ module Scenarios
             LOGGER.info 'PR contains reviewers. Everything fine!'
             exit(0)
           end
+          message = 'Add random reviewers'
         else
           # Prepare new_reviewers_list
           new_reviewers_list = prepare_new_reviewers_list(old_reviewers, new_reviewers, author_id)
+          message = "Add code owners next projects #{new_reviewers.keys} in reviewers"
+          if new_reviewers_list.empty?
+            LOGGER.warn('PR change files where code owner == PR author. I will add two random users in review')
+            new_reviewers_id   = random_reviewers_from_config(owners_config, author_id, 2)
+            new_reviewers_list = prepare_reviewers_list(new_reviewers_id, author_id)
+            message = 'Found case when Code owner and PR author the same person. I will add two random users in review'
+          end
         end
-        message = case new_reviewers.empty?
-                  when true
-                    'Add random reviewers'
-                  when false
-                    "Add code owners next projects #{new_reviewers.keys} in reviewers"
-                  end
+
         # Add info and new reviewers in PR
         with pr_repo do
           LOGGER.info 'Try to add reviewers to PR'
