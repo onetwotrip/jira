@@ -62,6 +62,11 @@ module Scenarios
         else
           # Prepare new_reviewers_list
           new_reviewers_list = prepare_new_reviewers_list(old_reviewers, new_reviewers, author_id)
+          if new_reviewers_list.empty?
+            LOGGER.warn('PR change files where code owner == PR author. I will add two random users in review')
+            new_reviewers_id   = random_reviewers_from_config(owners_config, author_id, 2)
+            new_reviewers_list = prepare_reviewers_list(new_reviewers_id, author_id)
+          end
         end
         message = case new_reviewers.empty?
                   when true
