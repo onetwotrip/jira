@@ -68,7 +68,7 @@ module Scenarios
             LOGGER.warn('PR change files where code owner == PR author. I will add two random users in review')
             new_reviewers_id   = random_reviewers_from_config(owners_config, author_id, 2)
             new_reviewers_list = prepare_reviewers_list(new_reviewers_id, author_id)
-            message = 'Found case when Code owner and PR author he same person. I will add two random users in review'
+            message = 'Found case when Code owner and PR author the same person. I will add two random users in review'
           end
         end
 
