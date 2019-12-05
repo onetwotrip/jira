@@ -23,7 +23,7 @@ module Scenarios
       LOGGER.info "Found #{pullrequests.prs.size} PR in status OPEN"
       pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
         LOGGER.info "Start work with PR: #{pr.pr['url']}"
-        pr_repo   = pr.repo
+        pr_repo   = git_repo(pr.pr['destination']['url'])
         pr_name   = pr.pr['name']
         pr_id     = pr.pr['id']
         reviewers = pr.pr['reviewers']
