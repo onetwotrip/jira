@@ -106,6 +106,23 @@ module Git
     end
 
     # :nocov:
+    def get_pr_full_info(id)
+      url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests/#{id}"
+      LOGGER.info "GET #{url}"
+      response = RestClient::Request.execute(
+        method:   :get,
+        url:      url,
+        user: SimpleConfig.bitbucket[:username],
+        password: SimpleConfig.bitbucket[:password]
+      )
+      JSON.parse(response, symbolize_names: true)
+    rescue StandardError => e
+      LOGGER.fatal "Got error when try to get full info about PR:#{id} from #{remote.url.repo}"
+      LOGGER.fatal "Error: #{e.response}"
+      exit(1)
+    end
+
+    # :nocov:
     def add_info_in_pullrequest(id, description = nil, reviewers = nil, title = nil)
       url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests/#{id}"
       request = {

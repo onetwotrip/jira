@@ -31,11 +31,13 @@ module Scenarios
         # Prepare account_id reviewers list from PR
         old_reviewers = get_reviewers_id(reviewers, pr_repo)
         # Get author id for case when he will be one of owners
-        author_id     = get_reviewers_id(pr_author, pr_repo).first
-        diff_stats    = {}
-        owners_config = {}
+        author_id      = get_reviewers_id(pr_author, pr_repo).first
+        diff_stats     = {}
+        owners_config  = {}
+        pr_description = ''
         # Get PR diff and owners_config
         with pr_repo do
+          pr_description = get_pr_full_info(pr_id)[:description]
           LOGGER.info 'Try to diff stats from BB'
           diff_stats = get_pullrequests_diffstats(pr_id)
           LOGGER.info 'Success!'
@@ -63,19 +65,22 @@ module Scenarios
         else
           # Prepare new_reviewers_list
           new_reviewers_list = prepare_new_reviewers_list(old_reviewers, new_reviewers, author_id)
-          message = "Add code owners next projects #{new_reviewers.keys} in reviewers"
+          message            = "Add code owners next projects #{new_reviewers.keys} in reviewers"
           if new_reviewers_list.empty?
             LOGGER.warn('PR change files where code owner == PR author. I will add two random users in review')
             new_reviewers_id   = random_reviewers_from_config(owners_config, author_id, 2)
             new_reviewers_list = prepare_reviewers_list(new_reviewers_id, author_id)
-            message = 'Found case when Code owner and PR author the same person. I will add two random users in review'
+            message            = 'Found case when Code owner and PR author the same person. I will add two random users in review'
           end
         end
+
+        # Prepare full description
+        description = prepare_pr_description(pr_description, message)
 
         # Add info and new reviewers in PR
         with pr_repo do
           LOGGER.info 'Try to add reviewers to PR'
-          add_info_in_pullrequest(pr_id, message, new_reviewers_list, pr_name)
+          add_info_in_pullrequest(pr_id, description, new_reviewers_list, pr_name)
           LOGGER.info 'Success! Everything fine!'
         end
       end
@@ -85,6 +90,17 @@ module Scenarios
         Проверка codeowners завершена!(/)
       {panel}
       BODY
+    end
+
+    def prepare_pr_description(description, message)
+      result = if description.empty?
+                 "**System:** #{message}"
+               elsif description.include?('**System:**')
+                 description
+               else
+                 "#{description} \n\n **System:** #{message}"
+               end
+      result
     end
 
     def with(instance, &block)
