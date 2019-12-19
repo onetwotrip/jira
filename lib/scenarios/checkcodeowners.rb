@@ -9,8 +9,8 @@ module Scenarios
       issue = jira.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info "Try to get all PR in status OPEN from #{issue.key}"
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
-                       .filter_by_status('OPEN')
-                       .filter_by_source_url(SimpleConfig.jira.issue)
+                          .filter_by_status('OPEN')
+                          .filter_by_source_url(SimpleConfig.jira.issue)
 
       if pullrequests.empty?
         issue.post_comment <<-BODY
