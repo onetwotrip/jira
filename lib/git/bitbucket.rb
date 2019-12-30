@@ -129,6 +129,7 @@ module Git
         description: description,
         title:       title,
         reviewers:  reviewers,
+        close_source_branch: true
       }.compact
 
       LOGGER.info "PUT #{url}"
