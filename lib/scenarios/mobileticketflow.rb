@@ -45,7 +45,7 @@ module Scenarios
           is_error = true
           puts e.message.red
 
-          if e.message.include?('Merge conflict')
+          if e.message.include?('Merge conflict') || e.message.include?('CONFLICT')
             issue.post_comment <<-BODY
               {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
                   Не удалось замержить PR: #{pr_url}
