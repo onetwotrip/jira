@@ -19,3 +19,5 @@ coverage/
 *.sublime-*
 env.properties
 /bin/.SimpleConfig.yml
+*/OneTwoTrip/*
+test_branch

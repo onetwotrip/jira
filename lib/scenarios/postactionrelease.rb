@@ -2,6 +2,11 @@ module Scenarios
   ##
   # PostactionRelease scenario
   class PostactionRelease
+    def with(instance, &block)
+      instance.instance_eval(&block)
+      instance
+    end
+
     def run
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       # noinspection RubyArgCount
@@ -26,9 +31,12 @@ module Scenarios
 
       pullrequests.each do |pr|
         # Checkout repo
-        puts "Clone/Open with #{pr.dst} branch #{pr.dst.branch} and merge #{pr.src.branch} and push".green
+        puts "Merge PR: #{pr.pr['url']}".green
         begin
-          pr.repo.push('origin', pr.pr['destination']['branch'])
+          local_repo = pr.repo
+          with local_repo do
+            merge_pullrequest(pr.pr['id'])
+          end
         rescue Git::GitExecuteError => e
           is_error = true
           puts e.message.red
