@@ -61,7 +61,7 @@ module Git
       LOGGER.fatal "Error: #{e}; URL: #{url}"
       LOGGER.fatal "Response: #{e.response}"
       exit(1)
-      end
+    end
 
     def decline_pullrequest(username = nil, password = nil, pull_request_id = '')
       url = "https://#{username}:#{password}@api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests/#{pull_request_id}/decline" # rubocop:disable Metrics/LineLength
