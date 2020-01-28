@@ -48,6 +48,20 @@ module Git
       end
     end
 
+    def merge_pullrequest(pull_request_id = '')
+      url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests/#{pull_request_id}/merge" # rubocop:disable Metrics/LineLength
+      RestClient::Request.execute(
+        method:   :post,
+        url:      url,
+        user: SimpleConfig.bitbucket[:username],
+        password: SimpleConfig.bitbucket[:password]
+      )
+    rescue StandardError => e
+      LOGGER.fatal "Pullrequest didn't merge"
+      LOGGER.fatal "Error: #{e}; URL: #{url}"
+      exit(1)
+      end
+
     def decline_pullrequest(username = nil, password = nil, pull_request_id = '')
       url = "https://#{username}:#{password}@api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests/#{pull_request_id}/decline" # rubocop:disable Metrics/LineLength
       RestClient.post url, content_type: :json
