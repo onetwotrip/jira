@@ -58,7 +58,8 @@ module Git
       )
     rescue StandardError => e
       LOGGER.fatal "Pullrequest didn't merge"
-      LOGGER.fatal "Error: #{e}; URL: #{url}; Response: #{e.response}"
+      LOGGER.fatal "Error: #{e}; URL: #{url}"
+      LOGGER.fatal "Response: #{e.response}"
       exit(1)
       end
 
