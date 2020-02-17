@@ -14,7 +14,7 @@ module Scenarios
 
       client = JIRA::Client.new SimpleConfig.jira.to_h
 
-      filter            = "type = Release and labels = #{ENV['SERVICE_NAME']} AND status in(Open,'Build Release','Build Failed',Testing,Passed,Staging,Production)" # rubocop:disable Metrics/LineLength</code>
+      filter            = "type = Release and labels = #{ENV['SERVICE_NAME']} AND status not in(Done, Rejected, Closed)" # rubocop:disable Metrics/LineLength</code>
       existing_releases = client.Issue.jql(filter, max_results: 100)
 
       unless existing_releases.empty?
