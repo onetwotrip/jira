@@ -175,7 +175,7 @@ module Scenarios
     end
 
     def random_reviewers_from_config(config, remove_id, count)
-      if remove_id.kind_of?(Array)
+      if remove_id.is_a?(Array)
         remove_id.each do |id|
           config['reviewers'].delete(id)
         end
