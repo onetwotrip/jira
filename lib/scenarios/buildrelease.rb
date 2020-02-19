@@ -12,8 +12,9 @@ module Scenarios
       LOGGER.info "Build release #{opts[:release]}"
 
       options = { auth_type: :basic }.merge(opts.to_hash)
-      client  = JIRA::Client.new(options)
+      client = JIRA::Client.new(options)
       release = client.Issue.find(opts[:release])
+      is_cd_build = ENV['CD_BUILD'] || false
 
       release.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
@@ -51,7 +52,7 @@ module Scenarios
           end
           # Unlink issue with more than one product branches. Test is skipped
           next unless is_only_one_branch
-          branches      = issuelink.outwardIssue.api_pullrequests
+          branches = issuelink.outwardIssue.api_pullrequests
           branches_list = []
           branches.each do |branch|
             branches_list << branch.repo_slug if branch.state.include?('OPEN')
@@ -71,12 +72,12 @@ module Scenarios
           exit(127)
         end
         badissues = {}
-        repos     = {}
+        repos = {}
 
         pre_release_branch = "#{opts[:release]}-#{opts[:postfix]}"
-        release_branch     = "#{opts[:release]}-release"
-        source             = opts[:source]
-        delete_branches    = []
+        release_branch = "#{opts[:release]}-release"
+        source = opts[:source]
+        delete_branches = []
         delete_branches << pre_release_branch
 
         # Get release branch if exist for feature deleting
@@ -99,7 +100,7 @@ module Scenarios
           has_merges = false
           merge_fail = false
           if issue.related['pullRequests'].empty?
-            body               = "CI: [~#{issue.assignee.key}] No pullrequest here"
+            body = "CI: [~#{issue.assignee.key}] No pullrequest here"
             badissues[:absent] = [] unless badissues.key?(:absent)
             badissues[:absent].push(key: issue.key, body: body)
             issue.post_comment body
@@ -119,14 +120,14 @@ module Scenarios
                   next unless branch['url'] == pullrequest['source']['url']
 
                   repo_name = branch['repository']['name']
-                  repo_url  = branch['repository']['url']
+                  repo_url = branch['repository']['url']
 
-                  repos[repo_name]             ||= { url: repo_url, branches: [] }
+                  repos[repo_name] ||= { url: repo_url, branches: [] }
                   repos[repo_name][:repo_base] ||= git_repo(repo_url,
                                                             delete_branches: delete_branches)
-                  repos[repo_name][:branches].push(issue:       issue,
+                  repos[repo_name][:branches].push(issue: issue,
                                                    pullrequest: pullrequest,
-                                                   branch:      branch)
+                                                   branch: branch)
                   repo_path = repos[repo_name][:repo_base]
                   repo_path.checkout('master')
                   # Merge master to pre_release_branch (ex OTT-8703-pre)
@@ -168,7 +169,7 @@ module Scenarios
                   end
                 end
               else
-                body                = "CI: [~#{issue.assignee.key}] PR: #{pullrequest['id']}"\
+                body = "CI: [~#{issue.assignee.key}] PR: #{pullrequest['id']}"\
                      " #{pullrequest['source']['branch']} не соответствует"\
                      " имени задачи #{issue.key}"
                 badissues[:badname] = [] unless badissues.key?(:badname)
@@ -208,6 +209,25 @@ module Scenarios
         BODY
         LOGGER.error "Не удалось собрать -pre ветки, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
         exit(1)
+      end
+      # If it is CI process we should unlink Merge Failed tickets
+      if is_cd_build
+        begin
+          release.issuelinks.select { |issuelink| issuelink.outwardIssue.status.name.downcase.include?('merge failed') }.each do |issue|
+            release.post_comment "Unlink ticket #{issue.outwardIssue.key} from release, cause ticket has 'Merge Failed' status"
+            issue.outwardIssue.post_comment "Unlink ticket from release, cause ticket has 'Merge Failed' status"
+            issue.delete
+            LOGGER.info "Unlink ticket #{issue.outwardIssue.key} from release, cause ticket has 'Merge Failed' status"
+          end
+        rescue StandardError => e
+          release.post_comment <<-BODY
+        {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+         Не удалось отлинковать Merge Failed задачи (x)
+         Подробности в логе таски https://jenkins.twiket.com/view/RELEASE/job/build_release/
+        {panel}
+          BODY
+          LOGGER.error "Не удалось отлинковать Merge Failed задачи, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
+        end
       end
 
       release.post_comment <<-BODY
