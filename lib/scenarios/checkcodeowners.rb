@@ -23,17 +23,17 @@ module Scenarios
       LOGGER.info "Found #{pullrequests.prs.size} PR in status OPEN"
       pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
         LOGGER.info "Start work with PR: #{pr.pr['url']}"
-        pr_repo   = git_repo(pr.pr['destination']['url'])
-        pr_name   = pr.pr['name']
-        pr_id     = pr.pr['id']
+        pr_repo = git_repo(pr.pr['destination']['url'])
+        pr_name = pr.pr['name']
+        pr_id = pr.pr['id']
         reviewers = pr.pr['reviewers']
         pr_author = pr.pr['author']
         # Prepare account_id reviewers list from PR
         old_reviewers = get_reviewers_id(reviewers, pr_repo)
         # Get author id for case when he will be one of owners
-        author_id      = get_reviewers_id(pr_author, pr_repo).first
-        diff_stats     = {}
-        owners_config  = {}
+        author_id = get_reviewers_id(pr_author, pr_repo).first
+        diff_stats = {}
+        owners_config = {}
         pr_description = ''
         # Get PR diff and owners_config
         with pr_repo do
@@ -43,7 +43,7 @@ module Scenarios
           LOGGER.info 'Success!'
           LOGGER.info "Try to get owners.yml file for project #{remote.url.repo}"
           owners_config_path = "#{File.expand_path('../../../', __FILE__)}/#{remote.url.repo}/FileOwners.yaml" # rubocop:disable Style/ExpandPathArguments, Metrics/LineLength
-          owners_config      = YAML.load_file owners_config_path
+          owners_config = YAML.load_file owners_config_path
           LOGGER.info "Success! Got file from #{owners_config_path}"
         end
 
@@ -55,7 +55,7 @@ module Scenarios
           LOGGER.warn 'No need to add code owners in reviewers'
           if old_reviewers.empty?
             LOGGER.info 'Need to add random code reviewers in PR'
-            new_reviewers_id   = random_reviewers_from_config(owners_config, author_id, 2)
+            new_reviewers_id = random_reviewers_from_config(owners_config, author_id, 2)
             new_reviewers_list = prepare_reviewers_list(new_reviewers_id, author_id)
           else
             LOGGER.info 'PR contains reviewers. Everything fine!'
@@ -65,12 +65,17 @@ module Scenarios
         else
           # Prepare new_reviewers_list
           new_reviewers_list = prepare_new_reviewers_list(old_reviewers, new_reviewers, author_id)
-          message            = "Add code owners next projects #{new_reviewers.keys} in reviewers"
+          message = "Add code owners next projects #{new_reviewers.keys} in reviewers"
           if new_reviewers_list.empty?
             LOGGER.warn('PR change files where code owner == PR author. I will add two random users in review')
-            new_reviewers_id   = random_reviewers_from_config(owners_config, author_id, 2)
+            new_reviewers_id = random_reviewers_from_config(owners_config, author_id, 2)
             new_reviewers_list = prepare_reviewers_list(new_reviewers_id, author_id)
-            message            = 'Found case when Code owner and PR author the same person. I will add two random users in review'
+            message = 'Found case when Code owner and PR author the same person. I will add two random users in review'
+          elsif new_reviewers_list.count < 2
+            LOGGER.warn('New reviewer list has less than 2 people. Need add one more random reviewer')
+            new_reviewers_id = random_reviewers_from_config(owners_config, [author_id, old_reviewers], 2)
+            new_reviewers_list = prepare_reviewers_list(new_reviewers_id, author_id)
+            message = 'Not enough owners for review(should be at least 2). I will add random reviewer '
           end
         end
 
@@ -110,7 +115,7 @@ module Scenarios
 
     def get_modified_links(diff_stats)
       LOGGER.info 'Try to get modified files'
-      result   = []
+      result = []
       statuses = %w[modified removed]
       diff_stats[:values].each do |diff|
         result << diff[:old][:path] if statuses.include? diff[:status]
@@ -121,7 +126,7 @@ module Scenarios
 
     def get_reviewers_id(reviewers, pr_repo)
       LOGGER.info 'Try to get current reviewers id'
-      result    = []
+      result = []
       reviewers = [reviewers] unless reviewers.is_a? Array
       with pr_repo do
         reviewers.each do |user|
@@ -169,9 +174,15 @@ module Scenarios
       result
     end
 
-    def random_reviewers_from_config(config, author_id, count)
-      # Delete PR author from reviewers list
-      config['reviewers'].delete(author_id)
+    def random_reviewers_from_config(config, remove_id, count)
+      if remove_id.is_a?(Array)
+        remove_id.each do |id|
+          config['reviewers'].delete(id)
+        end
+      else
+        # Delete PR author from reviewers list
+        config['reviewers'].delete(remove_id)
+      end
       # Get random users from list
       config['reviewers'].sample(count)
     end
