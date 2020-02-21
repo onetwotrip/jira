@@ -125,13 +125,18 @@ module Scenarios
         end
       end
 
-      # Work with tickets
-      issue.linked_issues('deployes').each do |subissue|
-        # Transition to DONE
-        subissue.transition 'To master' if subissue.get_transition_by_name 'To master'
+      if is_error
+        LOGGER.error "Some PR didn't merge"
+        issue.transition 'Undo code merge'
+        exit(1)
+      else
+        LOGGER.info "Everything fine. Try to move tickets to 'DONE' status"
+        # Work with tickets
+        issue.linked_issues('deployes').each do |subissue|
+          # Transition to DONE
+          subissue.transition 'To master' if subissue.get_transition_by_name 'To master'
+        end
       end
-
-      exit(1) if is_error
     end
   end
 end
