@@ -100,7 +100,7 @@ module Scenarios
           has_merges = false
           merge_fail = false
           if issue.related['pullRequests'].empty?
-            body = "CI: [~#{issue.assignee.key}] No pullrequest here"
+            body = "CI: [~#{issue.assignee.displayName}] No pullrequest here"
             badissues[:absent] = [] unless badissues.key?(:absent)
             badissues[:absent].push(key: issue.key, body: body)
             issue.post_comment body
@@ -146,7 +146,7 @@ module Scenarios
                   rescue Git::GitExecuteError => e
                     body = <<-BODY
                   CI: Error while merging to release #{opts[:release]}
-                  [~#{issue.assignee.key}]
+                  [~#{issue.assignee.displayName}]
                   Repo: #{repo_name}
                   Author: #{pullrequest['author']['name']}
                   PR: #{pullrequest['url']}
@@ -169,7 +169,7 @@ module Scenarios
                   end
                 end
               else
-                body = "CI: [~#{issue.assignee.key}] PR: #{pullrequest['id']}"\
+                body = "CI: [~#{issue.assignee.displayName}] PR: #{pullrequest['id']}"\
                      " #{pullrequest['source']['branch']} не соответствует"\
                      " имени задачи #{issue.key}"
                 badissues[:badname] = [] unless badissues.key?(:badname)
