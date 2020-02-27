@@ -11,8 +11,8 @@ module Scenarios
       issue = jira.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info "Try to get all PR in status OPEN from #{issue.key}"
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
-                       .filter_by_status('OPEN')
-                       .filter_by_source_url(SimpleConfig.jira.issue)
+                          .filter_by_status('OPEN')
+                          .filter_by_source_url(SimpleConfig.jira.issue)
 
       if pullrequests.empty?
         issue.post_comment <<-BODY
@@ -44,8 +44,7 @@ module Scenarios
           diff_stats = get_pullrequests_diffstats(pr_id)
           LOGGER.info 'Success!'
           LOGGER.info "Try to get owners.yml file for project #{remote.url.repo}"
-          #owners_config_path = "#{File.expand_path('../../../', __FILE__)}/#{remote.url.repo}/FileOwners.yaml" # rubocop:disable Style/ExpandPathArguments, Metrics/LineLength
-          owners_config_path = "#{File.expand_path('../../../', __FILE__)}/bin/#{remote.url.repo}/FileOwners.yaml" # rubocop:disable Style/ExpandPathArguments, Metrics/LineLength          owners_config = YAML.load_file owners_config_path
+          owners_config_path = "#{File.expand_path('../../../', __FILE__)}/#{remote.url.repo}/FileOwners.yaml" # rubocop:disable Style/ExpandPathArguments, Metrics/LineLength
           owners_config = YAML.load_file owners_config_path
           LOGGER.info "Success! Got file from #{owners_config_path}"
         end
