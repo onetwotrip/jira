@@ -2,6 +2,8 @@ module Scenarios
   ##
   # Add code owners to PR
   class CheckCodeOwners
+    DEFAULT_REVIEWERS_COUNT = 2
+
     def run
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       # noinspection RubyArgCount
@@ -54,8 +56,13 @@ module Scenarios
         if new_reviewers.empty?
           LOGGER.warn 'No need to add code owners in reviewers'
           if old_reviewers.empty?
-            LOGGER.info 'Need to add random code reviewers in PR'
-            new_reviewers_id = random_reviewers_from_config(owners_config, author_id, 2)
+            LOGGER.warn 'Need to add random code reviewers in PR'
+            new_reviewers_id = random_reviewers_from_config(owners_config, author_id, DEFAULT_REVIEWERS_COUNT)
+            new_reviewers_list = prepare_reviewers_list(new_reviewers_id, author_id)
+          elsif old_reviewers.count < DEFAULT_REVIEWERS_COUNT
+            LOGGER.warn 'Found only 1 reviewer in PR. Need to add some more'
+            new_reviewers_id = random_reviewers_from_config(owners_config, [author_id, old_reviewers], DEFAULT_REVIEWERS_COUNT)
+            new_reviewers_id += old_reviewers
             new_reviewers_list = prepare_reviewers_list(new_reviewers_id, author_id)
           else
             LOGGER.info 'PR contains reviewers. Everything fine!'
@@ -68,12 +75,12 @@ module Scenarios
           message = "Add code owners next projects #{new_reviewers.keys} in reviewers"
           if new_reviewers_list.empty?
             LOGGER.warn('PR change files where code owner == PR author. I will add two random users in review')
-            new_reviewers_id = random_reviewers_from_config(owners_config, author_id, 2)
+            new_reviewers_id = random_reviewers_from_config(owners_config, author_id, DEFAULT_REVIEWERS_COUNT)
             new_reviewers_list = prepare_reviewers_list(new_reviewers_id, author_id)
             message = 'Found case when Code owner and PR author the same person. I will add two random users in review'
-          elsif new_reviewers_list.count < 2
+          elsif new_reviewers_list.count < DEFAULT_REVIEWERS_COUNT
             LOGGER.warn('New reviewer list has less than 2 people. Need add one more random reviewer')
-            new_reviewers_id = random_reviewers_from_config(owners_config, [author_id, old_reviewers], 2)
+            new_reviewers_id = random_reviewers_from_config(owners_config, [author_id, old_reviewers], DEFAULT_REVIEWERS_COUNT)
             new_reviewers_list = prepare_reviewers_list(new_reviewers_id, author_id)
             message = 'Not enough owners for review(should be at least 2). I will add random reviewer '
           end
@@ -174,17 +181,19 @@ module Scenarios
       result
     end
 
-    def random_reviewers_from_config(config, remove_id, count)
+    def random_reviewers_from_config(config, remove_id, count = DEFAULT_REVIEWERS_COUNT)
       if remove_id.is_a?(Array)
         remove_id.each do |id|
           config['reviewers'].delete(id)
         end
+        additional_reviewers_count = DEFAULT_REVIEWERS_COUNT - (remove_id.size - 1) # Here -1 cause author_id in remove_id list
       else
         # Delete PR author from reviewers list
         config['reviewers'].delete(remove_id)
+        additional_reviewers_count = DEFAULT_REVIEWERS_COUNT
       end
       # Get random users from list
-      config['reviewers'].sample(count)
+      config['reviewers'].sample(additional_reviewers_count)
     end
   end
 end
