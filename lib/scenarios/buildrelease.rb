@@ -210,23 +210,31 @@ module Scenarios
         LOGGER.error "Не удалось собрать -pre ветки, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
         exit(1)
       end
+
       # If it is CI process we should unlink Merge Failed tickets
       if is_cd_build
-        begin
-          release.issuelinks.select { |issuelink| issuelink.outwardIssue.status.name.downcase.include?('merge failed') }.each do |issue|
-            release.post_comment "Unlink ticket #{issue.outwardIssue.key} from release, cause ticket has 'Merge Failed' status"
-            issue.outwardIssue.post_comment "Unlink ticket from release, cause ticket has 'Merge Failed' status"
-            issue.delete
-            LOGGER.info "Unlink ticket #{issue.outwardIssue.key} from release, cause ticket has 'Merge Failed' status"
-          end
-        rescue StandardError => e
-          release.post_comment <<-BODY
+        LOGGER.info "Try to get new info about release ticket"
+        release = client.Issue.find(opts[:release])
+        merge_failed_tikets = release.issuelinks.select { |issuelink| issuelink.outwardIssue.status.name.downcase.include?('merge failed') }
+
+        unless merge_failed_tikets.empty?
+          LOGGER.warn "Found merge_failed_ticket: #{merge_failed_tikets.size}"
+          begin
+            merge_failed_tikets.each do |issue|
+              release.post_comment "Unlink ticket #{issue.outwardIssue.key} from release, cause ticket has 'Merge Failed' status"
+              issue.outwardIssue.post_comment "Unlink ticket from release, cause ticket has 'Merge Failed' status"
+              issue.delete
+              LOGGER.info "Unlink ticket #{issue.outwardIssue.key} from release, cause ticket has 'Merge Failed' status"
+            end
+          rescue StandardError => e
+            release.post_comment <<-BODY
         {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
          Не удалось отлинковать Merge Failed задачи (x)
          Подробности в логе таски https://jenkins.twiket.com/view/RELEASE/job/build_release/
         {panel}
-          BODY
-          LOGGER.error "Не удалось отлинковать Merge Failed задачи, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
+            BODY
+            LOGGER.error "Не удалось отлинковать Merge Failed задачи, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
+          end
         end
       end
 
