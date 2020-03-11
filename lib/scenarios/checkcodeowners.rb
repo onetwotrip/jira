@@ -188,11 +188,9 @@ module Scenarios
         remove_id.reject(&:empty?).each do |id|
           config['reviewers'].delete(id)
         end
-        #additional_reviewers_count = count - (remove_id.size - 1) # Here -1 cause author_id in remove_id list
       else
         # Delete PR author from reviewers list
         config['reviewers'].delete(remove_id)
-        #additional_reviewers_count = count
       end
       # Get random users from list
       config['reviewers'].sample(count)
@@ -201,7 +199,7 @@ module Scenarios
     def get_new_reviewers_id_list(reviewers_list)
       LOGGER.info 'Create new reviewer id list'
       result = []
-      reviewers_list.each { |reviewer| result << reviewer[:account_id]}
+      reviewers_list.each { |reviewer| result << reviewer[:account_id] }
       LOGGER.info "Success! new reviewer id list: #{result}"
       result
     end
