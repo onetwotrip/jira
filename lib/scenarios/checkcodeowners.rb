@@ -82,7 +82,7 @@ module Scenarios
           elsif new_reviewers_list.count < DEFAULT_REVIEWERS_COUNT
             LOGGER.warn('New reviewer list has less than 2 people. Need add one more random reviewer')
             new_reviewers_id_list = get_new_reviewers_id_list(new_reviewers_list)
-            new_reviewers_id = random_reviewers_from_config(owners_config, [author_id, old_reviewers, new_reviewers_id_list].flatten, (DEFAULT_REVIEWERS_COUNT-new_reviewers_list.size))
+            new_reviewers_id = random_reviewers_from_config(owners_config, [author_id, old_reviewers, new_reviewers_id_list].flatten, (DEFAULT_REVIEWERS_COUNT - new_reviewers_list.size))
             new_reviewers_list += prepare_reviewers_list(new_reviewers_id, author_id)
             message = 'Not enough owners for review(should be at least 2). I will add random reviewer '
           end
