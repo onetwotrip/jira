@@ -7,10 +7,6 @@ module Scenarios
       # noinspection RubyArgCount
       issue = jira.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info("Start work with #{issue.key}")
-      if issue.key.include? 'ADR'
-        LOGGER.info("Временно отключен мердж для Андройда")
-        exit(1)
-      end
       is_error = false
       is_empty = false
 
