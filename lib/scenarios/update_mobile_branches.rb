@@ -66,10 +66,6 @@ module Scenarios
       # noinspection RubyArgCount
       issue = jira.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info("Start work after #{issue.key} was merged")
-      if issue.key.include? 'ADR'
-        LOGGER.info("Временно отключен мердж для Андройда")
-        exit(1)
-      end
       project_name = issue.fields['project']['key']
 
       # abort('IOS ticket was merged, so i will skip this task. Only ADR project supports this feature') if project_name.include?('IOS')
