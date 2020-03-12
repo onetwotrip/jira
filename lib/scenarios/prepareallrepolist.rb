@@ -20,7 +20,6 @@ module Scenarios
       else
         LOGGER.warn("Ticket #{issue.key} not a release ticket")
       end
-
     end
   end
 end
