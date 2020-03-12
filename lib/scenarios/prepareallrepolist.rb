@@ -7,15 +7,20 @@ module Scenarios
       # noinspection RubyArgCount
       issue = jira.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info("Start work with #{issue.key}")
-      result = ""
-      issue.branches.each do |branch|
-        result += ",#{branch.repo_slug}"
+      if issue.fields['issuetype']['name'].include?('Release')
+        result = ""
+        issue.branches.each do |branch|
+          result += ",#{branch.repo_slug}"
+        end
+        result = result[1..] # delete first comma
+        LOGGER.info("Find repos: #{result}")
+
+
+        Ott::Helpers.export_to_file(result, 'repo_list.txt')
+      else
+        LOGGER.warn("Ticket #{issue.key} not a release ticket")
       end
-      result = result[1..] # delete first comma
-      LOGGER.info("Find repos: #{result}")
 
-
-      Ott::Helpers.export_to_file(result, 'repo_list.txt')
     end
   end
 end
