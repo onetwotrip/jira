@@ -92,7 +92,7 @@ module Scenarios
                             .filter_by_status('OPEN')
                             .filter_by_source_url(SimpleConfig.jira.issue)
         LOGGER.info "Found #{pullrequests.prs.size} PR in status OPEN after release branch was merged"
-        pullrequests.each do |pr|
+        pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
           LOGGER.info 'Try to find feature PR for decline'
           next unless pr.pr['name'].include?('feature')
           begin

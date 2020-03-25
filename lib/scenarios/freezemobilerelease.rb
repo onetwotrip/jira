@@ -72,7 +72,7 @@ module Scenarios
           end
 
           if issue.key.include?('IOS')
-            LOGGER.warn "This is IOS ticket, so i have to make also feature branch"
+            LOGGER.warn 'This is IOS ticket, so i have to make also feature branch'
             new_branch_dev = "feature/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}/#{release_label}"
             LOGGER.info "Copying #{old_branch} to #{new_branch_dev} branch"
             cur_branch = repo_path.current_branch
