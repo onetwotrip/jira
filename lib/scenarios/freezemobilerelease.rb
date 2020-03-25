@@ -60,10 +60,9 @@ module Scenarios
         end
 
         release_issues.each do |branch| # rubocop:disable Metrics/BlockLength
-          old_branch = branch['name']
-          new_branch_dev = "feature/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}/#{release_label}"
+          old_branch        = branch['name']
           new_branch_master = "release/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}/#{release_label}"
-          repo_path = git_repo(branch['repository']['url'])
+          repo_path         = git_repo(branch['repository']['url'])
 
           # copy -pre to -release
           LOGGER.info "Working with #{repo_path.remote.url.repo}"
@@ -72,14 +71,22 @@ module Scenarios
             exit(1)
           end
 
-          LOGGER.info "Copying #{old_branch} to #{new_branch_dev} branch"
-          cur_branch = repo_path.current_branch
-          with repo_path do
-            checkout(old_branch)
-            pull
-            branch(new_branch_dev).delete if is_branch?(new_branch_dev)
-            branch(new_branch_dev).create
-            checkout cur_branch
+          if issue.key.include?('IOS')
+            LOGGER.warn 'This is IOS ticket, so i have to make also feature branch'
+            new_branch_dev = "feature/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}/#{release_label}"
+            LOGGER.info "Copying #{old_branch} to #{new_branch_dev} branch"
+            cur_branch = repo_path.current_branch
+            with repo_path do
+              checkout(old_branch)
+              pull
+              branch(new_branch_dev).delete if is_branch?(new_branch_dev)
+              branch(new_branch_dev).create
+              checkout cur_branch
+              LOGGER.info "Pushing #{new_branch_dev}"
+              push(repo_path.remote('origin'), new_branch_dev) # push -feature to origin
+              LOGGER.info "Creating PR from #{new_branch_dev} to 'master'"
+              new_create_pullrequest(new_branch_dev, 'master')
+            end
           end
 
           LOGGER.info "Copying #{old_branch} to #{new_branch_master} branch"
@@ -90,17 +97,12 @@ module Scenarios
             branch(new_branch_master).delete if is_branch?(new_branch_master)
             branch(new_branch_master).create
             checkout cur_branch
-          end
-
-          LOGGER.info "Pushing #{new_branch_dev} and #{new_branch_master}. Deleting #{old_branch} branch"
-          with repo_path do
+            LOGGER.info "Pushing #{new_branch_master}"
             push(repo_path.remote('origin'), new_branch_master) # push -release to origin
-            push(repo_path.remote('origin'), new_branch_dev) # push -feature to origin
-            branch(old_branch).delete_both if old_branch != 'master' # delete -pre from local/remote
             LOGGER.info "Creating PR from #{new_branch_master} to 'master'"
             new_create_pullrequest(new_branch_master, 'master')
-            LOGGER.info "Creating PR from #{new_branch_dev} to 'master'"
-            new_create_pullrequest(new_branch_dev, 'master')
+            LOGGER.info "Deleting #{old_branch} branch"
+            branch(old_branch).delete_both if old_branch != 'master' # delete -pre from local/remote
           end
         end
 
