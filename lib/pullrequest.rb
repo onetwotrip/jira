@@ -69,6 +69,11 @@ module JIRA
       @repo
     end
 
+    # use it when you need just repo owner and repo name parameters for BB request
+    def simple_repo
+      @repo ||= Git.get_branch URI.decode_www_form_component(dst.full_url)
+    end
+
     private
 
     def reviewers_by_files(files)

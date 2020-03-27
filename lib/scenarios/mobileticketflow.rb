@@ -31,7 +31,7 @@ module Scenarios
       pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
         src_branch = pr.pr['source']['branch']
         dst_branch = pr.pr['destination']['branch']
-        pr_url = pr.pr['url']
+        pr_url     = pr.pr['url']
 
         # Check is destination is master
         if dst_branch.eql?('master')
@@ -45,7 +45,7 @@ module Scenarios
         end
         LOGGER.info("Push PR from #{src_branch} to '#{dst_branch}")
         begin
-          local_repo = pr.repo
+          local_repo = pr.simple_repo
           with local_repo do
             merge_pullrequest(pr.pr['id'])
           end
