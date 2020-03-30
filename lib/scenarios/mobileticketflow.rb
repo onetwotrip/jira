@@ -2,6 +2,11 @@ module Scenarios
   ##
   # Automate merge ticket after change jira status from Test Ready -> Merge Ready
   class MobileTicketFlow
+    def with(instance, &block)
+      instance.instance_eval(&block)
+      instance
+    end
+
     def run
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       # noinspection RubyArgCount
@@ -26,7 +31,7 @@ module Scenarios
       pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
         src_branch = pr.pr['source']['branch']
         dst_branch = pr.pr['destination']['branch']
-        pr_url = pr.pr['url']
+        pr_url     = pr.pr['url']
 
         # Check is destination is master
         if dst_branch.eql?('master')
@@ -40,7 +45,10 @@ module Scenarios
         end
         LOGGER.info("Push PR from #{src_branch} to '#{dst_branch}")
         begin
-          pr.repo.push('origin', dst_branch)
+          local_repo = pr.simple_repo
+          with local_repo do
+            merge_pullrequest(pr.pr['id'])
+          end
         rescue Git::GitExecuteError => e
           is_error = true
           puts e.message.red
@@ -51,7 +59,6 @@ module Scenarios
                   Не удалось замержить PR: #{pr_url}
                   *Причина:* Merge conflict
               {panel}
-
             BODY
 
             issue.transition 'Merge Fail'
@@ -61,7 +68,6 @@ module Scenarios
                   Не удалось замержить PR: #{pr_url}
                   *Причина:* #{e.message}
               {panel}
-
             BODY
           end
           next

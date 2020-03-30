@@ -31,7 +31,7 @@ module Scenarios
             puts "Writing message in #{issue_task.key}".red
             issue_task.post_comment <<-BODY
               {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
-                  [~#{issue_task.assignee.key}]
+                   [#{issue_task.assignee.displayName}|~accountid:#{issue_task.assignee.accountId}]
                   Repo: #{pr.source['repository']['name']}
                   Author: #{pr.author['display_name']}
                   Branch: https://bitbucket.org/OneTwoTrip/#{pr.repo_slug}/branch/#{pr.source['branch']['name']}
@@ -50,7 +50,7 @@ module Scenarios
             puts "Writing message in #{issue_task.key}".red
             issue_task.post_comment <<-BODY
               {panel:title=Find conflict with master|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
-                  [~#{issue_task.assignee.key}]
+                  [#{issue_task.assignee.displayName}|~accountid:#{issue_task.assignee.accountId}]
                   Repo: #{pr.source['repository']['name']}
                   Author: #{pr.author['display_name']}
                   Branch: https://bitbucket.org/OneTwoTrip/#{pr.repo_slug}/branch/#{pr.source['branch']['name']}
