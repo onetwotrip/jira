@@ -11,7 +11,12 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       # noinspection RubyArgCount
       issue = jira.Issue.find(SimpleConfig.jira.issue)
-
+      issue.post_comment <<-BODY
+      {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+        Запущено подмерживание релизных веток и закрытие тикетов(!)
+        Ожидайте сообщение о завершении
+      {panel}
+      BODY
       is_error = false
 
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
@@ -70,6 +75,11 @@ module Scenarios
           subissue.transition 'To master' if subissue.get_transition_by_name 'To master'
         end
       end
+      issue.post_comment <<-BODY
+      {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+        Мерж релизных веток - завершен. Перевод задач - завершен (/)
+      {panel}
+      BODY
     end
   end
 end

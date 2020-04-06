@@ -61,10 +61,13 @@ module JIRA
     end
 
     def repo
+      LOGGER.info "Get repo for #{dst.full_url}"
       @repo ||= Git.get_branch URI.decode_www_form_component(dst.full_url)
+      LOGGER.info "Git fetching"
       @repo.chdir do
         `git fetch --prune`
       end
+      LOGGER.info "Git merging"
       @repo.merge("origin/#{@pr['source']['branch']}", "merge #{@pr['source']['branch']} into #{@pr['destination']['branch']}")
       @repo
     end
