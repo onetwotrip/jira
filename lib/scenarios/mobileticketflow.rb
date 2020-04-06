@@ -49,27 +49,16 @@ module Scenarios
           with local_repo do
             merge_pullrequest(pr.pr['id'])
           end
-        rescue Git::GitExecuteError => e
+        rescue StandardError => e
           is_error = true
-          puts e.message.red
-
-          if e.message.include?('Merge conflict') || e.message.include?('CONFLICT')
-            issue.post_comment <<-BODY
+          puts e.response.red
+          issue.post_comment <<-BODY
               {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
                   Не удалось замержить PR: #{pr_url}
-                  *Причина:* Merge conflict
+                  *Причина:* #{e.response}
               {panel}
-            BODY
-
-            issue.transition 'Merge Fail'
-          else
-            issue.post_comment <<-BODY
-              {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
-                  Не удалось замержить PR: #{pr_url}
-                  *Причина:* #{e.message}
-              {panel}
-            BODY
-          end
+          BODY
+          issue.transition 'Merge Fail'
           next
         end
       end

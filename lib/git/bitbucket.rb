@@ -56,11 +56,11 @@ module Git
         user: SimpleConfig.bitbucket[:username],
         password: SimpleConfig.bitbucket[:password]
       )
-    rescue StandardError => e
-      LOGGER.fatal "Pullrequest didn't merge"
-      LOGGER.fatal "Error: #{e}; URL: #{url}"
-      LOGGER.fatal "Response: #{e.response}"
-      exit(1)
+    # rescue StandardError => e
+    #   LOGGER.fatal "Pullrequest didn't merge"
+    #   LOGGER.fatal "Error: #{e}; URL: #{url}"
+    #   LOGGER.fatal "Response: #{e.response}"
+    #   continue
     end
 
     def decline_pullrequest(username = nil, password = nil, pull_request_id = '')
