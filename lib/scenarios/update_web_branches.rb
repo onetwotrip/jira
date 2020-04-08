@@ -77,8 +77,8 @@ module Scenarios
       LOGGER.info "Take #{project_name} filter"
       filter = update_filter_config[project_name]
       unless filter
-        LOGGER.error("Can't find task filter for project #{project_name}. Pls, check config")
-        exit 1
+        LOGGER.warn("Can't find task filter for project #{project_name}. Pls, check config")
+        exit 127
       end
 
       LOGGER.info "Try to find all tasks from filter #{filter}".green

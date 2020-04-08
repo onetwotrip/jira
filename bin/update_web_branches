@@ -4,4 +4,3 @@ require 'scenarios'
 require 'slop'
 
 Scenarios::UpdateWebBranches.new.run
-
