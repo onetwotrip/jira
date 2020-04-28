@@ -52,7 +52,7 @@ module Scenarios
               {panel}
             BODY
           end
-          issue.transition 'Reopen'
+          issue.transition 'Conflicts'
           next
         end
       end
