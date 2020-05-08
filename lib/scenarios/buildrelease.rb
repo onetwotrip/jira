@@ -174,6 +174,8 @@ module Scenarios
                      " имени задачи #{issue.key}"
                 badissues[:badname] = [] unless badissues.key?(:badname)
                 badissues[:badname].push(key: issue.key, body: body)
+                issue.post_comment body
+                issue.transition 'Merge Fail'
               end
             end
           end
