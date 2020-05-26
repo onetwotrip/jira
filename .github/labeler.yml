@@ -13,5 +13,5 @@ lib:
 scenarion:
   - "lib/scenarios/*"
 
-theme:tests:
+tests:
   - "spec/*"
