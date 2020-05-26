@@ -77,53 +77,6 @@ module Ott
       result
     end
   end
-  # This module represents StrictControl
-  module StrictControl
-    def self.run(issue)
-      sendmail get_stricts(issue)
-    end
-
-    def self.get_stricts(issue)
-      strict_control = []
-      issue.api_pullrequests.select { |pr| pr.state == 'OPEN' }.each do |pr|
-        LOGGER.info "Check PR: #{pr.title}"
-        repo = issue.repo pr.destination['repository']['links']['html']['href']
-
-        GitDiffParser.parse(pr.diff).each do |patch|
-          JSON.parse(ENV.fetch('STRICT_FILES', '{}')).each do |strict_path|
-            next unless patch.file.start_with?(strict_path)
-
-            pr.commits.each do |commit|
-              GitDiffParser.parse(repo.diff(commit.hash)).each do |p|
-                next unless p.file.start_with?(strict_path)
-
-                strict_control.push(
-                  author: commit.author['raw'].html_safe,
-                  url:    commit.links['html']['href'].html_safe,
-                  file:   patch.file.html_safe
-                )
-              end
-            end
-
-            LOGGER.info "StrictControl: #{patch.file}"
-          end
-        end
-      end
-      strict_control
-    end
-
-    def self.sendmail(strict_control)
-      b = binding
-      b.local_variable_set(:changes, strict_control)
-      mailer = OttInfra::SendMail.new SimpleConfig.sendgrid.to_h
-      mailer.add SimpleConfig.sendgrid.to_h.merge message: ERB.new(File.read("#{Ott::Helpers.root}/views/review_mail.erb")).result(b)
-      if strict_control.empty?
-        LOGGER.info 'CodeReview: No changes for review'
-      else
-        mailer.sendmail
-      end
-    end
-  end
 
   # This module represents CheckPullRequests
   module CheckPullRequests
