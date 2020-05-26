@@ -21,3 +21,4 @@ env.properties
 /bin/.SimpleConfig.yml
 */OneTwoTrip/*
 test_branch
+/Gemfile.lock
