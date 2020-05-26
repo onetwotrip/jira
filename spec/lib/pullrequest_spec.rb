@@ -3,6 +3,7 @@ describe JIRA::PullRequest do # rubocop:disable Metrics/BlockLength
   def create_test_object!(data)
     git_double = double(:git_double).as_null_object
     allow(Git).to receive(:get_branch) { git_double }
+
     allow(git_double.gtree.diff.stats).to receive(:keys) do
       %w[file1 file2 file3]
     end
