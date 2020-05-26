@@ -1,0 +1,17 @@
+workflow:
+  - ".github/**"
+
+job:
+  - "bin/**"
+  - ".gitignore"
+
+lib:
+  - "lib/common/*"
+  - "lib/git/*"
+  - "lib/*"
+
+scenarion:
+  - "lib/scenarios/*"
+
+theme:tests:
+  - "spec/*"
