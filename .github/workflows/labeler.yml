@@ -1,10 +1,10 @@
-name: "Add labels"
+name: "Add labels to PR"
 
 on:
   - pull_request
 
 jobs:
-  triage:
+  labler:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/labeler@v2
