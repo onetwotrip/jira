@@ -1,4 +1,4 @@
-name: "Add labels"
+name: "Add labels to PR"
 
 on:
   - pull_request
