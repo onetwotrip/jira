@@ -1,10 +1,6 @@
 workflow:
   - ".github/**"
 
-job:
-  - "bin/**"
-  - ".gitignore"
-
 lib:
   - "lib/common/*"
   - "lib/git/*"
