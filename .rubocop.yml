@@ -5,7 +5,7 @@ Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: comma
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: true
   Max: 140
 AllCops:

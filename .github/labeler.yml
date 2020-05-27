@@ -10,4 +10,7 @@ scenarion:
   - "lib/scenarios/*"
 
 tests:
-  - "spec/*"
+  - "spec/**"
+
+other:
+  - "*"
