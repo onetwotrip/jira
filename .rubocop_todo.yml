@@ -35,7 +35,7 @@ Style/GuardClause:
     - 'lib/scenarios/reviewrelease.rb'
 
 # Offense count: 2
-Style/MethodMissing:
+Style/MethodMissingSuper:
   Exclude:
     - 'lib/pullrequests.rb'
     - 'lib/repo.rb'
