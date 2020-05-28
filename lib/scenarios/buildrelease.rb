@@ -63,14 +63,9 @@ module Scenarios
           issuelink.delete
           LOGGER.fatal comment
         end
-        # Try to get all issueLinks again for check if empty after delete links
-        release = client.Issue.find(opts[:release])
 
-        if release.issuelinks.empty?
-          LOGGER.warn 'There is no any tickets in release ticket after deleting links. Try do delete release ticket'
-          release.delete_myself
-          exit(127)
-        end
+        delete_release_if_empty(client, opts[:release])
+
         badissues = {}
         repos = {}
 
@@ -215,7 +210,7 @@ module Scenarios
 
       # If it is CI process we should unlink Merge Failed tickets
       if is_cd_build
-        LOGGER.info "Try to get new info about release ticket"
+        LOGGER.info 'Try to get new info about release ticket'
         release = client.Issue.find(opts[:release])
         merge_failed_tikets = release.issuelinks.select { |issuelink| issuelink.outwardIssue.status.name.downcase.include?('merge failed') }
 
@@ -238,6 +233,7 @@ module Scenarios
             LOGGER.error "Не удалось отлинковать Merge Failed задачи, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
           end
         end
+        delete_release_if_empty(client, opts[:release])
       end
 
       release.post_comment <<-BODY
@@ -245,6 +241,17 @@ module Scenarios
         Сборка -pre веток завершена (/)
       {panel}
       BODY
+    end
+
+    def delete_release_if_empty(client, release_issue)
+      LOGGER.info 'Try to get all issueLinks again for check if empty after delete links'
+      release = client.Issue.find(release_issue)
+
+      if release.issuelinks.empty?
+        LOGGER.warn 'There is no any tickets in release ticket after deleting links. Try do delete release ticket'
+        release.delete_myself
+        exit(127)
+      end
     end
   end
 end
