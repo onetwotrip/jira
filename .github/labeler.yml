@@ -6,7 +6,7 @@ lib:
   - "lib/git/*"
   - "lib/*"
 
-scenarion:
+scenarios:
   - "lib/scenarios/*"
 
 tests:
