@@ -17,7 +17,7 @@ module Scenarios
 
 
         Ott::Helpers.export_to_file(result, 'repo_list.txt')
-        Ott::Helpers.export_to_file("RELEASE_NAME=#{issue.summary}", 'issue_name.txt')
+        Ott::Helpers.export_to_file("RELEASE_NAME=#{issue.summary}", 'release_name')
       else
         LOGGER.warn("Ticket #{issue.key} not a release ticket")
       end
