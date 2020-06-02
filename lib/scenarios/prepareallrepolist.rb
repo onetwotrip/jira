@@ -8,7 +8,7 @@ module Scenarios
       issue = jira.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info("Start work with #{issue.key}")
       if issue.fields['issuetype']['name'].include?('Release')
-        result = ""
+        result = ''
         issue.branches.each do |branch|
           result += ",#{branch.repo_slug}"
         end
@@ -17,6 +17,7 @@ module Scenarios
 
 
         Ott::Helpers.export_to_file(result, 'repo_list.txt')
+        Ott::Helpers.export_to_file(issue.summary, 'issue_name.txt')
       else
         LOGGER.warn("Ticket #{issue.key} not a release ticket")
       end
