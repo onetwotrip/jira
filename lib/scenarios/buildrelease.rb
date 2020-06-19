@@ -8,13 +8,14 @@ module Scenarios
       @opts = opts
     end
 
-    def run(is_only_one_branch = false) # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/AbcSize, Metrics/LineLength
+    def run(is_only_one_branch = false) # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/AbcSize
       LOGGER.info "Build release #{opts[:release]}"
 
       options = { auth_type: :basic }.merge(opts.to_hash)
       client = JIRA::Client.new(options)
       release = client.Issue.find(opts[:release])
       is_cd_build = ENV['CD_BUILD'] || false
+      unlink_merge_failed_ticket = ENV['UNLINK_MERGE_FAILED_TICKET'] || true
 
       release.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
@@ -43,7 +44,7 @@ module Scenarios
         release.issuelinks.each do |issuelink|
           if issuelink.type.name == 'Deployed' &&
             issuelink.outwardIssue && # rubocop:disable Layout/MultilineOperationIndentation
-            issuelink.outwardIssue.linked_issues('is blocked by').any? { |i| !good_statuses.include? i.status.name } # rubocop:disable Layout/MultilineOperationIndentation, Metrics/LineLength
+            issuelink.outwardIssue.linked_issues('is blocked by').any? { |i| !good_statuses.include? i.status.name } # rubocop:disable Layout/MultilineOperationIndentation
             comment = "#{issuelink.outwardIssue.key} blocked. Unlink from release #{release.key}"
             release.post_comment comment
             issuelink.outwardIssue.post_comment comment
@@ -52,12 +53,14 @@ module Scenarios
           end
           # Unlink issue with more than one product branches. Test is skipped
           next unless is_only_one_branch
+
           branches = issuelink.outwardIssue.api_pullrequests
           branches_list = []
           branches.each do |branch|
             branches_list << branch.repo_slug if branch.state.include?('OPEN')
           end
-          next unless (branches_list.uniq - ['avia_api_rspec', 'back-components']).size > 1
+          next unless (branches_list.uniq - %w[avia_api_rspec back-components]).size > 1
+
           comment = "Remove issue #{issuelink.outwardIssue.key} from release. Reason: issue has more than 1 product branch"
           release.post_comment comment
           issuelink.delete
@@ -187,6 +190,7 @@ module Scenarios
         repos.each do |name, repo|
           LOGGER.info "Push '#{pre_release_branch}' to '#{name}' repo"
           next unless opts[:push]
+
           local_repo = repo[:repo_base]
           local_repo.push('origin', pre_release_branch)
           local_repo.checkout('master')
@@ -209,7 +213,7 @@ module Scenarios
       end
 
       # If it is CI process we should unlink Merge Failed tickets
-      if is_cd_build
+      if is_cd_build && unlink_merge_failed_ticket
         LOGGER.info 'Try to get new info about release ticket'
         release = client.Issue.find(opts[:release])
         merge_failed_tikets = release.issuelinks.select { |issuelink| issuelink.outwardIssue.status.name.downcase.include?('merge failed') }
@@ -247,11 +251,11 @@ module Scenarios
       LOGGER.info 'Try to get all issueLinks again for check if empty after delete links'
       release = client.Issue.find(release_issue)
 
-      if release.issuelinks.empty?
-        LOGGER.warn 'There is no any tickets in release ticket after deleting links. Try do delete release ticket'
-        release.delete_myself
-        exit(127)
-      end
+      return unless release.issuelinks.empty?
+
+      LOGGER.warn 'There is no any tickets in release ticket after deleting links. Try do delete release ticket'
+      release.delete_myself
+      exit(127)
     end
   end
 end
