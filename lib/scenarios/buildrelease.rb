@@ -1,6 +1,6 @@
 module Scenarios
   ##
-  #  BuildRelease scenario
+  # BuildRelease scenario
   class BuildRelease # rubocop:disable Metrics/ClassLength
     attr_reader :opts
 
