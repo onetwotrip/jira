@@ -10,8 +10,8 @@ module Scenarios
 
     def run(is_only_one_branch = false) # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/AbcSize
       LOGGER.info "Build release #{opts[:release]}"
-
       options = { auth_type: :basic }.merge(opts.to_hash)
+      LOGGER.info "Start with: #{options}"
       client = JIRA::Client.new(options)
       release = client.Issue.find(opts[:release])
       is_cd_build = ActiveModel::Type::Boolean.new.cast(ENV['CD_BUILD'] || false)
