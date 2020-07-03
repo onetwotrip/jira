@@ -14,8 +14,8 @@ module Scenarios
       options = { auth_type: :basic }.merge(opts.to_hash)
       client = JIRA::Client.new(options)
       release = client.Issue.find(opts[:release])
-      is_cd_build = ActiveModel::Type::Boolean.new.cast(ENV['CD_BUILD'] || false)
-      unlink_merge_failed_ticket = ActiveModel::Type::Boolean.new.cast(ENV['UNLINK_MERGE_FAILED_TICKET'] || true)
+      is_cd_build = ENV['CD_BUILD'] || false
+      unlink_merge_failed_ticket = ENV['UNLINK_MERGE_FAILED_TICKET'] || true
 
       release.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}

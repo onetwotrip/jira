@@ -1,5 +1,4 @@
 source 'https://rubygems.org'
-gem 'activesupport'
 gem 'addressable'
 gem 'colorize'
 gem 'git', git: 'https://github.com/onetwotrip/ruby-git.git'
