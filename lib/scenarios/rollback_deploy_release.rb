@@ -5,11 +5,11 @@ module Scenarios
     def run
       projects_conf = YAML.load_file(ENV['PROJECTS_CONF'])
       prop_values = {
-        CHECKMASTER: ENV['CHECKMASTER'],
-        DEPLOY_USER: ENV['DEPLOY_USER'],
-        PROJECTS: {},
-        ROLES: JSON.parse(ENV['USER_ROLES']),
-        STAGE: ENV['STAGE'],
+        'CHECKMASTER' => ENV['CHECKMASTER'],
+        'DEPLOY_USER' => ENV['DEPLOY_USER'],
+        'PROJECTS' => {},
+        'ROLES' => JSON.parse(ENV['USER_ROLES']),
+        'STAGE' => ENV['STAGE'],
       }
       additional_values = {}
 
@@ -76,7 +76,7 @@ module Scenarios
         headings: %w[Project branch],
         rows: prop_values['PROJECTS'].map { |k, v| [k, v['BRANCH']] }
       )
-      properties = { DEPLOY: prop_values.to_json }
+      properties = { 'DEPLOY' => prop_values.to_json }
       properties = properties.merge(additional_values) unless additional_values.empty?
       JavaProperties.write(properties, './env.properties')
 
