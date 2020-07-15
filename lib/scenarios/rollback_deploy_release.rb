@@ -5,7 +5,7 @@ module Scenarios
     def run
       projects_conf = YAML.load_file(ENV['PROJECTS_CONF'])
       prop_values = {
-        'CHECKMASTER' => ENV['CHECKMASTER'],
+        'CHECKMASTER' => true,
         'DEPLOY_USER' => ENV['DEPLOY_USER'],
         'PROJECTS' => {},
         'ROLES' => JSON.parse(ENV['USER_ROLES']),
