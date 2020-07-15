@@ -76,7 +76,7 @@ module Scenarios
         headings: %w[Project branch],
         rows: prop_values['PROJECTS'].map { |k, v| [k, v['BRANCH']] }
       )
-      properties = { 'DEPLOY' => prop_values.to_json }
+      properties = { DEPLOY: prop_values.to_json }
       properties = properties.merge(additional_values) unless additional_values.empty?
       JavaProperties.write(properties, './env.properties')
 
