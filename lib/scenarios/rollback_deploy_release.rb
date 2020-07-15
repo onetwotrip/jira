@@ -66,7 +66,7 @@ module Scenarios
             prop_values['PROJECTS'][proj] = {}
             prop_values['PROJECTS'][proj]['ENABLE'] = true
             # If ROLLBACK true deploy without version (LIKEPROD)
-            prop_values['PROJECTS'][proj]['BRANCH'] = 'master' if true?(ENV['ROLLBACK'])
+            prop_values['PROJECTS'][proj]['BRANCH'] = 'master'
           end
         end
       end
