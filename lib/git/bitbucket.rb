@@ -34,8 +34,8 @@ module Git
         url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests"
         LOGGER.info "POST #{url}"
         RestClient::Request.execute(
-          method:   :post,
-          url:      url,
+          method: :post,
+          url: url,
           user: SimpleConfig.bitbucket[:username],
           password: SimpleConfig.bitbucket[:password],
           payload: request.to_json,
@@ -50,9 +50,15 @@ module Git
 
     def merge_pullrequest(pull_request_id = '')
       url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests/#{pull_request_id}/merge" # rubocop:disable Metrics/LineLength
+      request = {
+        merge_strategy: 'squash',
+        close_source_branch: true,
+      }.compact
       RestClient::Request.execute(
-        method:   :post,
-        url:      url,
+        method: :post,
+        url: url,
+        payload: request.to_json,
+        headers: { content_type: :json },
         user: SimpleConfig.bitbucket[:username],
         password: SimpleConfig.bitbucket[:password]
       )
@@ -76,8 +82,8 @@ module Git
       url = "https://bitbucket.org/!api/2.0/repositories/#{branch.repo_owner}/#{branch.repo_slug}/refs/branches/#{branch.name}" # rubocop:disable Metrics/LineLength
       LOGGER.info "DELETE #{url}"
       RestClient::Request.execute(
-        method:   :delete,
-        url:      url,
+        method: :delete,
+        url: url,
         user: SimpleConfig.bitbucket[:username],
         password: SimpleConfig.bitbucket[:password]
       )
@@ -91,8 +97,8 @@ module Git
       url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests/#{id}/diffstat" # rubocop:disable Metrics/LineLength
       LOGGER.info "GET #{url}"
       response = RestClient::Request.execute(
-        method:   :get,
-        url:      url,
+        method: :get,
+        url: url,
         user: SimpleConfig.bitbucket[:username],
         password: SimpleConfig.bitbucket[:password]
       )
@@ -108,8 +114,8 @@ module Git
       url = "https://bitbucket.org/xhr/mentions/repositories/#{remote.url.repo}?term=#{part_of_name}"
       LOGGER.info "GET #{url}"
       response = RestClient::Request.execute(
-        method:   :get,
-        url:      url,
+        method: :get,
+        url: url,
         user: SimpleConfig.bitbucket[:username],
         password: SimpleConfig.bitbucket[:password]
       )
@@ -125,8 +131,8 @@ module Git
       url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests/#{id}"
       LOGGER.info "GET #{url}"
       response = RestClient::Request.execute(
-        method:   :get,
-        url:      url,
+        method: :get,
+        url: url,
         user: SimpleConfig.bitbucket[:username],
         password: SimpleConfig.bitbucket[:password]
       )
@@ -142,15 +148,15 @@ module Git
       url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests/#{id}"
       request = {
         description: description,
-        title:       title,
-        reviewers:  reviewers,
+        title: title,
+        reviewers: reviewers,
         close_source_branch: true
       }.compact
 
       LOGGER.info "PUT #{url}"
       response = RestClient::Request.execute(
-        method:   :put,
-        url:      url,
+        method: :put,
+        url: url,
         payload: request.to_json,
         headers: { content_type: :json },
         user: SimpleConfig.bitbucket[:username],
