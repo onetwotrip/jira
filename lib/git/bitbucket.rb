@@ -7,6 +7,7 @@ module Git
   ##
   # Add methods for Git::Base
   class Base
+    # DEPRECATED: Please use new_create_pullrequest instead
     # Create pull request from src branch to dst
     # By default: from local branch to master
     def create_pullrequest(username = nil, password = nil, src = current_branch, destination = 'master')
@@ -44,7 +45,11 @@ module Git
       rescue StandardError => e
         LOGGER.fatal "Pullrequest didn't create"
         LOGGER.fatal "Error: #{e}; URL: #{url}; PARAMS: #{request}"
-        exit(1)
+        if e.response.include? 'There are no changes to be pulled'
+          LOGGER.warn e.response
+        else
+          exit 1
+        end
       end
     end
 
