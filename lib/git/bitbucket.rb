@@ -56,7 +56,7 @@ module Git
     def merge_pullrequest(pull_request_id = '')
       url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests/#{pull_request_id}/merge" # rubocop:disable Metrics/LineLength
       request = {
-        merge_strategy: 'squash',
+        merge_strategy: 'merge_commit',
         close_source_branch: true,
       }.compact
       RestClient::Request.execute(
