@@ -58,9 +58,7 @@ module Scenarios
             with local_repo do
               checkout('master')
               pull
-              create_pullrequest(
-                SimpleConfig.bitbucket[:username],
-                SimpleConfig.bitbucket[:password],
+              new_create_pullrequest(
                 'master',
                 'develop'
               )

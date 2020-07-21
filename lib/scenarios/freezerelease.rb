@@ -71,9 +71,7 @@ module Scenarios
             push(repo_path.remote('origin'), new_branch) # push -release to origin
             branch(old_branch).delete_both if old_branch != 'master' # delete -pre from local/remote
             LOGGER.info "Creating PR from #{new_branch} to #{cur_branch}"
-            create_pullrequest(
-              SimpleConfig.bitbucket[:username],
-              SimpleConfig.bitbucket[:password],
+            new_create_pullrequest(
               new_branch
             )
           end
