@@ -197,9 +197,14 @@ module Scenarios
         end
 
         LOGGER.fatal 'Not Merged:' unless badissues.empty?
+        is_build_success = true
         badissues.each_pair do |status, keys|
           LOGGER.fatal "#{status}: #{keys.size}"
-          keys.each { |i| LOGGER.fatal i[:key] }
+          keys.each do |i|
+            status = client.Issue.find(i[:key]).status.name
+            LOGGER.fatal "#{i[:key]} - #{status}"
+            is_build_success = false unless status.include?('Merge Failed')
+          end
         end
       rescue StandardError => e
         release.post_comment <<-BODY
@@ -240,11 +245,21 @@ module Scenarios
         delete_release_if_empty(client, opts[:release])
       end
 
-      release.post_comment <<-BODY
+      if is_build_success
+        release.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
         Сборка -pre веток завершена (/)
       {panel}
-      BODY
+        BODY
+      else
+        release.post_comment <<-BODY
+        {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+         Сборка -pre веток завершена с ошибками. Некоторые задачи, не были замержены, и не смогли перейти в статус Merge Failed (x)
+         Подробности в логе таски https://jenkins.twiket.com/view/RELEASE/job/build_release/
+        {panel}
+        BODY
+        exit 1
+      end
     end
 
     def delete_release_if_empty(client, release_issue)
