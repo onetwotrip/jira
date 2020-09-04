@@ -23,9 +23,6 @@ module Scenarios
         issue.post_comment comment
         issue.transition 'WTF'
       end
-
-      # Send stricts
-      Ott::StrictControl.run(issue)
     end
   end
 end

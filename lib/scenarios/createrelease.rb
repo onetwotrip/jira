@@ -3,7 +3,7 @@ module Scenarios
   # CreateRelease scenario
   class CreateRelease
     def find_by_filter(issue, filter)
-      issue.jql("filter=#{filter}")
+      issue.jql("filter=#{filter}", max_results: 100)
     rescue JIRA::HTTPError => jira_error
       error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
       LOGGER.error "Error in JIRA with the search by filter #{error_message}"
@@ -58,11 +58,26 @@ module Scenarios
 
       client = JIRA::Client.new SimpleConfig.jira.to_h
 
-      issues = params.filter && find_by_filter(client.Issue, params.filter)
+      release_issues = []
+
+      if params.filter
+        LOGGER.info "Start search ticket from filter #{params.filter}"
+        release_issues = params.filter && find_by_filter(client.Issue, params.filter)
+        LOGGER.info "Filter #{params.filter} doesn't contains tickets" if release_issues.empty?
+        LOGGER.info "Could find #{release_issues.size} tasks from filter #{params.filter}"
+      end
 
       if params.tasks && !params.tasks.empty?
-        issues_from_string = find_by_tasks(client.Issue, params.tasks)
-        issues = issues_from_string unless issues_from_string.empty?
+        LOGGER.info "Found tasks for release: #{params.tasks}. Start find them"
+        tasks = find_by_tasks(client.Issue, params.tasks)
+        LOGGER.info "Could find #{tasks.size} tasks. Add them to release ticket"
+        release_issues += find_by_tasks(client.Issue, params.tasks)
+      end
+
+      if release_issues.empty?
+        LOGGER.error 'Cant find any task for release ticket'
+        Ott::Helpers.export_to_file("SLACK_URL=''", 'release_properties')
+        exit(127)
       end
 
       begin
@@ -73,10 +88,10 @@ module Scenarios
         raise
       end
 
-      LOGGER.info "Start to link issues to release #{release.key}"
+      LOGGER.info "Start to link #{release_issues.size} issues to release #{release.key}"
 
       release_labels = []
-      issues.each do |issue|
+      release_issues.each do |issue|
         issue.link(release.key)
         issue.related['branches'].each do |branch|
           release_labels << branch['repository']['name'].to_s
@@ -94,6 +109,9 @@ module Scenarios
 
       LOGGER.info "Storing '#{release.key}' to file, to refresh buildname in Jenkins"
       Ott::Helpers.export_to_file(release.key, 'release_name.txt')
+      Ott::Helpers.export_to_file("export ISSUE=#{release.key}", 'set_env.sh')
+      Ott::Helpers.export_to_file("SLACK_URL=#{SimpleConfig.jira.site}/browse/#{release.key}\n\r
+                                        ISSUE=#{release.key}", 'release_properties')
     end
     # :nocov:
   end

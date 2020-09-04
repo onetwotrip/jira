@@ -11,7 +11,9 @@ bitbucket:
   password: <%= ENV['BB_PASSWORD'] %>
 jira:
   username: <%= ENV['JIRA_USERNAME'] %>
+  useremail: <%= ENV['JIRA_USEREMAIL'] %>
   password: <%= ENV['JIRA_PASSWORD'] %>
+  token: <%= ENV['JIRA_API_TOKEN'] %>
   site:     <%= ENV['JIRA_SITE'] %>
   issue:    <%= ENV['ISSUE'] %>
   auth_type: :basic

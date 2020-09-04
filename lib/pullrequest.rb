@@ -2,6 +2,7 @@ require 'helpers'
 require 'test'
 require 'git'
 require 'erb'
+require 'uri'
 
 module JIRA
   ##
@@ -60,9 +61,20 @@ module JIRA
     end
 
     def repo
-      @repo ||= Git.get_branch dst.full_url
-      @repo.merge "origin/#{src.branch}"
+      LOGGER.info "Get repo for #{dst.full_url}"
+      @repo ||= Git.get_branch URI.decode_www_form_component(dst.full_url)
+      LOGGER.info "Git fetching"
+      @repo.chdir do
+        `git fetch --prune`
+      end
+      LOGGER.info "Git merging"
+      @repo.merge("origin/#{@pr['source']['branch']}", "merge #{@pr['source']['branch']} into #{@pr['destination']['branch']}")
       @repo
+    end
+
+    # use it when you need just repo owner and repo name parameters for BB request
+    def simple_repo
+      @repo ||= Git.get_branch URI.decode_www_form_component(dst.full_url)
     end
 
     private

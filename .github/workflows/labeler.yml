@@ -1,0 +1,12 @@
+name: "Add labels to PR"
+
+on:
+  - pull_request
+
+jobs:
+  labler:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/labeler@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}

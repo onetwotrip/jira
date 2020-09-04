@@ -7,10 +7,12 @@ require 'pullrequests'
 require 'colorize'
 require 'common/logger'
 require 'common/bitbucket'
+require 'git/bitbucket'
 
 module JIRA
   module Resource
-    class Issue < JIRA::Base # :nodoc:
+    # Issue methods
+    class Issue < JIRA::Base # rubocop:disable Metrics/ClassLength
       # Link current issue to release_key
       # :nocov:
       def link(release_key)
@@ -50,9 +52,10 @@ module JIRA
 
       def rollback
         branches.each do |branch|
-          if branch.name =~ /^#{SimpleConfig.jira.issue}-(pre|release-[0-9]{2}\.[0-9]{2}\.[0-9]{4})$/
+          if branch.name =~ /^#{SimpleConfig.jira.issue}-(pre|release-[0-9]{2}\.[0-9]{2}\.[0-9]{4})$/ # rubocop:disable Style/Next
             LOGGER.info "Rollback branch '#{branch.name}' from '#{branch.target['repository']['full_name']}'"
-            branch.destroy
+            LOGGER.info "Delete branch #{branch.name} from #{branch.repo_slug} repo"
+            Git::Base.new.delete_branch(branch)
           end
         end
         api_pullrequests.each do |pr|
@@ -72,10 +75,12 @@ module JIRA
 
       def get_transition_by_name(name)
         available_transitions = client.Transition.all(issue: self)
+        @avail_transitions = []
         available_transitions.each do |transition|
           return transition if transition.name == name
+          @avail_transitions << transition.name
         end
-        LOGGER.warn "[#{key}] Transition state #{name} not found!"
+        LOGGER.warn "[#{key}] Transition state #{name} not found! Got only this: #{@avail_transitions.join(',')}"
       end
 
       def opts
@@ -97,33 +102,87 @@ module JIRA
         comment.save(body: body)
       end
 
+      # :nocov:
       def related
         params = {
           issueId: id,
           applicationType: 'bitbucket',
           dataType: 'pullrequest',
         }
+
         @related ||= JSON.parse(
-          RestClient.get(create_endpoint('rest/dev-status/1.0/issue/detail').to_s, params: params)
+          RestClient::Request.execute(
+            method: :get,
+            url: create_endpoint('rest/dev-status/1.0/issue/detail').to_s,
+            headers: { params: params },
+            user: opts[:useremail],
+            password: opts[:token]
+          )
         )['detail'].first
+
+        repos_id_list = {}
+
+        unless @related['branches'].empty?
+          @related['branches'].each do |branch|
+            url = branch['repository']['url']
+            next unless url.include?('{')
+            repo_id = url[url.rindex('{') + 1..url.size - 2].to_sym
+            repos_id_list[repo_id] = branch['repository']['name'] if repos_id_list[repo_id].nil?
+            url = "https://bitbucket.org/OneTwoTrip/#{repos_id_list[repo_id]}"
+            branch['url'] = "#{url}/branch/#{branch['name']}"
+            branch['createPullRequestUrl'] = "#{url}/pull-requests/new?source=#{branch['name']}"
+            branch['repository']['url'] = url
+          end
+        end
+
+        @related['pullRequests'].delete_if { |h| !(h['status'].include?('OPEN') && h['name'].include?(key)) } unless %w[ADR IOS].any? { |i| key.include? i } # key - ticket number # rubocop:disable Metrics/LineLength
+
+        unless @related['pullRequests'].empty?
+          @related['pullRequests'].each do |pr|
+            url = pr['source']['url']
+            next unless url.include?('{')
+            repo_id = url[url.rindex('{') + 1..url.rindex('}') - 1].to_sym
+            repos_name = repos_id_list[repo_id]
+            pr['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}#{pr['url'][pr['url'].index('/pull-requests')..pr['url'].size]}"
+            pr['source']['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}/branch/#{pr['source']['branch']}"
+            pr['destination']['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}/branch/#{pr['destination']['branch']}"
+          end
+        end
+        @related
+      end
+
+      def delete_myself
+        LOGGER.info "Start to delete issue #{key}"
+        r = RestClient::Request.execute(
+          method: :delete,
+          url: create_endpoint("rest/api/2/issue/#{key}").to_s,
+          user: opts[:useremail],
+          password: opts[:token],
+          raw_response: true
+        )
+        LOGGER.warn "Not 204 status code in response. Got: #{r.code}" if r.code != 204
+        if r.request.raw_response
+          LOGGER.info "Success delete issue #{key}"
+        else
+          LOGGER.error "Can't success delete issue #{key}. Response not 'true'. Got: #{r.request.raw_response}"
+        end
       end
 
       def create_endpoint(path)
         uri = "#{opts[:site]}#{opts[:context_path]}/#{path}"
-        endpoint = Addressable::URI.parse(uri)
-        endpoint.user = opts[:username]
-        endpoint.password = opts[:password]
-        endpoint
+        Addressable::URI.parse(uri)
       end
 
       def pullrequests(git_config = nil)
         JIRA::PullRequests.new(
-          *related['pullRequests'].map { |i| JIRA::PullRequest.new(git_config, i) }
+          *related['pullRequests'].map do |i|
+            JIRA::PullRequest.new(git_config, i)
+          end
         )
       end
 
       def linked_issues(param)
-        client.Issue.jql(%(issue in linkedIssues(#{key},"#{param}")))
+        client.Issue.jql(%(issue in linkedIssues(#{key},"#{param}")), max_results: 100)
       end
 
       def search_deployes
@@ -164,7 +223,7 @@ module JIRA
           end
         end
 
-        release_labels.uniq!
+        release_labels.uniq
       end
 
       def tags?(fkey, val)

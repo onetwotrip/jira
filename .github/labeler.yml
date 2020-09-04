@@ -1,0 +1,16 @@
+workflow:
+  - ".github/**"
+
+lib:
+  - "lib/common/*"
+  - "lib/git/*"
+  - "lib/*"
+
+scenarios:
+  - "lib/scenarios/*"
+
+tests:
+  - "spec/**"
+
+other:
+  - "*"

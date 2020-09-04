@@ -39,15 +39,30 @@ module Ott
   # :nocov:
   module CheckBranchesBuildStatuses
     def self.run(issue)
+      counter = 1
+      sleep_time = 60
       issue.branches.each do |branch|
         branch_path = "#{branch.repo_owner}/#{branch.repo_slug}/#{branch.name}"
-        LOGGER.info "Check Branch: #{branch_path}"
+        LOGGER.info "Check Build Branch Status: #{branch_path}"
         if branch_states(branch).empty?
           LOGGER.warn "Branch #{branch_path} doesn't have builds"
         else
           while branch_states(branch).select { |s| s == 'INPROGRESS' }.any?
             LOGGER.info "Branch #{branch_path} state INPROGRESS. Waiting..."
-            sleep 60
+            if counter == 5
+              issue.post_comment <<-BODY
+      {panel:title=Build notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+        Не удалось дождаться окончания сборки билда
+      {panel}
+              BODY
+              LOGGER.error "Build for #{branch_path} has no successful status"
+              LOGGER.error "Move to 'WAIT FOR REPLY' status"
+              issue.transition 'Needs reply'
+              exit(1)
+            end
+            sleep sleep_time
+            counter += 1
+            sleep_time *= 2
           end
           LOGGER.error "Branch #{branch_path} has no successful status" if branch_states(branch).delete_if { |s| s == 'SUCCESSFUL' }.any?
         end
@@ -55,45 +70,11 @@ module Ott
     end
 
     def self.branch_states(branch)
-      branch.commits.take(1).first.build_statuses.collect.map(&:state)
-    end
-  end
-  # This module represents StrictControl
-  module StrictControl
-    def self.run(issue)
-      sendmail get_stricts(issue)
-    end
-
-    def self.get_stricts(issue)
-      strict_control = []
-      issue.api_pullrequests.select { |pr| pr.state == 'OPEN' }.each do |pr|
-        LOGGER.info "Check PR: #{pr.title}"
-        repo = issue.repo pr.destination['repository']['links']['html']['href']
-        pr.commits.each do |commit|
-          GitDiffParser.parse(repo.diff(commit.hash)).each do |patch|
-            JSON.parse(ENV.fetch('STRICT_FILES', '{}')).each do |strict_path|
-              next unless patch.file.start_with?(strict_path)
-              strict_control.push(author: commit.author['raw'].html_safe,
-                                  url: commit.links['html']['href'].html_safe,
-                                  file: patch.file.html_safe)
-              LOGGER.info "StrictControl: #{patch.file}"
-            end
-          end
-        end
+      result = []
+      branch.commits.take(1).first.build_statuses.collect.each do |s|
+        result << s.state if s.name.include?(branch.name)
       end
-      strict_control
-    end
-
-    def self.sendmail(strict_control)
-      b = binding
-      b.local_variable_set(:changes, strict_control)
-      mailer = OttInfra::SendMail.new SimpleConfig.sendgrid.to_h
-      mailer.add SimpleConfig.sendgrid.to_h.merge message: ERB.new(File.read("#{Ott::Helpers.root}/views/review_mail.erb")).result(b)
-      if strict_control.empty?
-        LOGGER.info 'CodeReview: No changes for review'
-      else
-        mailer.sendmail
-      end
+      result
     end
   end
 

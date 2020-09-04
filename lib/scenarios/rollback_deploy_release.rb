@@ -1,12 +1,11 @@
 module Scenarios
   ##
-  # DeployRelease scenario
-  class DeployRelease
+  # Rollback DeployRelease scenario
+  class RollBackDeployRelease
     def run
       projects_conf = YAML.load_file(ENV['PROJECTS_CONF'])
-      all_projects = projects_conf.map { |_, v| v['projects'] }.flatten.sort.uniq
       prop_values = {
-        'CHECKMASTER' => ENV['CHECKMASTER'],
+        'CHECKMASTER' => 'true',
         'DEPLOY_USER' => ENV['DEPLOY_USER'],
         'PROJECTS' => {},
         'ROLES' => JSON.parse(ENV['USER_ROLES']),
@@ -56,9 +55,9 @@ module Scenarios
         end
 
         puts Terminal::Table.new(
-          title:    'Pullrequests status',
+          title: 'Pullrequests status',
           headings: %w[status author url],
-          rows:     prs.map { |v| [v['reject'] || v['status'].green, v['author']['name'], v['url']] }
+          rows: prs.map { |v| [v['reject'] || v['status'].green, v['author']['name'], v['url']] }
         )
 
         prs.reject { |pr| pr['reject'] }.each do |pr|
@@ -67,40 +66,15 @@ module Scenarios
             prop_values['PROJECTS'][proj] = {}
             prop_values['PROJECTS'][proj]['ENABLE'] = true
             # If ROLLBACK true deploy without version (LIKEPROD)
-            prop_values['PROJECTS'][proj]['BRANCH'] = pr['source']['branch'] unless true?(ENV['ROLLBACK'])
+            prop_values['PROJECTS'][proj]['BRANCH'] = 'master'
           end
         end
       end
-
-      if true?(ENV['LIKEPROD'])
-        all_projects.each do |proj|
-          skip = false
-
-          unless ENV['SKIP_LIKEPROD'] == ''
-            begin
-              skipies = ENV['SKIP_LIKEPROD'].split(',')
-              skip = true if skipies.include?(proj.downcase)
-            rescue StandardError => e
-              LOGGER.info "problems with SKIP_LIKEPROD: #{e.message}"
-            end
-          end
-
-          skip = true if prop_values['PROJECTS'][proj]
-
-          next if skip
-
-          prop_values['PROJECTS'][proj] = {}
-          prop_values['PROJECTS'][proj]['ENABLE'] = true
-          prop_values['PROJECTS'][proj]['BRANCH'] = 'master'
-        end
-      end
-
-      additional_values['KEEP_RELEASES'] = 1 if true? ENV['DYNAMIC_NODES_SYNC']
 
       puts Terminal::Table.new(
-        title:    'Deploy projects',
+        title: 'Deploy projects',
         headings: %w[Project branch],
-        rows:      prop_values['PROJECTS'].map { |k, v| [k, v['BRANCH']] }
+        rows: prop_values['PROJECTS'].map { |k, v| [k, v['BRANCH']] }
       )
       properties = { 'DEPLOY' => prop_values.to_json }
       properties = properties.merge(additional_values) unless additional_values.empty?

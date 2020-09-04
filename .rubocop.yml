@@ -1,15 +1,18 @@
 inherit_from: .rubocop_todo.yml
+Style/FrozenStringLiteralComment:
+  Enabled: false
 Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: comma
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: true
   Max: 140
 AllCops:
-  TargetRubyVersion: 2.1
+  TargetRubyVersion: 2.6
   Exclude:
     - repos/**/*
     - vendor/**/*
+    - bin/**/*
 Lint/ReturnInVoidContext:
   Enabled: false

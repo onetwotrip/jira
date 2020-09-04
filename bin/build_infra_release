@@ -11,7 +11,7 @@ opts = Slop.parse do |o|
   o.string '-t', '--token', 'token', default: SimpleConfig.jira.token
   o.string '--site', 'site', default: SimpleConfig.jira.site
   o.string '--context_path', 'context path', default: ''
-  o.string '--release', 'release', default: 'NOTIFY-69'
+  o.string '--release', 'release', default: 'INFRA-491'
   o.string '--source', 'source branch', default: 'master'
   o.string '--postfix', 'branch name postfix', default: 'pre'
 
@@ -29,4 +29,4 @@ opts = Slop.parse do |o|
   end
 end
 
-Scenarios::BuildRelease.new(opts).run
+Scenarios::BuildInfraRelease.new(opts).run

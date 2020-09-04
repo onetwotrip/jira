@@ -6,10 +6,11 @@ namespace :test do
   RSpec::Core::RakeTask.new(:spec) do |t|
     t.pattern = Dir.glob('spec/**/*_spec.rb')
   end
-  RuboCop::RakeTask.new(:rubocop)
+  # RuboCop::RakeTask.new(:rubocop)
 end
 
 task :test do
-  %w[rubocop spec].each { |task| Rake::Task["test:#{task}"].invoke }
+  # %w[rubocop spec].each { |task| Rake::Task["test:#{task}"].invoke }
+  Rake::Task['test:spec'].invoke
 end
 task default: 'test'

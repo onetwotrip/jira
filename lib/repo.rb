@@ -218,10 +218,15 @@ end
 
 # :nocov:
 def git_repo(url, opts = {})
+  LOGGER.info "Get repo for #{url}"
   git_repo = Git.get_branch(url)
   # Removal of existing branches
   opts[:delete_branches].to_a.each do |branch|
     next unless git_repo.find_branch? branch
+    LOGGER.info "Git fetching"
+    git_repo.chdir do
+      `git fetch --prune`
+    end
     if git_repo.is_local_branch? branch
       puts "Found pre release branch: #{branch}. Deleting local...".red
       git_repo.lib.branch_delete branch
@@ -244,15 +249,20 @@ def clean_branch(repo, branch)
 end
 
 def prepare_branch(repo, source, destination, clean = false)
+  LOGGER.info "Git fetching"
   repo.fetch
+  LOGGER.info "Git checkout to #{source}"
   repo.branch(source).checkout
-  repo.pull
+  LOGGER.info "Git pull #{source}"
+  repo.pull('origin', source)
   # destination branch should be checked out or has no effect on actual FS
   if clean
     repo.branch(destination).checkout
     clean_branch(repo, destination)
   end
+  LOGGER.info "Git checkout #{destination} "
   repo.branch(destination).checkout
+  LOGGER.info "Git merge #{source}"
   repo.merge(source,
              "CI: merge source branch #{source} to release #{destination}")
 end
