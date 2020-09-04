@@ -40,7 +40,7 @@ module Ott
   module CheckBranchesBuildStatuses
     def self.run(issue)
       counter = 1
-      sleep_time = 60
+      sleep_time = 60 # 60 секунд
       issue.branches.each do |branch|
         branch_path = "#{branch.repo_owner}/#{branch.repo_slug}/#{branch.name}"
         LOGGER.info "Check Build Branch Status: #{branch_path}"
@@ -49,7 +49,7 @@ module Ott
         else
           while branch_states(branch).select { |s| s == 'INPROGRESS' }.any?
             LOGGER.info "Branch #{branch_path} state INPROGRESS. Waiting..."
-            if counter == 5
+            if counter == 30 # максимальное время сборки: 30 минут
               issue.post_comment <<-BODY
       {panel:title=Build notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
         Не удалось дождаться окончания сборки билда
@@ -62,7 +62,6 @@ module Ott
             end
             sleep sleep_time
             counter += 1
-            sleep_time *= 2
           end
           LOGGER.error "Branch #{branch_path} has no successful status" if branch_states(branch).delete_if { |s| s == 'SUCCESSFUL' }.any?
         end
