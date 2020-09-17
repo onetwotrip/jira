@@ -49,13 +49,13 @@ module Scenarios
           with local_repo do
             merge_pullrequest(pr.pr['id'])
           end
-        rescue StandardError => e
+        rescue Git::GitExecuteError => e
           is_error = true
-          puts e.response.red
+          puts e.message.red
           issue.post_comment <<-BODY
               {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
                   Не удалось замержить PR: #{pr_url}
-                  *Причина:* #{e.response}
+                  *Причина:* #{e.message}
               {panel}
           BODY
           issue.transition 'Merge Fail'
