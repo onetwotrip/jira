@@ -14,6 +14,7 @@ module Scenarios
       issue.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
         Запущено подмерживание релизных веток и закрытие тикетов(!)
+        #{ENV['BUILD_URL']} 
         Ожидайте сообщение о завершении
       {panel}
       BODY

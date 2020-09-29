@@ -9,6 +9,7 @@ module Scenarios
       release.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
         Запущен откат релиза (!)
+        #{ENV['BUILD_URL']} 
         Ожидайте сообщение о завершении
       {panel}
       BODY
@@ -27,7 +28,7 @@ module Scenarios
         release.post_comment <<-BODY
         {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
          Не удалось откатить релиз (x)
-         Подробности в логе таски https://jenkins.twiket.com/view/RELEASE/job/rollback_release/
+         Подробности в логе таски #{ENV['BUILD_URL']} 
         {panel}
         BODY
         LOGGER.error "Не удалось откатить релиз, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"

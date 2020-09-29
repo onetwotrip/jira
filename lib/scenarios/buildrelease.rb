@@ -19,7 +19,8 @@ module Scenarios
 
       release.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
-        Запущено формирование -pre веток (!) #{ENV['BUILD_URL']}
+        Запущено формирование -pre веток (!)
+        #{ENV['BUILD_URL']} 
         Ожидайте сообщение о завершении
       {panel}
       BODY
@@ -210,7 +211,7 @@ module Scenarios
         release.post_comment <<-BODY
         {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
          Не удалось собрать -pre ветки (x)
-         Подробности в логе таски https://jenkins.twiket.com/view/RELEASE/job/build_release/
+         Подробности в логе таски #{ENV['BUILD_URL']} 
         {panel}
         BODY
         LOGGER.error "Не удалось собрать -pre ветки, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
@@ -236,7 +237,7 @@ module Scenarios
             release.post_comment <<-BODY
         {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
          Не удалось отлинковать Merge Failed задачи (x)
-         Подробности в логе таски https://jenkins.twiket.com/view/RELEASE/job/build_release/
+         Подробности в логе таски #{ENV['BUILD_URL']} 
         {panel}
             BODY
             LOGGER.error "Не удалось отлинковать Merge Failed задачи, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
@@ -255,7 +256,7 @@ module Scenarios
         release.post_comment <<-BODY
         {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
          Сборка -pre веток завершена с ошибками. Некоторые задачи, не были замержены, и не смогли перейти в статус Merge Failed (x)
-         Подробности в логе таски https://jenkins.twiket.com/view/RELEASE/job/build_release/
+         Подробности в логе таски #{ENV['BUILD_URL']} 
         {panel}
         BODY
         exit 1

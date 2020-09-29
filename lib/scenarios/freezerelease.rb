@@ -14,6 +14,7 @@ module Scenarios
       issue.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
         Запущено формирование релизных веток(!)
+        #{ENV['BUILD_URL']} 
         Ожидайте сообщение о завершении
       {panel}
       BODY
@@ -95,7 +96,7 @@ module Scenarios
         issue.post_comment <<-BODY
         {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
          Не удалось собрать релизные ветки (x)
-         Подробности в логе таски https://jenkins.twiket.com/view/RELEASE/job/freeze_release/
+         Подробности в логе таски #{ENV['BUILD_URL']} 
         {panel}
         BODY
         LOGGER.error "Не удалось собрать релизные ветки, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
