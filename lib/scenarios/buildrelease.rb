@@ -19,7 +19,7 @@ module Scenarios
 
       release.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
-        Запущено формирование -pre веток (!)
+        Запущено формирование -pre веток (!) #{ENV['BUILD_URL']}
         Ожидайте сообщение о завершении
       {panel}
       BODY
