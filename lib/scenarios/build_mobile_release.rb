@@ -6,7 +6,7 @@ module Scenarios
     attr_accessor :opts, :repo_prepare
 
     def initialize(opts)
-      @opts         = opts
+      @opts = opts
       @repo_prepare = false
     end
 
@@ -15,7 +15,7 @@ module Scenarios
 
       # Start
       options = { auth_type: :basic }.merge(opts.to_hash)
-      jira    = JIRA::Client.new(options)
+      jira = JIRA::Client.new(options)
       release = jira.Issue.find(opts[:release])
       release.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
@@ -61,9 +61,9 @@ module Scenarios
         end
 
         # Clean old release branch if exist
-        release_branch     = "#release/#{opts[:release]}"
+        release_branch = "#release/#{opts[:release]}"
         pre_release_branch = "#{opts[:release]}-pre"
-        delete_branches    = []
+        delete_branches = []
         delete_branches << pre_release_branch
 
         # Get release branch if exist for feature deleting
@@ -82,22 +82,22 @@ module Scenarios
 
         LOGGER.info "Number of issues: #{release.linked_issues('deployes').size}"
 
-        badissues    = {}
-        repos        = {}
+        badissues = {}
+        repos = {}
 
         # Check linked issues for merged PR
         release.linked_issues('deployes').each do |issue| # rubocop:disable Metrics/BlockLength
           LOGGER.info "Working on #{issue.key}"
           has_merges = false
           merge_fail = false
-          valid_pr   = []
+          valid_pr = []
           # Check ticket status
           LOGGER.info "Ticket #{issue.key} has status: #{issue.status.name}, but should 'Merge ready'" if issue.status.name != 'Merge ready'
 
           # Check PR exist in ticket
           if issue.related['pullRequests'].empty?
             if !issue.related['branches'].empty?
-              body               = "#{issue.key}: There is no pullrequest, but there is branhes. I'm afraid of changes are not at develop"
+              body = "#{issue.key}: There is no pullrequest, but there is branhes. I'm afraid of changes are not at develop"
               badissues[:absent] = [] unless badissues.key?(:absent)
               badissues[:absent].push(issue.key)
               LOGGER.fatal body
@@ -131,7 +131,7 @@ module Scenarios
             end
             # if ticket doesn't have valid pr (valid means contain issue number)
             unless valid_pr.include?(true)
-              body               = "#{issue.key}: There is no pullrequest contains issue number. I'm afraid of changes from ticket are not at develop" # rubocop:disable Metrics/LineLength
+              body = "#{issue.key}: There is no pullrequest contains issue number. I'm afraid of changes from ticket are not at develop" # rubocop:disable Metrics/LineLength
               badissues[:absent] = [] unless badissues.key?(:absent)
               badissues[:absent].push(issue.key)
               LOGGER.fatal body
@@ -194,13 +194,22 @@ module Scenarios
     end
 
     def prepare_repos(issue)
+      # Temp mock for mobile prj
+      if issue.key.include?('ADR-')
+        self.repo_prepare = true
+        return { url: 'https://bitbucket.org/OneTwoTrip/android_ott', name: 'android_ott' }
+      else
+        self.repo_prepare = true
+        return { url: 'https://bitbucket.org/OneTwoTrip/ios-12trip/', name: 'ios-12trip' }
+      end
+
       repositories = %w(ios-12trip android_ott) # rubocop:disable Style/PercentLiteralDelimiters
       issue.related['branches'].each do |branch|
         next unless branch['name'].include? issue.key
 
         repo_name = branch['repository']['name']
         next unless repositories.include? repo_name
-        repo_url          = branch['repository']['url']
+        repo_url = branch['repository']['url']
         self.repo_prepare = true
         return { url: repo_url, name: repo_name }
       end
