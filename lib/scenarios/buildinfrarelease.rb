@@ -11,7 +11,7 @@ module Scenarios
       @error_comment = <<-BODY
           {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
            Не удалось собрать билд (x)
-           Подробности в логе таски https://jenkins.twiket.com/view/RELEASE/job/build_infra_release/
+           Подробности в логе таски #{ENV['BUILD_URL']} 
           {panel}
       BODY
     end

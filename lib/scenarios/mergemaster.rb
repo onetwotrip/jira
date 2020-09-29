@@ -15,6 +15,7 @@ module Scenarios
       issue.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
         Запущено подтягивание мастеров в ветки задачи(!)
+        #{ENV['BUILD_URL']} 
         Ожидайте сообщение о завершении
       {panel}
       BODY
