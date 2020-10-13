@@ -167,10 +167,12 @@ module Scenarios
           LOGGER.info 'Repos:' unless repos.empty?
           repos.each do |name, repo|
             LOGGER.info "Push '#{pre_release_branch}' to '#{name}' repo"
-            LOGGER.info 'Push to remote'
             local_repo = repo[:repo_base]
+            LOGGER.info "Merge master into #{pre_release_branch}"
             local_repo.merge('master', "merge master to #{pre_release_branch}")
+            LOGGER.info 'Push to remote'
             local_repo.push('origin', pre_release_branch)
+            LOGGER.info 'Push success!'
             # tag = @fix_version.first['name']
             # local_repo.add_tag(tag, pre_release_branch, messsage: 'Add tag to -pre branch', f: true)
             # local_repo.push('origin', "refs/tags/#{tag}", f: true)
