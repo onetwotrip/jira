@@ -167,20 +167,31 @@ module Scenarios
     end
 
     def prepare_release_branches(issue)
-      LOGGER.info 'Prepare release branches!'
+      begin
+        LOGGER.info 'Prepare release branches!'
 
-      repo_path = git_repo(repo_for(issue))
-      # repo_path.chdir do
-      #   `git fetch origin --prune`
-      # end
-      release_label = issue.fields['labels'].first
-      release_branch = "release/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}/#{release_label}"
-      create_branch_and_pr(repo_path, release_branch, repo_for(issue))
-
-      if issue.key.include?('IOS')
-        LOGGER.warn 'This is IOS ticket, so i have to make also feature branch'
-        release_branch = "feature/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}/#{release_label}"
+        repo_path = git_repo(repo_for(issue))
+        # repo_path.chdir do
+        #   `git fetch origin --prune`
+        # end
+        release_label = issue.fields['labels'].first
+        release_branch = "release/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}/#{release_label}"
         create_branch_and_pr(repo_path, release_branch, repo_for(issue))
+
+        if issue.key.include?('IOS')
+          LOGGER.warn 'This is IOS ticket, so i have to make also feature branch'
+          release_branch = "feature/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}/#{release_label}"
+          create_branch_and_pr(repo_path, release_branch, repo_for(issue))
+        end
+      rescue StandardError => e
+        issue.post_comment <<-BODY
+        {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+         Не удалось собрать релизные ветки (x)
+         Подробности в логе таски #{ENV['BUILD_URL']} 
+        {panel}
+        BODY
+        LOGGER.error "Не удалось собрать релизные ветки, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
+        exit(1)
       end
     end
 
@@ -202,7 +213,7 @@ module Scenarios
     end
 
     def set_fix_version_to_all_tasks(issue)
-      fix_version = issue.fields['fixVersions']
+      fix_version = issue.fields['fixVersions'].first['name']
       LOGGER.info "Start to set Fix Versions: #{fix_version} to tickets"
       issue.linked_issues('deployes').each do |subissue|
         result = subissue.save(fields: { fixVersions: [{ name: fix_version }] })
@@ -218,13 +229,13 @@ module Scenarios
 
     def repo_for(issue)
       case issue.key.to_s
-      when /ADR-/
-        'https://bitbucket.org/OneTwoTrip/android_ott'
-      when /IOS-/
-        'https://bitbucket.org/OneTwoTrip/ios-12trip'
-      else
-        LOGGER.error "Cant' get repo_url for #{issue.key}. Only for: ARD, IOS projects"
-        exit 1
+        when /ADR-/
+          'https://bitbucket.org/OneTwoTrip/android_ott'
+        when /IOS-/
+          'https://bitbucket.org/OneTwoTrip/ios-12trip'
+        else
+          LOGGER.error "Cant' get repo_url for #{issue.key}. Only for: ARD, IOS projects"
+          exit 1
       end
     end
   end
