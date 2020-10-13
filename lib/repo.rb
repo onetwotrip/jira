@@ -223,7 +223,7 @@ def git_repo(url, opts = {})
   # Removal of existing branches
   opts[:delete_branches].to_a.each do |branch|
     next unless git_repo.find_branch? branch
-    LOGGER.info "Git fetching"
+    LOGGER.info 'Git fetching'
     git_repo.chdir do
       `git fetch --prune`
     end
@@ -249,8 +249,8 @@ def clean_branch(repo, branch)
 end
 
 def prepare_branch(repo, source, destination, clean = false)
-  LOGGER.info "Git fetching"
-  repo.fetch
+  LOGGER.info 'Git fetching'
+  repo.fetch('origin', prune: true)
   LOGGER.info "Git checkout to #{source}"
   repo.branch(source).checkout
   LOGGER.info "Git pull #{source}"
@@ -260,7 +260,7 @@ def prepare_branch(repo, source, destination, clean = false)
     repo.branch(destination).checkout
     clean_branch(repo, destination)
   end
-  LOGGER.info "Git checkout #{destination} "
+  LOGGER.info "Git checkout #{destination}"
   repo.branch(destination).checkout
   LOGGER.info "Git merge #{source}"
   repo.merge(source,
