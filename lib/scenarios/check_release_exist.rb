@@ -19,6 +19,9 @@ module Scenarios
 
       unless existing_releases.empty?
         LOGGER.warn "Found #{existing_releases.count} release(s) for Service: #{ENV['SERVICE_NAME']} in work. Before continue they are should be in DONE status" # rubocop:disable Metrics/LineLength</code>
+        existing_releases.each do |release|
+          LOGGER.warn"Current release in work: #{SimpleConfig.jira.site}/browse/#{release.key}"
+        end
         Ott::Helpers.export_to_file("SLACK_URL=''", 'release_properties')
         exit(127)
       end
