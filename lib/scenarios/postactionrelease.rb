@@ -43,7 +43,7 @@ module Scenarios
           with local_repo do
             merge_pullrequest(pr.pr['id'])
           end
-        rescue Git::GitExecuteError => e
+        rescue StandardError => e
           is_error = true
           puts e.message.red
           if e.message.include?('Merge conflict')
