@@ -106,7 +106,10 @@ module Ott
                   Next builds has FAILURE status: #{failed_builds} 
                 {panel}
         BODY
+        # For ticket
         issue.transition 'Needs reply'
+        # For infra release
+        issue.transition 'Build Failed'
         LOGGER.error 'Found some branch with FAILURE status'
         exit(1)
       end
