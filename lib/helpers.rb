@@ -38,15 +38,30 @@ module Ott
     end
   end
 
-  # This module represents CheckBranchesBuildStatuses
-  # :nocov:
-  module CheckBranchesBuildStatuses
-    def self.run(issue)
+  # Check Build Status
+  module CheckBuildStatuses
+    # For all Branches in ticket
+    def self.for_all_branches(issue)
+      check(issue, false)
+    end
+
+    # For all branches which contain open PR in ticket
+    def self.for_open_pull_request(issue)
+      check(issue, true)
+    end
+
+    def self.check(issue, is_open_pr = false)
       white_list = ENV['REPO_WHITE_LIST'] || []
       failed_builds = []
-      issue.api_pullrequests.each do |pr|
-        repo_name = pr.repo_slug
-        branch_name = pr.source['branch']['name']
+      branches_array = issue.branches
+      branches_array = issue.api_pullrequests if is_open_pr
+      branches_array.each do |item|
+        repo_name = item.repo_slug
+        branch_name = if is_open_pr
+                        item.source['branch']['name']
+                      else
+                        item.name
+                      end
         build_url = "https://build.twiket.com/job/#{repo_name}/job/#{branch_name}/"
         LOGGER.info "Check #{repo_name}: #{branch_name}"
         if white_list.include? repo_name
@@ -66,7 +81,7 @@ module Ott
 
             issue.post_comment <<-BODY
                 {panel:title=Build notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
-                  Не удалось дождаться окончания сборки [билда|#{build_url}] 
+                  Не удалось дождаться окончания сборки [билда|#{build_url}]
                 {panel}
             BODY
             issue.transition 'Wait for reply'
@@ -103,7 +118,7 @@ module Ott
       else
         issue.post_comment <<-BODY
                 {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
-                  Next builds has FAILURE status: #{failed_builds} 
+                  Next builds has FAILURE status: #{failed_builds}
                 {panel}
         BODY
         # For ticket
