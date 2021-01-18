@@ -10,7 +10,7 @@ module Scenarios
       # Check PR names
       Ott::CheckPullRequests.run(issue)
       # Check builds status
-      Ott::CheckBranchesBuildStatuses.run(issue)
+      Ott::CheckBuildStatuses.for_open_pull_request(issue)
     end
   end
 end

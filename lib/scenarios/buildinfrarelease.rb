@@ -35,7 +35,7 @@ module Scenarios
 
       if flag || (step_id == 1)
         LOGGER.info "Check build status #{@opts[:release]}"
-        Ott::CheckBranchesBuildStatuses.run(issue)
+        Ott::CheckBuildStatuses.for_all_branches(issue)
         flag = true
       end
 
@@ -49,7 +49,7 @@ module Scenarios
 
       if flag || (step_id == 3)
         LOGGER.info "Review release #{@opts[:release]}"
-        Scenarios::ReviewRelease.new.run(true)
+        Scenarios::ReviewRelease.new.run
       end
 
       LOGGER.info "Move ticket #{@opts[:release]} to Testing status"

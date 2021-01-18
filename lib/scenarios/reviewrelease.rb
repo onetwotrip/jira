@@ -2,7 +2,7 @@ module Scenarios
   ##
   # ReviewRelease scenario
   class ReviewRelease
-    def run(simple_mode = false)
+    def run
       LOGGER.info "Starting #{self.class.name} for #{SimpleConfig.jira.issue}"
       jira  = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
@@ -23,18 +23,7 @@ module Scenarios
       end
 
       # Check builds status
-      Ott::CheckBranchesBuildStatuses.run(issue)
-      unless simple_mode
-        # Post comment
-        comment = LOGGER.history_comment(EnhancedLogger::WARN)
-        if comment.empty?
-          LOGGER.info 'Review is OK. No errors'
-          issue.post_comment LOGGER.history_comment(EnhancedLogger::INFO)
-        else
-          issue.post_comment comment
-          issue.transition 'WTF'
-        end
-      end
+      Ott::CheckBuildStatuses.for_all_branches(issue)
     end
   end
 end
