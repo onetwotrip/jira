@@ -60,7 +60,7 @@ module Scenarios
           branches.each do |branch|
             branches_list << branch.repo_slug if branch.state.include?('OPEN')
           end
-          next unless (branches_list.uniq - %w[avia_api_rspec back-components webfront_tests]).size > 1
+          next unless (branches_list.uniq - %w[avia_api_rspec back-components webfront_tests elastalert_rules cron swagger]).size > 1
 
           comment = "Remove issue #{issuelink.outwardIssue.key} from release. Reason: issue has more than 1 product branch"
           release.post_comment comment
