@@ -18,9 +18,10 @@ module Scenarios
       end
 
       unless ENV['LABELS'].nil?
-        LOGGER.info "Found some additional labels: #{ENV['LABELS']} I will add them to issue #{issue.key}"
-        additional_label = ENV['LABELS']
-        labels << additional_label
+        LOGGER.info "Found some additional labels: #{ENV['LABELS']} - I will add them to issue #{issue.key}"
+        ENV['LABELS'].sub(' ', '').split(',').each do |it|
+          labels << it
+        end
       end
 
       LOGGER.info "Add labels: #{labels.uniq} to issue #{issue.key}"
