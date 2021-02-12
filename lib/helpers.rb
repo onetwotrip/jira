@@ -122,7 +122,7 @@ module Ott
                 {panel}
         BODY
         # For ticket
-        issue.transition 'Needs reply'
+        issue.transition 'Reopened'
         # For infra release
         issue.transition 'Build Failed'
         LOGGER.error 'Found some branch with FAILURE status'
