@@ -99,7 +99,7 @@ module Scenarios
           has_merges = false
           merge_fail = false
           if issue.related['pullRequests'].empty?
-            body = "CI: [~#{issue.assignee.displayName}] No pullrequest here"
+            body = "CI: [~#{issue.assignee.displayName}] Не нашел валидных PR(Статус Open и номер задачи в названии PR)"
             badissues[:absent] = [] unless badissues.key?(:absent)
             badissues[:absent].push(key: issue.key, body: body)
             issue.post_comment body

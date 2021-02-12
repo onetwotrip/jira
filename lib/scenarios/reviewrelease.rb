@@ -7,15 +7,6 @@ module Scenarios
       jira  = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
 
-      # Check issie status
-      # LOGGER.error "Issue '#{issue.key}' doesn't have 'Code review' status" unless issue.status.name == 'Code Review'
-
-      # Check branches name
-      # issue.branches.each do |branch|
-      #   branch_path = "#{branch.repo_owner}/#{branch.repo_slug}/#{branch.name}"
-      #   LOGGER.error "Incorrect branch name: #{branch_path}" unless branch.name.match "^#{issue.key}-pre"
-      # end
-
       # Check pullrequests name
       issue.api_pullrequests.select { |pr| pr.state == 'OPEN' }.each do |pr|
         LOGGER.info "Check PR: #{pr.title}"
