@@ -8,6 +8,9 @@ require 'colorize'
 require 'common/logger'
 require 'common/bitbucket'
 require 'git/bitbucket'
+require 'model/branch_info'
+require 'model/pull_request_info'
+require 'model/development_info'
 
 module JIRA
   module Resource
@@ -44,10 +47,28 @@ module JIRA
         end
       end
 
+      def development
+        result = DevelopmentInfo.new
+        pullrequests = api_pullrequests
+
+        branches.each do |branch|
+          pr_status = pullrequests.select { |pr| pr.source['branch']['name'].include?(branch.name) }
+          pr_status = pr_status.first.state unless pr_status.empty?
+          result.branches << BranchInfo.new(branch.repo_slug, branch.name, pr_status)
+        end
+
+        pullrequests.each do |pr|
+          result.pr << PullRequestInfo.new(pr.id, pr.repo_slug, pr.source['branch']['name'], pr.title, pr.state)
+        end
+
+        result
+      end
+
       def repo(url)
         repo = Git::Utils.url_to_ssh url
         BITBUCKET.repo(repo.owner, repo.slug)
       end
+
       # :nocov:
 
       def rollback
@@ -71,6 +92,7 @@ module JIRA
         # rubocop:disable Style/DoubleNegation
         !!get_transition_by_name(name)
       end
+
       # rubocop:enable Style/PredicateName, Style/DoubleNegation
 
       def get_transition_by_name(name)
