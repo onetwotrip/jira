@@ -20,11 +20,11 @@ module Scenarios
         prs = issue.related['pullRequests']
 
         if prs.empty?
-          LOGGER.error "Error: no pull requests found for the issue #{SimpleConfig.jira.issue}"
+          LOGGER.error "Error: no valid pull requests found for the issue #{SimpleConfig.jira.issue}. Valid PR should contains '#{SimpleConfig.jira.issue}' in title"
           exit 1
         end
 
-        puts 'Checking for wrong PRs names:'
+        LOGGER.info 'Checking for wrong PRs names:'
 
         prs.each do |pr|
           prname = pr['name'].dup
@@ -56,9 +56,9 @@ module Scenarios
         end
 
         puts Terminal::Table.new(
-          title:    'Pullrequests status',
+          title: 'Pullrequests status',
           headings: %w[status author url],
-          rows:     prs.map { |v| [v['reject'] || v['status'].green, v['author']['name'], v['url']] }
+          rows: prs.map { |v| [v['reject'] || v['status'].green, v['author']['name'], v['url']] }
         )
 
         prs.reject { |pr| pr['reject'] }.each do |pr|
@@ -98,9 +98,9 @@ module Scenarios
       additional_values['KEEP_RELEASES'] = 1 if true? ENV['DYNAMIC_NODES_SYNC']
 
       puts Terminal::Table.new(
-        title:    'Deploy projects',
+        title: 'Deploy projects',
         headings: %w[Project branch],
-        rows:      prop_values['PROJECTS'].map { |k, v| [k, v['BRANCH']] }
+        rows: prop_values['PROJECTS'].map { |k, v| [k, v['BRANCH']] }
       )
       properties = { 'DEPLOY' => prop_values.to_json }
       properties = properties.merge(additional_values) unless additional_values.empty?
