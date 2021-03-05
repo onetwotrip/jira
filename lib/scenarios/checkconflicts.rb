@@ -4,8 +4,8 @@ module Scenarios
   class CheckConflicts
     def find_by_filter(issue, filter)
       issue.jql("filter=#{filter}")
-    rescue JIRA::HTTPError => jira_error
-      error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
+    rescue JIRA::HTTPError => e
+      error_message = e.response['body_exists'] ? e.message : e.response.body
       LOGGER.info "Error in JIRA with the search by filter #{error_message}".red
       []
     end
@@ -13,36 +13,16 @@ module Scenarios
     def check_issue(issue_task)
       LOGGER.info "Start check #{issue_task.key} issue".green
       is_already_reopen = false
-      issue_task.api_pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
+      # rubocop:disable Metrics/BlockLength
+      issue_task.api_pullrequests.each do |pr|
         next unless pr.state == 'OPEN'
+
         if pr.repo_slug.include?('rspec') || pr.repo_slug.include?('autotest')
           LOGGER.info 'Find autotest branch. Skip check conflict'
           next
         end
         begin
-          diff_in_pr      = pr.diff
-          commit_id       = pr.source['commit']['hash']
-          commit          = BITBUCKET.repo(pr.repo_owner, pr.repo_slug).commit(commit_id)
-          status_of_build = commit.build_statuses.collect.last
-
-          if !status_of_build.nil? && status_of_build.state.upcase.include?('FAILED')
-            puts "Detected build status error in #{issue_task.key}. Writing comment in ticket...".red
-            puts "#{issue_task.key}: https://bitbucket.org/OneTwoTrip/#{pr.repo_slug}/pull-requests/#{pr.id}".red
-            puts "Writing message in #{issue_task.key}".red
-            issue_task.post_comment <<-BODY
-              {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
-                   [#{issue_task.assignee.displayName}|~accountid:#{issue_task.assignee.accountId}]
-                  Repo: #{pr.source['repository']['name']}
-                  Author: #{pr.author['display_name']}
-                  Branch: https://bitbucket.org/OneTwoTrip/#{pr.repo_slug}/branch/#{pr.source['branch']['name']}
-                  PR: https://bitbucket.org/OneTwoTrip/#{pr.repo_slug}/pull-requests/#{pr.id}
-              {panel}
-                  Проверьте почему билд в ветке не собрался и исправьте проблему
-            BODY
-            puts "Reopen ticket: #{issue_task.key}".red
-            issue_task.transition 'Reopened' unless is_already_reopen
-            is_already_reopen = true
-          end
+          diff_in_pr = pr.diff
           conflict_flag = diff_in_pr.include? '<<<<<<<'
           if conflict_flag
             puts "Find conflicts in #{issue_task.key}. Writing comment in ticket...".red
@@ -62,8 +42,8 @@ module Scenarios
             issue_task.transition 'Reopened' unless is_already_reopen
             is_already_reopen = true
           end
-        rescue StandardError => error
-          puts "There is error occurred with ticket #{issue_task.key}: #{error.message}".red
+        rescue StandardError => e
+          puts "There is error occurred with ticket #{issue_task.key}: #{e.message}".red
         end
       end
     end
@@ -71,10 +51,10 @@ module Scenarios
     # :nocov:
     def run
       LOGGER.info 'Start check conflicts'.green
-      client        = JIRA::Client.new SimpleConfig.jira.to_h
+      client = JIRA::Client.new SimpleConfig.jira.to_h
       release_issue = client.Issue.find(SimpleConfig.jira.issue)
-      project_name  = release_issue.fields['project']['key']
-      release_name  = release_issue.fields['summary'].upcase
+      project_name = release_issue.fields['project']['key']
+      release_name = release_issue.fields['summary'].upcase
 
       LOGGER.info "Found release ticket: #{release_issue.key} in project: #{project_name}"
       filter_config = JSON.parse(ENV['RELEASE_FILTER'])
@@ -115,6 +95,7 @@ module Scenarios
       LOGGER.info "Start check #{issues.count} issues".green
       issues.each { |issue| check_issue(issue) }
     end
+
     # :nocov:
   end
 end
