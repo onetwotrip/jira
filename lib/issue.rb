@@ -50,6 +50,7 @@ module JIRA
       def development
         result = DevelopmentInfo.new
         pullrequests = api_pullrequests
+        LOGGER.info "Found #{pullrequests.size} OPEN PR from api_pullrequests"
 
         branches.each do |branch|
           pr_status = pullrequests.select { |pr| pr.source['branch']['name'].include?(branch.name) }
