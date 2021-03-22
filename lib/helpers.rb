@@ -68,6 +68,17 @@ module Ott
           LOGGER.warn "Repo: #{repo_name} in white_list: #{white_list}. Go next!"
           next
         end
+
+        # Need some wait while Jenkins get hook from BB and start build
+        10.times do
+          Jenkins.get_last_build_status(repo_name, branch_name)
+          break
+        rescue StandardError => e
+          LOGGER.warn 'Wait while Jenkins start build...'
+          sleep(6)
+          next
+        end
+
         begin
           result = Jenkins.get_last_build_status(repo_name, branch_name)
           counter = 0
@@ -90,17 +101,17 @@ module Ott
           end
           LOGGER.info "Branch was built for #{counter * 10} seconds" if counter.positive?
           case result
-            when 'SUCCESS'
-              LOGGER.info "#{repo_name}: #{branch_name} SUCCESS!"
-              next
-            when 'FAILURE'
-              LOGGER.error "#{build_url} - FAILURE!"
-              failed_builds << build_url
-              next
-            else
-              LOGGER.error "#{build_url} - strange status!"
-              failed_builds << build_url
-              next
+          when 'SUCCESS'
+            LOGGER.info "#{repo_name}: #{branch_name} SUCCESS!"
+            next
+          when 'FAILURE'
+            LOGGER.error "#{build_url} - FAILURE!"
+            failed_builds << build_url
+            next
+          else
+            LOGGER.error "#{build_url} - strange status!"
+            failed_builds << build_url
+            next
           end
         rescue StandardError => e
           LOGGER.error e.message.red
@@ -143,8 +154,8 @@ module Ott
   module CheckPullRequests
     def self.run(issue)
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
-                       .filter_by_status('OPEN')
-                       .filter_by_source_url(issue.key)
+                          .filter_by_status('OPEN')
+                          .filter_by_source_url(issue.key)
 
       return if pullrequests.valid?
 
