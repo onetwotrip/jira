@@ -16,7 +16,7 @@ module Jenkins
     JSON.parse(response, symbolize_names: true)[:result]
   rescue StandardError => e
     LOGGER.fatal "Got error when try to get last build status for branch:#{branch_name} from repo: #{repo_name}"
-    LOGGER.fatal "Error: #{e.response}"
+    LOGGER.fatal "Error: #{e}"
     raise e
   end
 end
