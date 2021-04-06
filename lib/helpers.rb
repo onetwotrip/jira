@@ -42,15 +42,23 @@ module Ott
   module CheckBuildStatuses
     # For all Branches in ticket
     def self.for_all_branches(issue)
-      check(issue, false)
+      check(issue)
     end
 
     # For all branches which contain open PR in ticket
     def self.for_open_pull_request(issue)
-      check(issue, true)
+      check(issue, is_open_pr: true)
     end
 
-    def self.check(issue, is_open_pr = false)
+    def self.for_mobile_open_pull_request(issue)
+      check(issue, is_open_pr: true, mobile: true)
+    end
+
+    # issue - Jira tiket number
+    # is_open_pr - Does it have to check build for open PR?
+    # timeout - time to try to get build last status. Calculate as timeout(seconds) = timeout(value)*10
+    # mobile - is it for mobile branch check. It has symbol / in branch name and should handle in another way
+    def self.check(issue, is_open_pr: false, timeout: 180, mobile: false)
       white_list = ENV['REPO_WHITE_LIST'] || []
       failed_builds = []
       branches_array = issue.branches
@@ -71,7 +79,12 @@ module Ott
 
         # Need some wait while Jenkins get hook from BB and start build
         10.times do
-          Jenkins.get_last_build_status(repo_name, branch_name)
+          if mobile
+            # Mobile project has build from open PR, not branch. So we need use PR id for url
+            Jenkins.get_last_build_status(repo_name, "PR-#{item.id}")
+          else
+            Jenkins.get_last_build_status(repo_name, branch_name)
+          end
           break
         rescue StandardError => e
           LOGGER.warn 'Wait while Jenkins start build...'
@@ -80,15 +93,24 @@ module Ott
         end
 
         begin
-          result = Jenkins.get_last_build_status(repo_name, branch_name)
+          result = if mobile
+                     # Mobile project has build from open PR, not branch. So we need use PR id for url
+                     Jenkins.get_last_build_status(repo_name, "PR-#{item.id}")
+                   else
+                     Jenkins.get_last_build_status(repo_name, branch_name)
+                   end
           counter = 0
-          timeout = 180 # ~30min for build
           until result
             LOGGER.warn "Build #{build_url} has status IN PROGRESS... - #{counter}/#{timeout}"
-            result = Jenkins.get_last_build_status(repo_name, branch_name)
+            result = if mobile
+                       # Mobile project has build from open PR, not branch. So we need use PR id for url
+                       Jenkins.get_last_build_status(repo_name, "PR-#{item.id}")
+                     else
+                       Jenkins.get_last_build_status(repo_name, branch_name)
+                     end
             sleep(10) # 10 sec
             counter += 1
-            next if counter < 180
+            next if counter < timeout
 
             issue.post_comment <<-BODY
                 {panel:title=Build notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
@@ -101,17 +123,17 @@ module Ott
           end
           LOGGER.info "Branch was built for #{counter * 10} seconds" if counter.positive?
           case result
-          when 'SUCCESS'
-            LOGGER.info "#{repo_name}: #{branch_name} SUCCESS!"
-            next
-          when 'FAILURE'
-            LOGGER.error "#{build_url} - FAILURE!"
-            failed_builds << build_url
-            next
-          else
-            LOGGER.error "#{build_url} - strange status!"
-            failed_builds << build_url
-            next
+            when 'SUCCESS'
+              LOGGER.info "#{repo_name}: #{branch_name} SUCCESS!"
+              next
+            when 'FAILURE'
+              LOGGER.error "#{build_url} - FAILURE!"
+              failed_builds << build_url
+              next
+            else
+              LOGGER.error "#{build_url} - strange status!"
+              failed_builds << build_url
+              next
           end
         rescue StandardError => e
           LOGGER.error e.message.red
@@ -164,6 +186,47 @@ module Ott
                   Нет валидных PR(Статус: Open и с номером задачи в названии)
               {panel}
       BODY
+    end
+  end
+end
+
+module Tinybucket
+  module Api
+    module Helper
+      module ApiHelper
+        private
+
+        def next_proc(method, options)
+          lambda do |next_options|
+            send(method, options.merge(next_options))
+          end
+        end
+
+        def urlencode(v, key)
+          if v.blank? || (escaped = CGI.escape(v.to_s)).blank?
+            msg = "Invalid #{key} parameter. (#{v})"
+            raise ArgumentError, msg
+          end
+          # ADR and IOS use / in branch name, so we have to skip it for CGI.escape
+          escaped = v.to_s if v.to_s.include?('feature/')
+          escaped
+        end
+
+        def build_path(base_path, *components)
+          components.reduce(base_path) do |path, component|
+            part = if component.is_a?(Array)
+                     urlencode(*component)
+                   else
+                     component.to_s
+                   end
+            path + '/' + part
+          end
+        rescue ArgumentError => e
+          raise ArgumentError, "Failed to build request URL: #{e}"
+        end
+
+        module_function :build_path, :next_proc, :urlencode
+      end
     end
   end
 end
