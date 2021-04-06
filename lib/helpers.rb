@@ -42,7 +42,7 @@ module Ott
   module CheckBuildStatuses
     # For all Branches in ticket
     def self.for_all_branches(issue)
-      check(issue, is_open_pr: false)
+      check(issue)
     end
 
     # For all branches which contain open PR in ticket
@@ -54,6 +54,10 @@ module Ott
       check(issue, is_open_pr: true, mobile: true)
     end
 
+    # issue - Jira tiket number
+    # is_open_pr - Does it have to check build for open PR?
+    # timeout - time to try to get build last status. Calculate as timeout(seconds) = timeout(value)*10
+    # mobile - is it for mobile branch check. It has symbol / in branch name and should handle in another way
     def self.check(issue, is_open_pr: false, timeout: 180, mobile: false)
       white_list = ENV['REPO_WHITE_LIST'] || []
       failed_builds = []
@@ -76,6 +80,7 @@ module Ott
         # Need some wait while Jenkins get hook from BB and start build
         10.times do
           if mobile
+            # Mobile project has build from open PR, not branch. So we need use PR id for url
             Jenkins.get_last_build_status(repo_name, "PR-#{item.id}")
           else
             Jenkins.get_last_build_status(repo_name, branch_name)
@@ -89,15 +94,20 @@ module Ott
 
         begin
           result = if mobile
+                     # Mobile project has build from open PR, not branch. So we need use PR id for url
                      Jenkins.get_last_build_status(repo_name, "PR-#{item.id}")
                    else
                      Jenkins.get_last_build_status(repo_name, branch_name)
                    end
           counter = 0
-          #timeout = timeout # ~30min for build
           until result
             LOGGER.warn "Build #{build_url} has status IN PROGRESS... - #{counter}/#{timeout}"
-            result = Jenkins.get_last_build_status(repo_name, branch_name)
+            result = if mobile
+                       # Mobile project has build from open PR, not branch. So we need use PR id for url
+                       Jenkins.get_last_build_status(repo_name, "PR-#{item.id}")
+                     else
+                       Jenkins.get_last_build_status(repo_name, branch_name)
+                     end
             sleep(10) # 10 sec
             counter += 1
             next if counter < timeout
