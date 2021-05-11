@@ -23,9 +23,10 @@ module Scenarios
         LOGGER.warn("Found #{blocked_by_issues.count} issues that blocks current issue. Start to check PR")
         blocked_by_issues.each do |i|
           pullrequests = i.pullrequests(SimpleConfig.git.to_h)
-                          .filter_by_status('MERGED')
+                          .filter_by_status('OPEN')
                           .filter_by_source_url(i.key)
-          if pullrequests.empty?
+          # Product ticket with merged PR -> pullrequest object doesn't contain them at all
+          if !pullrequests.empty?
             LOGGER.error("#{i.key}: found not merged PR for product branch")
             issue.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
