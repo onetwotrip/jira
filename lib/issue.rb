@@ -30,8 +30,8 @@ module JIRA
         li.save(params)
       end
 
-      def branches
-        related['branches'].map do |branch|
+      def branches(full_info = false)
+        related(full_info)['branches'].map do |branch|
           begin
             repo(branch['url']).branch(branch['name'])
           rescue Tinybucket::Error::NotFound
@@ -41,19 +41,19 @@ module JIRA
         end.reject(&:nil?)
       end
 
-      def api_pullrequests
-        related['pullRequests'].map do |pullrequest|
+      def api_pullrequests(full_info = false)
+        related(full_info)['pullRequests'].map do |pullrequest|
           repo(pullrequest['url']).pull_request(pullrequest['id'][/\d+/])
         end
       end
 
       def development
         result = DevelopmentInfo.new
-        pullrequests = api_pullrequests
+        pullrequests = api_pullrequests(true)
         LOGGER.info "Found #{pullrequests.size} OPEN PR from api_pullrequests"
 
         branches.each do |branch|
-          pr_status = pullrequests.select { |pr| pr.source['branch']['name'].include?(branch.name) }
+          pr_status = pullrequests.select { |pr| pr.source['branch']['name'].include?(branch.name) && pr.source['repository']['name'].include?(branch.repo_slug) }
           pr_status = pr_status.first.state unless pr_status.empty?
           result.branches << BranchInfo.new(branch.repo_slug, branch.name, pr_status)
         end
@@ -126,7 +126,7 @@ module JIRA
       end
 
       # :nocov:
-      def related
+      def related(full_info = false)
         params = {
           issueId: id,
           applicationType: 'bitbucket',
@@ -157,8 +157,8 @@ module JIRA
             branch['repository']['url'] = url
           end
         end
-
-        @related['pullRequests'].delete_if { |h| !(h['status'].include?('OPEN') && h['name'].include?(key)) } unless %w[ADR IOS].any? { |i| key.include? i } # key - ticket number # rubocop:disable Metrics/LineLength
+        # key - ticket number
+        @related['pullRequests'].delete_if { |h| !(h['status'].include?('OPEN') && h['name'].include?(key)) } unless %w[ADR IOS].any? { |i| key.include? i } || full_info # rubocop:disable Metrics/LineLength
 
         unless @related['pullRequests'].empty?
           @related['pullRequests'].each do |pr|
