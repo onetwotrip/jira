@@ -70,6 +70,7 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       # noinspection RubyArgCount
       issue = jira.Issue.find(SimpleConfig.jira.issue)
+      LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
       LOGGER.info("Start work after #{issue.key} was merged")
 
       project_name = issue.fields['project']['key']

@@ -6,6 +6,7 @@ module Scenarios
       LOGGER.info "Starting RollbackRelease for #{SimpleConfig.jira.issue}"
       jira    = JIRA::Client.new SimpleConfig.jira.to_h
       release = jira.Issue.find(SimpleConfig.jira.issue)
+      LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
       release.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
         Запущен откат релиза (!)

@@ -16,6 +16,7 @@ module Scenarios
       if SimpleConfig.jira.issue
         jira = JIRA::Client.new SimpleConfig.jira.to_h
         issue = jira.Issue.find SimpleConfig.jira.issue
+        LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
         prs = issue.related['pullRequests']
 
         if prs.empty?

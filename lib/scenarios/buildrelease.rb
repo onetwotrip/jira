@@ -14,6 +14,7 @@ module Scenarios
       LOGGER.info "Start with: #{options}"
       client = JIRA::Client.new(options)
       release = client.Issue.find(opts[:release])
+      LOGGER.info Ott::Helpers.jira_link(release.key).to_s
       is_cd_build = ActiveModel::Type::Boolean.new.cast(ENV['CD_BUILD'] || false)
       unlink_merge_failed_ticket = ActiveModel::Type::Boolean.new.cast(ENV['UNLINK_MERGE_FAILED_TICKET'] || true)
 

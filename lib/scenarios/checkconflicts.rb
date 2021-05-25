@@ -12,6 +12,7 @@ module Scenarios
 
     def check_issue(issue_task)
       LOGGER.info "Start check #{issue_task.key} issue".green
+
       is_already_reopen = false
       # rubocop:disable Metrics/BlockLength
       issue_task.api_pullrequests.each do |pr|
@@ -55,7 +56,7 @@ module Scenarios
       release_issue = client.Issue.find(SimpleConfig.jira.issue)
       project_name = release_issue.fields['project']['key']
       release_name = release_issue.fields['summary'].upcase
-
+      LOGGER.info Ott::Helpers.jira_link(release_issue.key).to_s
       LOGGER.info "Found release ticket: #{release_issue.key} in project: #{project_name}"
       filter_config = JSON.parse(ENV['RELEASE_FILTER'])
       # Check project exist in filter_config
