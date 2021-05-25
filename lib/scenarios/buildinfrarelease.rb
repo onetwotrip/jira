@@ -23,7 +23,7 @@ module Scenarios
       flag        = false
       jira        = JIRA::Client.new SimpleConfig.jira.to_h
       issue       = jira.Issue.find(SimpleConfig.jira.issue)
-
+      LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
       issue.transition 'CI Build' if is_cd_build
 
       if flag || step_id.zero?

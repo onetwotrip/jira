@@ -11,6 +11,7 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       # noinspection RubyArgCount
       issue = jira.Issue.find(SimpleConfig.jira.issue)
+      LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
       issue.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
         Запущено подмерживание релизных веток и закрытие тикетов(!)

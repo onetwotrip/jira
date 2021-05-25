@@ -8,7 +8,7 @@ module Scenarios
       LOGGER.info "Starting check PR for #{taboo_repos} repos"
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
-
+      LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
       issue.development.branches.each do |branch|
         LOGGER.info "Work with #{branch.repo}:#{branch.url}"
         next unless taboo_repos.include? branch.repo

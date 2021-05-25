@@ -25,7 +25,7 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       # noinspection RubyArgCount
       issue = jira.Issue.find(SimpleConfig.jira.issue)
-
+      LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
                           .filter_by_status('OPEN')
                           .filter_by_source_url(SimpleConfig.jira.issue)

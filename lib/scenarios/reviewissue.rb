@@ -6,7 +6,7 @@ module Scenarios
       LOGGER.info "Starting review #{SimpleConfig.jira.issue}"
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
-
+      LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
       # Check PR names
       Ott::CheckPullRequests.run(issue)
       # Check builds status

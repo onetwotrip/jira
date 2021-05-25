@@ -36,6 +36,10 @@ module Ott
       end
       LOGGER.info "Exported #{File.size(file_path)} bytes to '#{file_path}'"
     end
+
+    def self.jira_link(key)
+      "#{SimpleConfig.jira.site}/browse/#{key}"
+    end
   end
 
   # Check Build Status

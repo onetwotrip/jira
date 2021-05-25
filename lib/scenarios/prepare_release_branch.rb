@@ -6,7 +6,7 @@ module Scenarios
     def run
       jira  = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
-
+      LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
       release_branch = if ENV['ADR']
         prepare_android_branch(issue)
       else
