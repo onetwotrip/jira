@@ -27,7 +27,7 @@ module JIRA
     end
 
     def run_tests(params = {})
-      test = Ott::Test.new params.merge(repo: @repo)
+      test = Ott::Test.new **params.merge(repo: @repo)
       test.run!
       @tests.push test
     end
