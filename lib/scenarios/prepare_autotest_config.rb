@@ -7,6 +7,8 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info("Start work with #{Ott::Helpers.jira_link(issue.key)}")
+      LOGGER.info('Start review issue')
+      Scenarios::ReviewIssue.new.run
       LOGGER.info('Start prepare release branch')
       branch = Scenarios::PrepareReleaseBranch.new.run
       LOGGER.info("Success! #{branch}")
