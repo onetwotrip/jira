@@ -15,7 +15,7 @@ module Scenarios
       LOGGER.info('Try to get repo list')
       repos = Scenarios::PrepareAllRepoList.new.run(release_skip: true)
       LOGGER.info("Success! repo: #{repos}")
-      config = "#{branch};ARGS="
+      config = "#{branch}\nARGS="
       if repos.empty?
         LOGGER.error("Repo is empty, but it shouldn't")
         exit(1)
