@@ -2,13 +2,13 @@ module Scenarios
   ##
   # Prepare released repos and write to file
   class PrepareAllRepoList
-    def run
+    def run(release_skip = false)
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       # noinspection RubyArgCount
       issue = jira.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
       LOGGER.info("Start work with #{issue.key}")
-      if issue.fields['issuetype']['name'].include?('Release')
+      if issue.fields['issuetype']['name'].include?('Release') || release_skip
         result = ''
         issue.branches.each do |branch|
           result += ",#{branch.repo_slug}"
@@ -22,6 +22,7 @@ module Scenarios
       else
         LOGGER.warn("Ticket #{issue.key} not a release ticket")
       end
+      result
     end
   end
 end
