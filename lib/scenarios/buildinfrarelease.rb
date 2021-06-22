@@ -55,6 +55,7 @@ module Scenarios
       LOGGER.info "Move ticket #{@opts[:release]} to Testing status"
       issue.transition 'Test Ready'
     rescue StandardError, SystemExit => _
+      LOGGER.info("Exception: #{_}")
       exit(127) if _.status == 127
       LOGGER.error "Found some errors while release #{@opts[:release]} was building"
       if ticket_exist?(issue.key)
