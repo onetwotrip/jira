@@ -20,7 +20,7 @@ module Scenarios
         LOGGER.error("Repo is empty, but it shouldn't")
         exit(1)
       else
-        repos.split(',').each { |repo| config += " --tag #{repo}," }
+        repos.split(',').each { |repo| config += " --tag #{repo.gsub("-","_")}," }
       end
       LOGGER.info("Final config is: #{config}")
       Ott::Helpers.export_to_file(config, 'autotest_config')
