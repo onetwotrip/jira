@@ -90,47 +90,47 @@ module Scenarios
       end
 
       # Work with feature branch, if exist
-      if issue.key.include?('IOS')
-        LOGGER.info 'Try to get all PR in status OPEN'
-        issue        = jira.Issue.find(SimpleConfig.jira.issue)
-        pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
-                            .filter_by_status('OPEN')
-                            .filter_by_source_url(SimpleConfig.jira.issue)
-        LOGGER.info "Found #{pullrequests.prs.size} PR in status OPEN after release branch was merged"
-        pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
-          LOGGER.info 'Try to find feature PR for decline'
-          next unless pr.pr['name'].include?('feature')
-          begin
-            LOGGER.info "Found feature PR: #{pr.pr['source']['branch']}"
-            if pr.pr['status'] == 'MERGED'
-              LOGGER.info "PR: #{pr.pr['source']['branch']} already MERGED"
-              next
-            end
-            local_repo = pr.repo
-
-            # Decline PR if destination branch is develop
-            LOGGER.warn 'Try to decline PR to develop'
-            with local_repo do
-              decline_pullrequest(
-                SimpleConfig.bitbucket[:username],
-                SimpleConfig.bitbucket[:password],
-                pr.pr['id']
-              )
-            end
-            LOGGER.info 'Success declined PR'
-          rescue Git::GitExecuteError => e
-            is_error = true
-            LOGGER.fatal e.message
-            issue.post_comment <<-BODY
-            {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
-                Не удалось отменить PR: #{pr.pr['url']}
-                *Причина:* #{e.message}
-            {panel}
-            BODY
-            next
-          end
-        end
-      end
+      # if issue.key.include?('IOS')
+      #   LOGGER.info 'Try to get all PR in status OPEN'
+      #   issue        = jira.Issue.find(SimpleConfig.jira.issue)
+      #   pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
+      #                       .filter_by_status('OPEN')
+      #                       .filter_by_source_url(SimpleConfig.jira.issue)
+      #   LOGGER.info "Found #{pullrequests.prs.size} PR in status OPEN after release branch was merged"
+      #   pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
+      #     LOGGER.info 'Try to find feature PR for decline'
+      #     next unless pr.pr['name'].include?('feature')
+      #     begin
+      #       LOGGER.info "Found feature PR: #{pr.pr['source']['branch']}"
+      #       if pr.pr['status'] == 'MERGED'
+      #         LOGGER.info "PR: #{pr.pr['source']['branch']} already MERGED"
+      #         next
+      #       end
+      #       local_repo = pr.repo
+      #
+      #       # Decline PR if destination branch is develop
+      #       LOGGER.warn 'Try to decline PR to develop'
+      #       with local_repo do
+      #         decline_pullrequest(
+      #           SimpleConfig.bitbucket[:username],
+      #           SimpleConfig.bitbucket[:password],
+      #           pr.pr['id']
+      #         )
+      #       end
+      #       LOGGER.info 'Success declined PR'
+      #     rescue Git::GitExecuteError => e
+      #       is_error = true
+      #       LOGGER.fatal e.message
+      #       issue.post_comment <<-BODY
+      #       {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
+      #           Не удалось отменить PR: #{pr.pr['url']}
+      #           *Причина:* #{e.message}
+      #       {panel}
+      #       BODY
+      #       next
+      #     end
+      #   end
+      # end
 
       if is_error
         LOGGER.error "Some PR didn't merge"
