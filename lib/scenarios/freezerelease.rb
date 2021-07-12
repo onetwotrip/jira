@@ -9,7 +9,7 @@ module Scenarios
 
     def run
       LOGGER.info "Starting freeze_release for #{SimpleConfig.jira.issue}"
-      jira  = JIRA::Client.new SimpleConfig.jira.to_h
+      jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
       issue.post_comment <<-BODY
@@ -22,8 +22,34 @@ module Scenarios
 
       begin
         release_issues = []
+        related_branches = issue.related['branches']
+        waiting = false
+        timeout = 15
+        counter = 1
+        unless branches_contains_branch?(related_branches, '-pre')
+          LOGGER.warn "Ticket doesn't contain any -pre branch. Try to wait..."
+          waiting = true
+        end
+
+        while waiting
+          sleep(20)
+          counter += 1
+          issue = jira.Issue.find(SimpleConfig.jira.issue)
+          related_branches = issue.related['branches']
+          if !branches_contains_branch?(related_branches, '-pre')
+            LOGGER.warn "Still no - #{counter}/#{timeout}"
+          else
+            LOGGER.info 'Found -pre branch!'
+            waiting = false
+          end
+          if counter >= timeout
+            LOGGER.warn "Can't wait -pre branch! Is jira ticket ok?"
+            exit 1
+          end
+        end
+
         # prepare release candidate branches
-        issue.related['branches'].each do |branch|
+        related_branches.each do |branch|
           repo_path = git_repo(branch['repository']['url'])
           repo_path.chdir do
             `git fetch --prune`
@@ -41,15 +67,15 @@ module Scenarios
         end
 
         if release_issues.empty?
-          LOGGER.error 'There is no -pre branches in release ticket'
+          LOGGER.error "Can't create any release branch"
           exit(1)
         end
 
         release_issues.each do |branch| # rubocop:disable Metrics/BlockLength
-          today      = Time.new.strftime('%d.%m.%Y')
+          today = Time.new.strftime('%d.%m.%Y')
           old_branch = branch['name']
           new_branch = "#{SimpleConfig.jira.issue}-release-#{today}"
-          repo_path  = git_repo(branch['repository']['url'])
+          repo_path = git_repo(branch['repository']['url'])
 
           # copy -pre to -release
           LOGGER.info "Working with #{repo_path.remote.url.repo}"
@@ -97,7 +123,7 @@ module Scenarios
         issue.post_comment <<-BODY
         {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
          Не удалось собрать релизные ветки (x)
-         Подробности в логе таски #{ENV['BUILD_URL']} 
+         Подробности в логе таски #{ENV['BUILD_URL']}#{' '}
         {panel}
         BODY
         LOGGER.error "Не удалось собрать релизные ветки, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
@@ -108,6 +134,13 @@ module Scenarios
         Формирование релизных веток завершено (/)
       {panel}
       BODY
+    end
+
+    def branches_contains_branch?(branches, branch)
+      branches.each do |i|
+        return true if i['name'].include?(branch)
+      end
+      false
     end
   end
 end
