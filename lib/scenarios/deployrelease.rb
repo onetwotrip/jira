@@ -16,7 +16,13 @@ module Scenarios
 
       if SimpleConfig.jira.issue
         jira = JIRA::Client.new SimpleConfig.jira.to_h
-        issue = jira.Issue.find SimpleConfig.jira.issue
+        begin
+          issue = jira.Issue.find SimpleConfig.jira.issue
+        rescue JIRA::HTTPError => e
+          LOGGER.error("Got error: #{e.response.body}")
+          exit 1
+        end
+
         prs = issue.related['pullRequests']
 
         if prs.empty?
