@@ -19,13 +19,25 @@ module Scenarios
       end
 
       filter_config = JSON.parse(ENV['RELEASE_FILTER'])
-      client        = JIRA::Client.new SimpleConfig.jira.to_h
+      client = JIRA::Client.new SimpleConfig.jira.to_h
       release_issue = client.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(release_issue.key).to_s
 
-      project_name         = release_issue.fields['project']['key']
-      release_name         = release_issue.fields['summary'].upcase
+      project_name = release_issue.fields['project']['key']
+      release_name = release_issue.fields['summary'].upcase
       release_issue_number = release_issue.key
+      components = release_issue.fields['components']
+      component = if components.count > 1
+                    LOGGER.error "Found more than 1 components: #{components.count} Should be only 1"
+                    release_issue.post_comment <<-BODY
+                      {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+                        Релиз не должен содержать больше чем 1 компонент (x)
+                      {panel}
+                    BODY
+                    exit
+                  else
+                    components
+                  end
 
       # Check project exist in filter_config
       if filter_config[project_name].nil?
@@ -52,6 +64,8 @@ module Scenarios
 
       LOGGER.info "Release type: #{release_type}"
       release_filter = filter_config[project_name][release_type]
+      release_filter = "#{release_filter} AND component = #{component.first['name']}" unless component.empty?
+
       # Check release filter
       if release_filter.nil? || release_filter.empty?
         message = "I don't find release filter for jira project: '#{project_name.upcase}' and release_type: #{release_type}"
@@ -77,6 +91,8 @@ module Scenarios
           {panel}
         BODY
         exit
+      else
+        LOGGER.info "Release filter contains: #{issues.count} tasks"
       end
 
       # Message about count of release candidate issues
