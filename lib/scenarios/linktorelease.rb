@@ -64,7 +64,12 @@ module Scenarios
 
       LOGGER.info "Release type: #{release_type}"
       release_filter = filter_config[project_name][release_type]
-      release_filter = "#{release_filter} AND component = #{component.first['name']}" unless component.empty?
+
+      release_filter = if component.empty?
+                         "#{release_filter} AND (component not in('B2B_Android','B2B_IOS') or component is EMPTY)"
+                       else
+                         "#{release_filter} AND component = #{component.first['name']}"
+                       end
 
       # Check release filter
       if release_filter.nil? || release_filter.empty?
@@ -102,9 +107,9 @@ module Scenarios
           {panel}
       BODY
 
-      issues.each do |issue|
-        issue.link(release_issue_number)
-      end
+      # issues.each do |issue|
+      #   issue.link(release_issue_number)
+      # end
 
       unless %w[ADR IOS].any? { |p| release_issue_number.include? p }
         release_labels = []
