@@ -107,9 +107,9 @@ module Scenarios
           {panel}
       BODY
 
-      # issues.each do |issue|
-      #   issue.link(release_issue_number)
-      # end
+      issues.each do |issue|
+        issue.link(release_issue_number)
+      end
 
       unless %w[ADR IOS].any? { |p| release_issue_number.include? p }
         release_labels = []
