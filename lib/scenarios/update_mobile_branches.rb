@@ -58,7 +58,9 @@ module Scenarios
     end
 
     def update_issue(issue)
-      pullrequests = issue.pullrequests(SimpleConfig.git.to_h).filter_by_status('OPEN')
+      pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
+                          .filter_by_status('OPEN')
+                          .filter_by_source_url(SimpleConfig.jira.issue)
       LOGGER.info "Found #{pullrequests.prs.count} pullrequests".green
       pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
         unless pr.pr['destination']['branch'].include? 'develop'
