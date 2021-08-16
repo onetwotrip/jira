@@ -11,7 +11,7 @@ module Scenarios
       @error_comment = <<-BODY
           {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
            Не удалось собрать билд (x)
-           Подробности в логе таски #{ENV['BUILD_URL']} 
+           Подробности в логе таски #{ENV['BUILD_URL']}
           {panel}
       BODY
     end
@@ -27,7 +27,7 @@ module Scenarios
       issue.transition 'CI Build' if is_cd_build
 
       if flag || step_id.zero?
-        Scenarios::BuildRelease.new(@opts).run(true)
+        @should_stop_flag = Scenarios::BuildRelease.new(@opts).run(true)
         LOGGER.info 'Wait while build will start'
         sleep 20
         flag = true
@@ -40,6 +40,8 @@ module Scenarios
       end
 
       if flag || (step_id == 2)
+        LOGGER.info "Check should_stop_flag: #{@should_stop_flag}"
+        exit(0) if @should_stop_flag # Stop build if it has merge failed tickets
         LOGGER.info "Freeze release #{@opts[:release]}"
         Scenarios::FreezeRelease.new.run
         LOGGER.info 'Wait while build will start'

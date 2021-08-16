@@ -16,6 +16,7 @@ module Scenarios
       release = client.Issue.find(opts[:release])
       LOGGER.info Ott::Helpers.jira_link(release.key).to_s
       is_cd_build = ActiveModel::Type::Boolean.new.cast(ENV['CD_BUILD'] || false)
+      should_stop_flag = false # For marked build with merge failed tickets
       unlink_merge_failed_ticket = ActiveModel::Type::Boolean.new.cast(ENV['UNLINK_MERGE_FAILED_TICKET'] || true)
 
       release.post_comment <<-BODY
@@ -184,6 +185,7 @@ module Scenarios
             issue.transition 'Merge to release'
           elsif merge_fail
             issue.transition 'Merge Fail'
+            should_stop_flag = true
             LOGGER.fatal "#{issue.key} was not merged!"
           end
         end
@@ -224,7 +226,7 @@ module Scenarios
         LOGGER.info 'Try to get new info about release ticket'
         release = client.Issue.find(opts[:release])
         merge_failed_tikets = release.issuelinks.select { |issuelink| issuelink.outwardIssue.status.name.downcase.include?('merge failed') }
-
+        should_stop_flag = false # Drop flag when release ticket had cleared merge failed tickets
         unless merge_failed_tikets.empty?
           LOGGER.warn "Found merge_failed_ticket: #{merge_failed_tikets.size}"
           begin
@@ -257,11 +259,12 @@ module Scenarios
         release.post_comment <<-BODY
         {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
          Сборка -pre веток завершена с ошибками. Некоторые задачи, не были замержены, и не смогли перейти в статус Merge Failed (x)
-         Подробности в логе таски #{ENV['BUILD_URL']} 
+         Подробности в логе таски #{ENV['BUILD_URL']}
         {panel}
         BODY
         exit 1
       end
+      should_stop_flag
     end
 
     def delete_release_if_empty(client, release_issue)
