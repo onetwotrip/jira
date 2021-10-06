@@ -138,7 +138,7 @@ module JIRA
             method: :get,
             url: create_endpoint('rest/dev-status/1.0/issue/detail').to_s,
             headers: { params: params },
-            user: opts[:useremail],
+            user: opts[:username],
             password: opts[:token]
           )
         )['detail'].first
@@ -179,7 +179,7 @@ module JIRA
         r = RestClient::Request.execute(
           method: :delete,
           url: create_endpoint("rest/api/2/issue/#{key}").to_s,
-          user: opts[:useremail],
+          user: opts[:username],
           password: opts[:token],
           raw_response: true
         )
