@@ -110,8 +110,9 @@ module Scenarios
       LOGGER.info "Storing '#{release.key}' to file, to refresh buildname in Jenkins"
       Ott::Helpers.export_to_file(release.key, 'release_name.txt')
       Ott::Helpers.export_to_file("export ISSUE=#{release.key}", 'set_env.sh')
-      Ott::Helpers.export_to_file("SLACK_URL=#{SimpleConfig.jira.site}/browse/#{release.key}\n\r
-                                        ISSUE=#{release.key}", 'release_properties')
+      Ott::Helpers.export_to_file("SLACK_URL='#{SimpleConfig.jira.site}/browse/#{release.key}'\n\r
+                                        ISSUE=#{release.key}\n\r
+                                        env.ISSUE=#{release.key}", 'release_properties')
     end
     # :nocov:
   end
