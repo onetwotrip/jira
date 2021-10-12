@@ -13,6 +13,7 @@ module Scenarios
         'STAGE' => ENV['STAGE'],
       }
       additional_values = {}
+      front_projects = []
 
       if SimpleConfig.jira.issue
         jira = JIRA::Client.new SimpleConfig.jira.to_h
@@ -89,6 +90,15 @@ module Scenarios
             rescue StandardError => e
               LOGGER.info "problems with SKIP_LIKEPROD: #{e.message}"
             end
+          end
+
+          if true?(ENV['WITHOUT_WEBFRONT'])
+            front_projects = projects_conf.reduce([]) do |m, (_, v)|
+              m.concat(v['projects']) if v['config']['name'].include?("webfront")
+              m
+              end.flatten
+            skip_web = front_projects.to_s
+            skip = true if skip_web.match(/"#{proj}"/)
           end
 
           skip = true if prop_values['PROJECTS'][proj]
