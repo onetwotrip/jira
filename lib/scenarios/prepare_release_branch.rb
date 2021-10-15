@@ -14,7 +14,7 @@ module Scenarios
       end
 
       LOGGER.info 'Prepare file with info'
-      Ott::Helpers.export_to_file("BRANCH=#{release_branch}", 'test_branch')
+      Ott::Helpers.export_to_file("BRANCH='#{release_branch}'", 'test_branch')
       LOGGER.info 'Success!'
       return "BRANCH=#{release_branch}"
     end
