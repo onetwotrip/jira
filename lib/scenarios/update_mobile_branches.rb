@@ -50,6 +50,7 @@ module Scenarios
         LOGGER.info "Work with #{i.key} (#{counter}/#{count_max})"
         unless i.fields['fixVersions'].empty?
           LOGGER.warn "Issue #{i.key} contains fixVersions, so this is release ticket and i will skip update branch"
+          counter += 1
           next
         end
         update_issue(i)
@@ -60,7 +61,7 @@ module Scenarios
     def update_issue(issue)
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
                           .filter_by_status('OPEN')
-                          .filter_by_source_url(SimpleConfig.jira.issue)
+                          .filter_by_source_url(issue.key)
       LOGGER.info "Found #{pullrequests.prs.count} pullrequests".green
       pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
         unless pr.pr['destination']['branch'].include? 'develop'
