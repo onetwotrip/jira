@@ -3,7 +3,7 @@ module Scenarios
   # Check issue has merged special PR
   class MergeChecker
     def run
-      taboo_repos = %w(back-components)
+      taboo_repos = %w(back-components front-components)
 
       LOGGER.info "Starting check PR for #{taboo_repos} repos"
       jira = JIRA::Client.new SimpleConfig.jira.to_h
@@ -18,7 +18,7 @@ module Scenarios
           LOGGER.error 'Branch has open PR. Need to be merged before go next'
           issue.post_comment <<-BODY
               {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
-                  В задаче есть ветка из репозитория #{taboo_repos}, которая должна быть замержена, прежде чем задача перейдет в Merge Ready статус.
+                  В задаче есть одна из веток #{taboo_repos}, которая должна быть замержена, прежде чем задача перейдет в Merge Ready статус.
                   Обратитесь к техлиду.
               {panel}
           BODY
