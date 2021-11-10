@@ -14,8 +14,8 @@ module Scenarios
       end
 
       LOGGER.info 'Prepare file with info'
-      Ott::Helpers.export_to_file("BRANCH='#{release_branch}'\n\r
-                                        env.BRANCH='#{release_branch}'", 'test_branch')
+      Ott::Helpers.export_to_file("env.BRANCH='#{release_branch}'", 'pipeline_test_branch')
+      Ott::Helpers.export_to_file("BRANCH=#{release_branch}", 'test_branch')
       LOGGER.info 'Success!'
       return "BRANCH=#{release_branch}"
     end
