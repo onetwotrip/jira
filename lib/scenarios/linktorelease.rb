@@ -66,9 +66,9 @@ module Scenarios
       release_filter = filter_config[project_name][release_type]
 
       release_filter = if component.empty?
-                         "#{release_filter} AND (component not in('B2B_Android','B2B_IOS') or component is EMPTY) AND assemble not in('b2b_ott','b2c_avia','b2c_train')"
+                         "#{release_filter} AND (component not in('B2B_Android','B2B_IOS') or component is EMPTY)"
                        else
-                         "#{release_filter} AND (component = #{component.first['name']} or assemble in('b2b_ott'))"
+                         "#{release_filter} AND (component = #{component.first['name']}"
                        end
 
       # Check release filter
