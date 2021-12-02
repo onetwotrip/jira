@@ -59,6 +59,7 @@ module Scenarios
                Не удалось подтянуть мастера (x)
                 *Причина:* Merge conflict
                 *Ветки:* #{fail_merge}
+                *URL:* #{ENV['BUILD_URL']}
             {panel}
         BODY
       end
