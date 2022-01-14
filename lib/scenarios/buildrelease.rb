@@ -232,7 +232,7 @@ module Scenarios
           begin
             merge_failed_tikets.each do |issue|
               release.post_comment "Unlink ticket #{issue.outwardIssue.key} from release, cause ticket has 'Merge Failed' status"
-              issue.outwardIssue.post_comment "Unlink ticket from release, cause ticket has 'Merge Failed' status"
+              issue.outwardIssue.post_comment "Unlink ticket from release #{release.key}, cause ticket has 'Merge Failed' status"
               issue.delete
               LOGGER.info "Unlink ticket #{issue.outwardIssue.key} from release, cause ticket has 'Merge Failed' status"
             end
