@@ -40,6 +40,13 @@ module Ott
     def self.jira_link(key)
       "#{SimpleConfig.jira.site}/browse/#{key}"
     end
+
+    # Check if ticket belongs to ADR or IOS project
+    # @param key - issue number, e.x. ADR-123
+    # @return [TrueClass, FalseClass]
+    def self.mobile_project?(key)
+      %w[ADR IOS].include? key.split('-').first
+    end
   end
 
   # Check Build Status
