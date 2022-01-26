@@ -170,19 +170,19 @@ module Scenarios
     def prepare_release_branches(issue)
       begin
         LOGGER.info 'Prepare release branches!'
-
-        repo_path = git_repo(repo_for(issue))
+        repo_url = repo_for(issue)
+        repo_path = git_repo(repo_url)
         # repo_path.chdir do
         #   `git fetch origin --prune`
         # end
         release_label = issue.fields['labels'].first
         release_branch = "release/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}/#{release_label}"
-        create_branch_and_pr(repo_path, release_branch, repo_for(issue))
+        create_branch_and_pr(repo_path, release_branch, repo_url)
 
         if issue.key.include?('IOS')
           LOGGER.warn 'This is IOS ticket, so i have to make also feature branch'
           release_branch = "feature/#{SimpleConfig.jira.issue}/#{issue.fields['fixVersions'].first['name']}/#{release_label}"
-          create_branch_and_pr(repo_path, release_branch, repo_for(issue))
+          create_branch_and_pr(repo_path, release_branch, repo_url)
         end
       rescue StandardError => e
         issue.post_comment <<-BODY
@@ -231,7 +231,14 @@ module Scenarios
     def repo_for(issue)
       case issue.key.to_s
         when /ADR-/
-          'https://bitbucket.org/OneTwoTrip/android_ott'
+          issue_type_name = issue.attrs['fields'].fetch('issuetype').fetch('name')
+          LOGGER.warn("Issuetype = #{issue_type_name}")
+          case issue.attrs['fields'].fetch('issuetype').fetch('name')
+            when /B2B_/
+              'https://bitbucket.org/OneTwoTrip/android_b2b'
+            else
+              'https://bitbucket.org/OneTwoTrip/android_ott'
+          end
         when /IOS-/
           'https://bitbucket.org/OneTwoTrip/ios-12trip'
         else
