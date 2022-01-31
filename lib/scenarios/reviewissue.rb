@@ -60,9 +60,6 @@ module Scenarios
               raise msg
             end
           end
-          #check if destination is android_b2b repo
-          # if it is - go next, else error -> In Progress
-
         else
           LOGGER.info "For assemble=#{assemble} no need any specific checks"
           exit 0
