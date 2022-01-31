@@ -28,7 +28,7 @@ module Scenarios
       release_issue_number = issue.key
       # customfield_12166 - is Assemble field
       assemble_field = issue.fields['customfield_12166']
-      if assemble_field.nil?
+      if assemble_field.nil? && mobile_project?(issue.key)
         message = 'Assemble field is empty. Please set up it'
         issue.post_comment <<-BODY
           {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
@@ -37,7 +37,7 @@ module Scenarios
         BODY
         LOGGER.error message
         raise 'Assemble field is empty'
-      else
+      elsif mobile_project?(issue.key)
         assemble = assemble_field['value'] || ''
       end
 
