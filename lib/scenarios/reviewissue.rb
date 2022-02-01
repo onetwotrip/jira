@@ -49,7 +49,7 @@ module Scenarios
               LOGGER.info "Branch #{src_branch} has correct PR to android_b2b project"
               next
             else
-              msg = "Branch #{src_branch} has incorrect destination project. Should be android_b2b, but now - #{pr_dst_url}"
+              msg = "Branch #{src_branch} has incorrect PR destination project. Should be android_b2b, but now another"
               issue.post_comment <<-BODY
                 {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
                   #{msg} (x)
