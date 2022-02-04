@@ -127,7 +127,7 @@ module Ott
           end
           LOGGER.info "Branch was built for #{counter * 10} seconds" if counter.positive?
           case result
-            when 'SUCCESS'
+            when 'SUCCESS', 'UNSTABLE'
               LOGGER.info "#{repo_name}: #{branch_name} SUCCESS!"
               next
             when 'FAILURE'
