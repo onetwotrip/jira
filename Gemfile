@@ -13,6 +13,7 @@ gem 'ottinfra-sendmail', git: 'https://github.com/onetwotrip/ott_infra-sendmail.
 gem 'rest-client'
 gem 'sendgrid-ruby'
 gem 'SimpleConfig', git: 'https://github.com/onetwotrip/SimpleConfig'
+gem 'slack-notifier', '2.4.0'
 gem 'slop'
 gem 'terminal-table'
 gem 'tinybucket', git: 'https://github.com/onetwotrip/tinybucket'

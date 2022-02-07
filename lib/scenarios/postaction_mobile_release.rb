@@ -1,3 +1,5 @@
+require 'slack-notifier'
+
 module Scenarios
   ##
   # PostactionRelease scenario
@@ -125,7 +127,7 @@ module Scenarios
         if is_b2c_project
           LOGGER.info 'B2C project was updated'
           LOGGER.info 'Make PR из B2c master -> B2B develop (report slack channel)'
-          Git::Base.new.create_pullrequest_throw_api(
+          res = Git::Base.new.create_pullrequest_throw_api(
             repo_full_name: 'OneTwoTrip/android_b2b',
             title: 'B2C Master to B2B develop',
             description: 'AUTO: B2C Master to B2B develop',
@@ -134,10 +136,12 @@ module Scenarios
             dst_branch_name: 'develop',
             reviewers: default_android_reviewers
           )
+          notifier = Slack::Notifier.new 'https://hooks.slack.com/services/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'
+          notifier.ping "<!subteam^SU96ZR6DQ> Был сформирован pr из android_ott в android_b2b: https://bitbucket.org/OneTwoTrip/android_b2b/pull-requests/#{JSON.parse(res)['id']} :ottb2b:"
         elsif is_b2b_project
           LOGGER.info 'B2B project was updated'
           LOGGER.info 'Make PR из B2B master -> B2C develop (report slack channel)'
-          Git::Base.new.create_pullrequest_throw_api(
+          res = Git::Base.new.create_pullrequest_throw_api(
             repo_full_name: 'OneTwoTrip/android_ott',
             title: 'B2B Master to B2C develop',
             description: 'AUTO: B2B Master to B2C develop',
@@ -145,7 +149,9 @@ module Scenarios
             src_repo_full_name: 'OneTwoTrip/android_b2b',
             dst_branch_name: 'develop',
             reviewers: default_android_reviewers
-          )
+          ) # JSON.parse(res)["id"]
+          notifier = Slack::Notifier.new 'https://hooks.slack.com/services/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'
+          notifier.ping "<!subteam^SU96ZR6DQ> Был сформирован pr из android_b2b в android_ott: https://bitbucket.org/OneTwoTrip/android_ott/pull-requests/#{JSON.parse(res)['id']} :ott:"
         else
           LOGGER.warn 'B2C/B2B develop update skipped'
         end
