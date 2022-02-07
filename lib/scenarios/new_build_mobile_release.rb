@@ -48,6 +48,18 @@ module Scenarios
         exit(1)
       end
 
+      # customfield_12166 - is Assemble field
+      if issue.fields['customfield_12166'].nil?
+        message = "У релизного тикета не выставлено поле 'Assemble'"
+        issue.post_comment <<-BODY
+          {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F04D2A|bgColor=#F1F3F1}
+            #{message} (x)
+          {panel}
+        BODY
+        LOGGER.error message
+        exit(1)
+      end
+
       # Check release label exist and only one
       release_labels = issue.fields['labels']
       if release_labels.empty?
@@ -188,7 +200,7 @@ module Scenarios
         issue.post_comment <<-BODY
         {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
          Не удалось собрать релизные ветки (x)
-         Подробности в логе таски #{ENV['BUILD_URL']} 
+         Подробности в логе таски #{ENV['BUILD_URL']}
         {panel}
         BODY
         LOGGER.error "Не удалось собрать релизные ветки, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
@@ -208,7 +220,7 @@ module Scenarios
       LOGGER.info 'Push success!'
       with repo_path do
         LOGGER.info 'Create PR'
-        new_create_pullrequest(release_branch, 'master')
+        create_pullrequest(release_branch, 'master')
         LOGGER.info 'Success!'
       end
     end

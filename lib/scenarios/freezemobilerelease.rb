@@ -87,7 +87,7 @@ module Scenarios
               LOGGER.info "Pushing #{new_branch_dev}"
               push(repo_path.remote('origin'), new_branch_dev) # push -feature to origin
               LOGGER.info "Creating PR from #{new_branch_dev} to 'master'"
-              new_create_pullrequest(new_branch_dev, 'master')
+              create_pullrequest(new_branch_dev, 'master')
             end
           end
 
@@ -102,7 +102,7 @@ module Scenarios
             LOGGER.info "Pushing #{new_branch_master}"
             push(repo_path.remote('origin'), new_branch_master) # push -release to origin
             LOGGER.info "Creating PR from #{new_branch_master} to 'master'"
-            new_create_pullrequest(new_branch_master, 'master')
+            create_pullrequest(new_branch_master, 'master')
             LOGGER.info "Deleting #{old_branch} branch"
             branch(old_branch).delete_both if old_branch != 'master' # delete -pre from local/remote
           end

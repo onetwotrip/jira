@@ -15,11 +15,21 @@ module Scenarios
       issue.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
         Запущено подмерживание релизных веток и закрытие тикетов(!)
-        #{ENV['BUILD_URL']} 
+        #{ENV['BUILD_URL']}
         Ожидайте сообщение о завершении
       {panel}
       BODY
       is_error = false
+      is_master_updated = false
+      is_b2b_project = false
+      is_b2c_project = false
+      # customfield_12166 - is Assemble field
+      case project_name(issue.fields['customfield_12166']['value'])
+        when 'android_ott'
+          is_b2c_project = true
+        when 'android_b2b'
+          is_b2b_project = true
+      end
 
       LOGGER.info "Try to get all PR in status OPEN from #{issue.key}"
       pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
@@ -36,8 +46,10 @@ module Scenarios
       tag_enable = issue.key.include?('IOS') || issue.key.include?('ADR')
       # Work with release branch
       pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
+        is_master_updated = false
         LOGGER.info 'Try to find release branch'
         next unless pr.pr['name'].include?('release')
+
         begin
           LOGGER.info "Found release PR: #{pr.pr['source']['branch']}"
           local_repo = pr.repo
@@ -53,6 +65,7 @@ module Scenarios
           LOGGER.info "Try to merge #{pr.src.branch} in #{pr.dst}/#{pr.dst.branch}"
           local_repo.push('origin', pr.pr['destination']['branch'])
           LOGGER.info 'Success!'
+          is_master_updated = true
 
           # IF repo is `ios-12trip` so make PR from updated master to develop
           if pr.pr['destination']['url'].include?('ios-12trip')
@@ -89,49 +102,6 @@ module Scenarios
         end
       end
 
-      # Work with feature branch, if exist
-      # if issue.key.include?('IOS')
-      #   LOGGER.info 'Try to get all PR in status OPEN'
-      #   issue        = jira.Issue.find(SimpleConfig.jira.issue)
-      #   pullrequests = issue.pullrequests(SimpleConfig.git.to_h)
-      #                       .filter_by_status('OPEN')
-      #                       .filter_by_source_url(SimpleConfig.jira.issue)
-      #   LOGGER.info "Found #{pullrequests.prs.size} PR in status OPEN after release branch was merged"
-      #   pullrequests.each do |pr| # rubocop:disable Metrics/BlockLength
-      #     LOGGER.info 'Try to find feature PR for decline'
-      #     next unless pr.pr['name'].include?('feature')
-      #     begin
-      #       LOGGER.info "Found feature PR: #{pr.pr['source']['branch']}"
-      #       if pr.pr['status'] == 'MERGED'
-      #         LOGGER.info "PR: #{pr.pr['source']['branch']} already MERGED"
-      #         next
-      #       end
-      #       local_repo = pr.repo
-      #
-      #       # Decline PR if destination branch is develop
-      #       LOGGER.warn 'Try to decline PR to develop'
-      #       with local_repo do
-      #         decline_pullrequest(
-      #           SimpleConfig.bitbucket[:username],
-      #           SimpleConfig.bitbucket[:password],
-      #           pr.pr['id']
-      #         )
-      #       end
-      #       LOGGER.info 'Success declined PR'
-      #     rescue Git::GitExecuteError => e
-      #       is_error = true
-      #       LOGGER.fatal e.message
-      #       issue.post_comment <<-BODY
-      #       {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
-      #           Не удалось отменить PR: #{pr.pr['url']}
-      #           *Причина:* #{e.message}
-      #       {panel}
-      #       BODY
-      #       next
-      #     end
-      #   end
-      # end
-
       if is_error
         LOGGER.error "Some PR didn't merge"
         issue.transition 'Undo code merge'
@@ -149,6 +119,56 @@ module Scenarios
         Мерж релизных веток - завершен. Перевод задач - завершен (/)
       {panel}
       BODY
+
+      # Sync Android b2c/b2b repos
+      if Ott::Helpers.mobile_project?(issue.key) && is_master_updated
+        if is_b2c_project
+          LOGGER.info 'B2C project was updated'
+          LOGGER.info 'Make PR из B2c master -> B2B develop (report slack channel)'
+          Git::Base.new.create_pullrequest_throw_api(
+            repo_full_name: 'OneTwoTrip/android_b2b',
+            title: 'B2C Master to B2B develop',
+            description: 'AUTO: B2C Master to B2B develop',
+            src_branch_name: 'master',
+            src_repo_full_name: 'OneTwoTrip/android_ott',
+            dst_branch_name: 'develop',
+            reviewers: default_android_reviewers
+          )
+        elsif is_b2b_project
+          LOGGER.info 'B2B project was updated'
+          LOGGER.info 'Make PR из B2B master -> B2C develop (report slack channel)'
+          Git::Base.new.create_pullrequest_throw_api(
+            repo_full_name: 'OneTwoTrip/android_ott',
+            title: 'B2B Master to B2C develop',
+            description: 'AUTO: B2B Master to B2C develop',
+            src_branch_name: 'master',
+            src_repo_full_name: 'OneTwoTrip/android_b2b',
+            dst_branch_name: 'develop',
+            reviewers: default_android_reviewers
+          )
+        else
+          LOGGER.warn 'B2C/B2B develop update skipped'
+        end
+      end
+    end
+
+    # Return which repo was updated
+    # @param assemble_value - Value from Jira release ticket
+    def project_name(assemble_value)
+      case assemble_value
+        when 'b2b_ott'
+          'android_b2b'
+        when 'b2c_ott'
+          'android_ott'
+      end
+    end
+
+    def default_android_reviewers
+      [
+        {
+          uuid: '{c5aa798c-62b9-4644-af9a-e540b2cce219}', # vitaliy.ermakov
+        },
+      ]
     end
   end
 end

@@ -7,32 +7,57 @@ module Git
   ##
   # Add methods for Git::Base
   class Base
-    # DEPRECATED: Please use new_create_pullrequest instead
-    # Create pull request from src branch to dst
-    # By default: from local branch to master
-    def create_pullrequest(username = nil, password = nil, src = current_branch, destination = 'master')
-      request = { title: "#{src} #{remote.url.repo}",
-                  source: { branch: { name: src },
-                            repository: { full_name: remote.url.repo } },
-                  destination: { branch: { name: destination } } }
-      begin
-        url = "https://#{username}:#{password}@api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests"
-        RestClient.post url, request.to_json, content_type: :json
-      rescue StandardError => e
-        LOGGER.fatal "Pullrequest didn't create"
-        LOGGER.fatal "Error: #{e}; URL: #{url}; PARAMS: #{request}"
-        exit(1)
-      end
-    end
-
     # :nocov:
-    def new_create_pullrequest(src = current_branch, destination = 'master')
+    def create_pullrequest(src = current_branch, destination = 'master')
       request = { title: "#{src} #{remote.url.repo}",
                   source: { branch: { name: src },
                             repository: { full_name: remote.url.repo } },
                   destination: { branch: { name: destination } } }
       begin
         url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests"
+        LOGGER.info "POST #{url}"
+        RestClient::Request.execute(
+          method: :post,
+          url: url,
+          user: SimpleConfig.bitbucket[:username],
+          password: SimpleConfig.bitbucket[:password],
+          payload: request.to_json,
+          headers: { content_type: :json }
+        )
+      rescue StandardError => e
+        LOGGER.fatal "Pullrequest didn't create"
+        LOGGER.fatal "Error: #{e}; URL: #{url}; PARAMS: #{request}"
+        if e.response.include? 'There are no changes to be pulled'
+          LOGGER.warn e.response
+        else
+          exit 1
+        end
+      end
+    end
+
+    def create_pullrequest_throw_api(repo_full_name: nil, title: nil, description: nil, src_branch_name: nil,
+                                     src_repo_full_name: nil, dst_branch_name: nil, reviewers: nil)
+      request = {
+        title: title,
+        description: description,
+        source: {
+          branch: {
+            name: src_branch_name,
+          },
+          repository: {
+            full_name: src_repo_full_name,
+          },
+        },
+        destination: {
+          branch: {
+            name: dst_branch_name,
+          },
+        },
+        reviewers: reviewers,
+        close_source_branch: false,
+      }
+      begin
+        url = "https://api.bitbucket.org/2.0/repositories/#{repo_full_name}/pullrequests"
         LOGGER.info "POST #{url}"
         RestClient::Request.execute(
           method: :post,
@@ -155,7 +180,7 @@ module Git
         description: description,
         title: title,
         reviewers: reviewers,
-        close_source_branch: true
+        close_source_branch: true,
       }.compact
 
       LOGGER.info "PUT #{url}"
