@@ -121,7 +121,7 @@ module Scenarios
       BODY
 
       # Sync Android b2c/b2b repos
-      if Ott::Helpers.mobile_project?(issue.key) && is_master_updated
+      if Ott::Helpers.mobile_project?(issue.key) && is_master_updated && !issue.key.include?('IOS')
         if is_b2c_project
           LOGGER.info 'B2C project was updated'
           LOGGER.info 'Make PR из B2c master -> B2B develop (report slack channel)'
