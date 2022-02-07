@@ -124,6 +124,7 @@ module Scenarios
 
       # Sync Android b2c/b2b repos
       if Ott::Helpers.mobile_project?(issue.key) && is_master_updated && !issue.key.include?('IOS')
+        webhook_url = 'https://hooks.slack.com/services/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'
         if is_b2c_project
           LOGGER.info 'B2C project was updated'
           LOGGER.info 'Make PR из B2c master -> B2B develop (report slack channel)'
@@ -136,7 +137,7 @@ module Scenarios
             dst_branch_name: 'develop',
             reviewers: default_android_reviewers
           )
-          notifier = Slack::Notifier.new 'https://hooks.slack.com/services/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'
+          notifier = Slack::Notifier.new webhook_url
           notifier.ping "<!subteam^SU96ZR6DQ> Был сформирован pr из android_ott в android_b2b: https://bitbucket.org/OneTwoTrip/android_b2b/pull-requests/#{JSON.parse(res)['id']} :ottb2b:"
         elsif is_b2b_project
           LOGGER.info 'B2B project was updated'
@@ -150,7 +151,7 @@ module Scenarios
             dst_branch_name: 'develop',
             reviewers: default_android_reviewers
           ) # JSON.parse(res)["id"]
-          notifier = Slack::Notifier.new 'https://hooks.slack.com/services/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'
+          notifier = Slack::Notifier.new webhook_url
           notifier.ping "<!subteam^SU96ZR6DQ> Был сформирован pr из android_b2b в android_ott: https://bitbucket.org/OneTwoTrip/android_ott/pull-requests/#{JSON.parse(res)['id']} :ott:"
         else
           LOGGER.warn 'B2C/B2B develop update skipped'
