@@ -220,7 +220,7 @@ module Scenarios
       LOGGER.info 'Push success!'
       with repo_path do
         LOGGER.info 'Create PR'
-        new_create_pullrequest(release_branch, 'master')
+        create_pullrequest(release_branch, 'master')
         LOGGER.info 'Success!'
       end
     end
