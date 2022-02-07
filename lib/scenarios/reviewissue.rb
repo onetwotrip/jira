@@ -24,7 +24,7 @@ module Scenarios
         end
         assemble = assemble_field['value']
         LOGGER.info "Assemble field is: #{assemble}"
-        if assemble.include? 'b2b_ott'
+        if assemble.include?('b2b_ott') && !issue.key.include?('IOS')
           LOGGER.warn 'Assemble=b2b_ott found. Need check if destination in PR is android_b2b project'
           # get all open PR
           LOGGER.info "Try to get all PR in status OPEN from #{issue.key}"
