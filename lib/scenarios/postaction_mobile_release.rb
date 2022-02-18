@@ -75,7 +75,7 @@ module Scenarios
             with local_repo do
               checkout('master')
               pull
-              new_create_pullrequest(
+              create_pullrequest(
                 'master',
                 'develop'
               )
