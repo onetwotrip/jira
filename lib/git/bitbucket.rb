@@ -14,7 +14,7 @@ module Git
                             repository: { full_name: remote.url.repo } },
                   destination: { branch: { name: destination } } }
       begin
-        url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests"
+        url = "https://api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests"
         LOGGER.info "POST #{url}"
         RestClient::Request.execute(
           method: :post,
@@ -79,7 +79,7 @@ module Git
     end
 
     def merge_pullrequest(pull_request_id = '')
-      url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests/#{pull_request_id}/merge" # rubocop:disable Metrics/LineLength
+      url = "https://api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests/#{pull_request_id}/merge" # rubocop:disable Metrics/LineLength
       request = {
         merge_strategy: 'merge_commit',
         close_source_branch: true,
@@ -99,17 +99,17 @@ module Git
       raise e
     end
 
-    def decline_pullrequest(username = nil, password = nil, pull_request_id = '')
-      url = "https://#{username}:#{password}@api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests/#{pull_request_id}/decline" # rubocop:disable Metrics/LineLength
-      RestClient.post url, content_type: :json
-    rescue StandardError => e
-      LOGGER.fatal "Pullrequest didn't decline"
-      LOGGER.fatal "Error: #{e}; URL: #{url}"
-      exit(1)
-    end
+    # def decline_pullrequest(username = nil, password = nil, pull_request_id = '')
+    #   url = "https://#{username}:#{password}@api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests/#{pull_request_id}/decline" # rubocop:disable Metrics/LineLength
+    #   RestClient.post url, content_type: :json
+    # rescue StandardError => e
+    #   LOGGER.fatal "Pullrequest didn't decline"
+    #   LOGGER.fatal "Error: #{e}; URL: #{url}"
+    #   exit(1)
+    # end
 
     def delete_branch(branch = current_branch)
-      url = "https://bitbucket.org/!api/2.0/repositories/#{branch.repo_owner}/#{branch.repo_slug}/refs/branches/#{branch.name}" # rubocop:disable Metrics/LineLength
+      url = "https://api.bitbucket.org/2.0/repositories/#{branch.repo_owner}/#{branch.repo_slug}/refs/branches/#{branch.name}" # rubocop:disable Metrics/LineLength
       LOGGER.info "DELETE #{url}"
       RestClient::Request.execute(
         method: :delete,
@@ -124,7 +124,7 @@ module Git
 
     # :nocov:
     def get_pullrequests_diffstats(id)
-      url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests/#{id}/diffstat" # rubocop:disable Metrics/LineLength
+      url = "https://api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests/#{id}/diffstat" # rubocop:disable Metrics/LineLength
       LOGGER.info "GET #{url}"
       response = RestClient::Request.execute(
         method: :get,
@@ -158,7 +158,7 @@ module Git
 
     # :nocov:
     def get_pr_full_info(id)
-      url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests/#{id}"
+      url = "https://api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests/#{id}"
       LOGGER.info "GET #{url}"
       response = RestClient::Request.execute(
         method: :get,
@@ -175,7 +175,7 @@ module Git
 
     # :nocov:
     def add_info_in_pullrequest(id, description = nil, reviewers = nil, title = nil)
-      url = "https://bitbucket.org/!api/2.0/repositories/#{remote.url.repo}/pullrequests/#{id}"
+      url = "https://api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests/#{id}"
       request = {
         description: description,
         title: title,
