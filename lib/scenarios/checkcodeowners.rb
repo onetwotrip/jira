@@ -29,18 +29,23 @@ module Scenarios
         pr_repo = git_repo(pr.pr['destination']['url'])
         pr_name = pr.pr['name']
         pr_id = pr.pr['id']
-        reviewers = pr.pr['reviewers']
-        pr_author = pr.pr['author']
+        reviewers = []
+        pr_author = []
+        diff_stats = {}
+        owners_config = {}
+        pr_description = ''
+        with pr_repo do
+          pr_info = get_pr_full_info(pr_id)
+          pr_description = pr_info[:description]
+          reviewers = pr_info[:reviewers]
+          pr_author = pr_info[:author]
+        end
         # Prepare account_id reviewers list from PR
         old_reviewers = get_reviewers_id(reviewers, pr_repo)
         # Get author id for case when he will be one of owners
         author_id = get_reviewers_id(pr_author, pr_repo).first
-        diff_stats = {}
-        owners_config = {}
-        pr_description = ''
         # Get PR diff and owners_config
         with pr_repo do
-          pr_description = get_pr_full_info(pr_id)[:description]
           LOGGER.info 'Try to diff stats from BB'
           diff_stats = get_pullrequests_diffstats(pr_id)
           LOGGER.info 'Success!'
@@ -142,7 +147,7 @@ module Scenarios
       with pr_repo do
         reviewers.each do |user|
           # Name with space should replace with +
-          result << get_reviewer_info(user['name'].sub(' ', '+')).first[:mention_id]
+          result << user[:account_id]
         end
       end
       LOGGER.info "Success! Result: #{result}"
