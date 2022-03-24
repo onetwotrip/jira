@@ -171,6 +171,7 @@ module JIRA
             pr['destination']['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}/branch/#{pr['destination']['branch']}"
           end
         end
+        LOGGER.info "Related info: #{@related}"
         @related
       end
 
