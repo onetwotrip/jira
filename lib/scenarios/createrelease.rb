@@ -101,6 +101,7 @@ module Scenarios
       release_labels.uniq!
 
       LOGGER.info "Created new release #{release.key} from filter #{params[:filter]}"
+      LOGGER.info Ott::Helpers.jira_link(release.key).to_s
 
       LOGGER.info "Add labels: #{release_labels} to release #{release.key}"
       release_issue = client.Issue.find(release.key)
