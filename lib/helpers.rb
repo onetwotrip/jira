@@ -73,7 +73,7 @@ module Ott
       white_list = ENV['REPO_WHITE_LIST'] || []
       failed_builds = []
       branches_array = issue.branches
-      branches_array = issue.api_pullrequests if is_open_pr
+      branches_array = issue.api_pullrequests.select { |pr| pr.state == 'OPEN' } if is_open_pr
       branches_array.each do |item|
         repo_name = item.repo_slug
         branch_name = if is_open_pr
