@@ -10,11 +10,18 @@ module Scenarios
       issue = jira.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
       # Check Does ticket from FC project with not PUBLISHED status exist
-      not_merged_component = issue.issuelinks.select { |i| i.inwardIssue.key.include?('FC-') && !i.inwardIssue.status.name.include?('Published') }
+      all_issues = []
+      issue.issuelinks.each do |i|
+        all_issues.append(i.outwardIssue) if i.outwardIssue
+        all_issues.append(i.inwardIssue) if i.inwardIssue
+      end
+      not_merged_component = all_issues.select { |i| i.key.include?('FC-') && !i.status.name.include?('Published') }
 
       unless not_merged_component.empty?
-        LOGGER.error "Find #{not_merged_component.first.inwardIssue.key} issue without PUBLISHED status. Need transfer current issue to 'WAIT COMPONENT PUBLISH status'"
+        LOGGER.error "Find issue: #{not_merged_component.first.key}  without PUBLISHED status. Need transfer current issue to 'WAIT COMPONENT PUBLISH' status"
+        issue.transition 'Wait Component Publish'
 
+        raise 'Some errors found. See log before'
       end
 
       issue.development.branches.each do |branch|
