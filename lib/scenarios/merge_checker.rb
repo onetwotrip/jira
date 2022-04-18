@@ -18,10 +18,15 @@ module Scenarios
       not_merged_component = all_issues.select { |i| i.key.include?('FC-') && !i.status.name.include?('Published') }
 
       unless not_merged_component.empty?
-        LOGGER.error "Find issue: #{not_merged_component.first.key}  without PUBLISHED status. Need transfer current issue to 'WAIT COMPONENT PUBLISH' status"
+        error_msg = "Find issue: #{not_merged_component.first.key}  without PUBLISHED status. Need transfer current issue to 'WAIT COMPONENT PUBLISH' status"
+        LOGGER.error error_msg
+        issue.post_comment error_msg
         issue.transition 'Wait Component Publish'
 
-        raise 'Some errors found. See log before'
+        LOGGER.warn "Also need transfer #{not_merged_component.first.key} in status 'NEED PUBLISH'"
+        not_merged_component.first.post_comment "Linked issue #{issue.key} ready for release and wait while this issue going to be published"
+        not_merged_component.first.transition 'Need Publish'
+        raise 'Some errors found. See log above'
       end
 
       issue.development.branches.each do |branch|
