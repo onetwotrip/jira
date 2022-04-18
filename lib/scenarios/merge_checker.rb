@@ -9,6 +9,26 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
+      # Check Does ticket from FC project with not PUBLISHED status exist
+      all_issues = []
+      issue.issuelinks.each do |i|
+        all_issues.append(i.outwardIssue) if i.outwardIssue
+        all_issues.append(i.inwardIssue) if i.inwardIssue
+      end
+      not_merged_component = all_issues.select { |i| i.key.include?('FC-') && !i.status.name.include?('Published') }
+
+      unless not_merged_component.empty?
+        error_msg = "Find issue: #{not_merged_component.first.key}  without PUBLISHED status. Need transfer current issue to 'WAIT COMPONENT PUBLISH' status"
+        LOGGER.error error_msg
+        issue.post_comment error_msg
+        issue.transition 'Wait Component Publish'
+
+        LOGGER.warn "Also need transfer #{not_merged_component.first.key} in status 'NEED PUBLISH'"
+        not_merged_component.first.post_comment "Linked issue #{issue.key} ready for release and wait while this issue going to be published"
+        not_merged_component.first.transition 'Need Publish'
+        raise 'Some errors found. See log above'
+      end
+
       issue.development.branches.each do |branch|
         LOGGER.info "Work with #{branch.repo}:#{branch.url}"
         next unless taboo_repos.include? branch.repo
