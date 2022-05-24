@@ -8,7 +8,7 @@ module Scenarios
       @opts = opts
     end
 
-    def run(is_only_one_branch = false) # rubocop:disable Metrics/MethodLength, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity, Metrics/AbcSize
+    def run(is_only_one_branch = false)
       LOGGER.info "Build release #{opts[:release]}"
       options = { auth_type: :basic }.merge(opts.to_hash)
       LOGGER.info "Start with: #{options}"
@@ -145,19 +145,37 @@ module Scenarios
                     LOGGER.info "#{branch['name']} merged"
                     has_merges = true
                   rescue Git::GitExecuteError => e
+                    # rubocop:disable Metrics/BlockNesting
+
+                    body_text = if is_cd_build
+                             if unlink_merge_failed_ticket
+                               "Задача была отлинкована от релиза #{opts[:release]}, т.к. имела конфликт либо с веткой master либо с веткой релиза"
+                             else
+                               <<-BODY
+                                Замержите мастер в ветку #{branch['name']} .
+                                Затем замержите ветку #{branch['name']} в ветку релиза.
+                                Если конфликт не с мастером, а с веткой релиза, то конфликт надо править в ветке релиза.
+                                После этого переведите задачу в статус *In Release* руками
+                               BODY
+                             end
+                           else
+                             <<-BODY
+                                Замержите мастер в ветку #{branch['name']} .
+                                Затем замержите ветку #{branch['name']} в ветку релиза #{pre_release_branch}.
+                                Если конфликт не с мастером, а с веткой релиза, то конфликт надо править в *-pre ветке релиза* #{pre_release_branch}.
+                                После этого переведите задачу в статус *In Release* руками
+                             BODY
+                                end
                     body = <<-BODY
-                  CI: Error while merging to release #{opts[:release]}
-                  [~#{issue.assignee.displayName}]
-                  Repo: #{repo_name}
-                  Author: #{pullrequest['author']['name']}
-                  PR: #{pullrequest['url']}
-                  {noformat:title=Ошибка}
-                  Error #{e}
-                  {noformat}
-                  Замержите мастер в ветку #{branch['name']} .
-                  Затем замержите ветку #{branch['name']} в ветку релиза #{pre_release_branch}.
-                  Если конфликт не с мастером, а с веткой релиза, то конфликт надо править в *-pre ветке релиза* #{pre_release_branch}.
-                  После этого переведите задачу в статус *In Release*
+                                CI: Error while merging to release #{opts[:release]}
+                                [~#{issue.assignee.displayName}]
+                                Repo: #{repo_name}
+                                Author: #{pullrequest['author']['name']}
+                                PR: #{pullrequest['url']}
+                                {noformat:title=Ошибка}
+                                Error #{e}
+                                {noformat}
+                                #{body_text}
                     BODY
                     if opts[:push] # rubocop:disable Metrics/BlockNesting
                       issue.post_comment body
