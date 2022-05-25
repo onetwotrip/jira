@@ -7,6 +7,13 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
+      issue.post_comment <<-BODY
+      {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+        Запущена проверка тикета(!)
+        #{ENV['BUILD_URL']} 
+        Ожидайте сообщение о завершении
+      {panel}
+      BODY
       if Ott::Helpers.mobile_project?(issue.key)
         LOGGER.info 'Check mobile issue'
         # customfield_12166 - is Assemble field
