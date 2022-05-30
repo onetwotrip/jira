@@ -3,12 +3,20 @@ module Scenarios
   # Check issue has merged special PR
   class MergeChecker
     def run
-      taboo_repos = %w(back-components front-components)
-
-      LOGGER.info "Starting check PR for #{taboo_repos} repos"
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
+      # Prepare taboo_repos depend from jira state
+
+      taboo_repos = case issue.status.name
+                      when 'Test ready'
+                        %w[front-components]
+                      when 'Merge ready'
+                        %w[back-components front-components]
+                      else
+                        %w[]
+                    end
+      LOGGER.info "Starting check PR for #{taboo_repos} repos"
       # Check Does ticket from FC project with not PUBLISHED status exist
       all_issues = []
       issue.issuelinks.each do |i|
