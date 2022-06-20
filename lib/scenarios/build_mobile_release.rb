@@ -3,7 +3,7 @@ module Scenarios
   # From develop
   # Release branch for ADR prj
   # Release and feature branch for IOS prj
-  class NewBuildMobileRelease # rubocop:disable Metrics/ClassLength
+  class BuildMobileRelease # rubocop:disable Metrics/ClassLength
     def with(instance, &block)
       instance.instance_eval(&block)
       instance
