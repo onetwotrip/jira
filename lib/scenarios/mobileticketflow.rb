@@ -55,6 +55,8 @@ module Scenarios
         is_empty = true
       end
 
+      Ott::CheckBuildStatuses.for_mobile_open_pull_request(issue)
+
       # rubocop:disable Metrics/BlockLength
       pullrequests.each do |pr|
         src_branch = pr.pr['source']['branch']
