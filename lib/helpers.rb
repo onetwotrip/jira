@@ -156,7 +156,7 @@ module Ott
         LOGGER.info 'All builds success!'
         issue.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
-        Проверка сборок в ветках завершена успешна (/)
+        Проверка сборок в ветках завершена успешно (/)
       {panel}
         BODY
       else
