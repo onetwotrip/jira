@@ -110,6 +110,7 @@ module Scenarios
       issue.post_comment <<-BODY
           {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
             Тикетов будет прилинковано: #{issues.count} (!)
+            #{ENV['BUILD_URL']}
           {panel}
       BODY
 
