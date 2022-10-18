@@ -64,15 +64,19 @@ module Scenarios
         pr_url = pr.pr['url']
 
         # Check is destination is master
-        if dst_branch.eql?('master')
-          LOGGER.error("Found branch #{src_branch} with PR to 'master'!!!")
-          issue.post_comment <<-BODY
-      {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
-          Мерж ветки *#{src_branch}* не прошел, т.к. у нее PR в *мастер*! Не надо так делать!
-      {panel}
-          BODY
-          next
+        project_name = issue.fields['project']['key']
+        unless project_name == 'AND' && src_branch.include?('_hotfix')
+          if dst_branch.eql?('master')
+            LOGGER.error("Found branch #{src_branch} with PR to 'master'!!!")
+            issue.post_comment <<-BODY
+              {panel:title=Build status error|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
+                  Мерж ветки *#{src_branch}* не прошел, т.к. у нее PR в *мастер*! Не надо так делать!
+              {panel}
+            BODY
+            next
+          end
         end
+
         unless blocked_by_issues.empty?
           unless dst_branch.eql?('develop')
             LOGGER.error("#{issue.key}: Ticket has blocked by issues, but found branch #{src_branch} with PR not to 'develop'!!!")
