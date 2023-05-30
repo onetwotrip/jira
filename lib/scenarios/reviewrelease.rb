@@ -2,7 +2,7 @@ module Scenarios
   ##
   # ReviewRelease scenario
   class ReviewRelease
-    def run
+    def run(is_containered)
       LOGGER.info "Starting #{self.class.name} for #{SimpleConfig.jira.issue}"
       jira  = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
@@ -14,7 +14,7 @@ module Scenarios
       end
 
       # Check builds status
-      Ott::CheckBuildStatuses.for_all_branches(issue)
+      Ott::CheckBuildStatuses.for_all_branches(issue, is_containered)
     end
   end
 end

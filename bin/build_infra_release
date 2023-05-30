@@ -22,6 +22,7 @@ opts = Slop.parse do |o|
   o.bool '--clean', 'clean local and remote branches', default: false
   o.bool '--dryrun', 'do not post comments to Jira', default: false
   o.bool '--ignorelinks', 'honor linked issues', default: false
+  o.bool '--is_containered', 'is the build a docker image', default: false
 
   o.on '--help', 'print the help' do
     puts o

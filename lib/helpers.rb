@@ -52,8 +52,8 @@ module Ott
   # Check Build Status
   module CheckBuildStatuses
     # For all Branches in ticket
-    def self.for_all_branches(issue)
-      check(issue)
+    def self.for_all_branches(issue, is_containered)
+      check(issue, is_containered: is_containered)
     end
 
     # For all branches which contain open PR in ticket
@@ -69,13 +69,17 @@ module Ott
     # is_open_pr - Does it have to check build for open PR?
     # timeout - time to try to get build last status. Calculate as timeout(seconds) = timeout(value)*10
     # mobile - is it for mobile branch check. It has symbol / in branch name and should handle in another way
-    def self.check(issue, is_open_pr: false, timeout: 180, mobile: false)
+    def self.check(issue, is_open_pr: false, is_containered: false, timeout: 180, mobile: false)
       white_list = ENV['REPO_WHITE_LIST'] || []
       failed_builds = []
       branches_array = issue.branches
       branches_array = issue.api_pullrequests.select { |pr| pr.state == 'OPEN' } if is_open_pr
       branches_array.each do |item|
-        repo_name = item.repo_slug
+        repo_name = if is_containered
+                      "#{item.repo_slug}-container"
+                    else
+                      item.repo_slug
+                    end
         branch_name = if is_open_pr
                         item.source['branch']['name']
                       else
