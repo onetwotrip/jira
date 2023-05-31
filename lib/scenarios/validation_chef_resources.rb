@@ -1,7 +1,7 @@
 module Scenarios
   ##
-  # SyncChefResources scenario
-  class SyncChefResources
+  # ValidationChefResources scenario
+  class ValidationChefResources
     def run
       repo_name = 'devops-chef-resources'
 
@@ -45,40 +45,24 @@ module Scenarios
       opts = {
         input: '',
         consul_template: '/usr/bin/consul-template',
-        consul_template_args: '-vault-retry=false -vault-renew-token=false'
+        consul_template_args: '-vault-retry=false -vault-renew-token=false -dry'
       }
 
-      LOGGER.info "Syncing roles"
+      LOGGER.info "Validation roles"
       roles_list.each do |role|
-        LOGGER.info "Syncing #{role}"
+        LOGGER.info "Validation role: '#{role}'"
         opts[:input] = "#{git_repo.dir}/#{role}"
-        Scenarios::SyncChefResource.new(opts).run
-        LOGGER.info "Syncing #{role} - done"
+        Scenarios::ValidationChefResource.new(opts).run
+        LOGGER.info "Validation role: '#{role}' - done"
       end
 
-      stage_table = {
-        'staging' => ['staging'],
-        'production' => %w[production-a
-                           infra
-                           misc
-                           extranet
-                           staging
-                           marketing]
-      }
-
-      LOGGER.info "Syncing environments"
-      stage_table[SimpleConfig.stage].each do |env|
-        LOGGER.info "Syncing environment: #{env}"
-        env_filepath = env_list.find { |e| e.include?(env) }
-        if env_filepath
-          opts[:input] = "#{git_repo.dir}/#{env_filepath}"
-          Scenarios::SyncChefResource.new(opts).run
-        else
-          LOGGER.info "#{env} is not changed in #{branch_name}"
-        end
-        LOGGER.info "Syncing environment: #{env} - done"
+      LOGGER.info "Validation environments"
+      env_list.each do |env|
+        LOGGER.info "Validation environments: '#{env}'"
+        opts[:input] = "#{git_repo.dir}/#{env}"
+        Scenarios::ValidationChefResource.new(opts).run
+        LOGGER.info "Validation environments: '#{env}' - done"
       end
-      LOGGER.info "Syncing environments - done"
     end
   end
 end

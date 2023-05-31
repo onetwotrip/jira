@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+require 'bundler/setup'
+require 'scenarios'
+require 'slop'
+
+opts = Slop.parse do |o|
+  o.string '--input', 'Path to resource'
+  o.string '--consul-template', 'Path to consul-template binary', default: '/usr/bin/consul-template'
+  o.string '--consul-template-args', 'Additional consul-template args', default: '-vault-retry=false -vault-renew-token=false -dry'
+
+  o.on '--help', 'print the help' do
+    puts o
+    exit
+  end
+end
+
+Scenarios::ValidationChefResource.new(opts).run
