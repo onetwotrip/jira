@@ -13,7 +13,7 @@ module Scenarios
 
     def run
       input = opts[:input]
-      if(File.exist?(input))
+      if (File.exist?(input))
         LOGGER.info "Working with #{input}"
       else
         raise "File '#{input}' not found"
@@ -41,14 +41,14 @@ module Scenarios
       LOGGER.info "Resource class #{resource['json_class']}, name #{resource['name']}"
 
       chef_object =
-      case resource['json_class']
-      when 'Chef::Role'
-        ChefAPI::Resource::Role.fetch(resource['name'])
-      when 'Chef::Environment'
-        ChefAPI::Resource::Environment.fetch(resource['name'])
-      else
-        raise "Unsupported resource type #{resource['json_class']}"
-      end
+        case resource['json_class']
+        when 'Chef::Role'
+          ChefAPI::Resource::Role.fetch(resource['name'])
+        when 'Chef::Environment'
+          ChefAPI::Resource::Environment.fetch(resource['name'])
+        else
+          raise "Unsupported resource type #{resource['json_class']}"
+        end
 
       chef_object.update(resource)
       chef_object.save
