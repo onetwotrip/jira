@@ -37,31 +37,44 @@ module Scenarios
       roles_list = diff_filelist.select { |e| e.start_with?('roles/') }
       env_list = diff_filelist.select { |e| e.start_with?('environments/') }
 
-      LOGGER.info 'Changed roles:'
-      LOGGER.info roles_list
-      LOGGER.info 'Changed environments:'
-      LOGGER.info env_list
-
       opts = {
         input: '',
         consul_template: '/usr/bin/consul-template',
         consul_template_args: '-vault-retry=false -vault-renew-token=false -dry'
       }
 
-      LOGGER.info "Validation roles"
-      roles_list.each do |role|
-        LOGGER.info "Validation role: '#{role}'"
-        opts[:input] = "#{git_repo.dir}/#{role}"
-        Scenarios::ValidationChefResource.new(opts).run
-        LOGGER.info "Validation role: '#{role}' - done"
+      unless roles_list.empty?
+        LOGGER.info 'Changed roles:'
+        LOGGER.info roles_list
+
+        LOGGER.info "Validation roles"
+        roles_list.each do |role|
+          if File.file?("#{git_repo.dir}/#{role}")
+            LOGGER.info "Validation role: '#{role}'"
+            opts[:input] = "#{git_repo.dir}/#{role}"
+            Scenarios::ValidationChefResource.new(opts).run
+            LOGGER.info "Validation role: '#{role}' - done"
+          else
+            LOGGER.warn "Removed role: '#{role}'"
+          end
+        end
       end
 
-      LOGGER.info "Validation environments"
-      env_list.each do |env|
-        LOGGER.info "Validation environments: '#{env}'"
-        opts[:input] = "#{git_repo.dir}/#{env}"
-        Scenarios::ValidationChefResource.new(opts).run
-        LOGGER.info "Validation environments: '#{env}' - done"
+      unless env_list.empty?
+        LOGGER.info 'Changed environments:'
+        LOGGER.info env_list
+
+        LOGGER.info "Validation environments"
+        env_list.each do |env|
+          if File.file?("#{git_repo.dir}/#{env}")
+            LOGGER.info "Validation environment: '#{env}'"
+            opts[:input] = "#{git_repo.dir}/#{env}"
+            Scenarios::ValidationChefResource.new(opts).run
+            LOGGER.info "Validation environment: '#{env}' - done"
+          else
+            LOGGER.warn "Removed environment: '#{env}'"
+          end
+        end
       end
     end
   end
