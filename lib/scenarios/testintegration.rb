@@ -12,6 +12,8 @@ module Scenarios
 
       issue_links = issue[:fields][:issuelinks]
 
+      puts issue_links
+
       issue_links.each do |link|
         inward_issue = link[:inwardIssue]
         key = inward_issue[:key]
