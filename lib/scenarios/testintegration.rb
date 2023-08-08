@@ -3,13 +3,13 @@ module Scenarios
   ##
   # TestIntegration scenario
   class TestIntegration
-    def run
-      jira_issue = SimpleConfig.jira.issue
+    @jira_issue = SimpleConfig.jira.issue
 
-      LOGGER.info "Starting for #{jira_issue}"
+    def run
+      LOGGER.info "Starting integration for #{@jira_issue}"
 
       jira = JIRA::Client.new SimpleConfig.jira.to_h
-      issue = jira.Issue.find(jira_issue)
+      issue = jira.Issue.find(@jira_issue)
 
       puts issue.to_json
 
@@ -26,7 +26,13 @@ module Scenarios
         id = inward_issue ? inward_issue['id'] : outward_issue['id']
 
         nestedIssue = jira.Issue.find(id)
-        nested_issue_links = nestedIssue.fields['issuelinks']
+        fields = nestedIssue.fields
+
+        if check_issue_links(fields.to_json)
+          puts "issue #{issue_name} contain #{@jira_issue}"
+        end
+
+        nested_issue_links = fields['issuelinks']
 
         nested_keys_blocks = []
         nested_keys_relates = []
@@ -35,6 +41,8 @@ module Scenarios
         nested_keys_duplicated = []
         nested_keys_inheritanced = []
         nested_keys_issue_type = []
+        nested_keys_causes = []
+        nested_keys_reviews = []
 
         nested_object = {}
 
@@ -67,6 +75,12 @@ module Scenarios
           when 'Issue type'
             nested_keys_issue_type.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
             nested_object[:issue_type] = nested_keys_issue_type
+          when 'Problem/Incident'
+            nested_keys_causes.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+            nested_object[:causes] = nested_keys_causes
+          when 'Post-Incident Reviews'
+            nested_keys_reviews.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+            nested_object[:reviews] = nested_keys_reviews
           end
 
           updated_issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
@@ -85,7 +99,7 @@ module Scenarios
           }],
       }.to_json
 
-      url = "#{ENV['JIRA_SITE']}/rest/internal/3/issue/#{jira_issue}/description"
+      url = "#{ENV['JIRA_SITE']}/rest/internal/3/issue/#{@jira_issue}/description"
 
       LOGGER.info "PUT #{url}"
 
@@ -97,6 +111,26 @@ module Scenarios
         user: SimpleConfig.jira[:username],
         password: SimpleConfig.jira[:password]
       )
+    end
+
+    def check_issue_links(obj)
+      found_key = false
+
+      if obj.key?("fields") && obj["fields"].key?("issueLinks")
+        obj["fields"]["issueLinks"].each do |link|
+          if link.key?("outwardIssue") && link["outwardIssue"].key?("key")
+            key = link["outwardIssue"]["key"]
+            if key == @jira_issue
+              found_key = true
+            else
+              found_key = false
+              break
+            end
+          end
+        end
+      end
+
+      found_key
     end
 
     def transform_content(array)
