@@ -8,10 +8,11 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
 
-      issues = []
-
       fields = issue.fields
       issue_links = fields['issuelinks']
+
+      issue_name = ''
+      nested_object = {}
 
       issue_links.each do |link|
         inward_issue = link['inwardIssue']
@@ -24,8 +25,6 @@ module Scenarios
 
         nested_keys_blocks = []
         nested_keys_relates = []
-
-        nested_object = {}
 
         nested_issue_links.each do |nested_link|
           # puts nested_link
@@ -45,18 +44,16 @@ module Scenarios
             nested_object[:relates] = nested_keys_relates
           end
         end
-
-        object = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
-
-        issues << object
       end
+
+      issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
 
       puts JSON.pretty_generate(issues)
 
       issue.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
         Внимание, зависимость задач (!)
-        #{JSON.pretty_generate(issues)}
+        "#{JSON.pretty_generate(issues)}"
       {panel}
       BODY
     end
