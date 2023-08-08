@@ -102,9 +102,9 @@ module Scenarios
           value.each do |key, value|
             if value.is_a?(Array)
               content << { type: 'text', text: key.to_s + ':' }
+              content << { type: 'hardBreak' }
 
               value.each do |item|
-                content << { type: 'hardBreak' }
                 content << { type: 'inlineCard', attrs: { url: item } }
                 content << { type: 'text', text: ' ' }
                 content << { type: 'hardBreak' }
