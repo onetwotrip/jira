@@ -24,6 +24,7 @@ module Scenarios
 
         type = 0
         nested_keys = []
+        nested_object = {}
 
         nested_issue_links.each do |nested_link|
           nested_inward_issue = nested_link['inwardIssue']
@@ -32,12 +33,12 @@ module Scenarios
 
           nested_key = nested_inward_issue ? nested_inward_issue['key'] : nested_outward_issue['key']
           nested_keys.push(nested_key)
+
+          nested_object[:type] = type
+          nested_object[:urls] = nested_keys
         end
 
-        object = { issue: "https://onetwotripdev.atlassian.net/browse/#{issue_name}", nested_issues: {
-          type: type,
-          urls: nested_keys,
-        } }
+        object = { issue: "https://onetwotripdev.atlassian.net/browse/#{issue_name}", nested_issues: nested_object }
 
         issues << object
       end
