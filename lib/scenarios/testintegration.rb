@@ -7,10 +7,16 @@ module Scenarios
 
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
+      ## create loop for all linked issues
+      # issue = jira.Issue.find('RND-123'
+
       issueLinks = issue.fields['issuelinks']
 
-      puts issueLinks.to_json
-      # puts issue
+      nestedIssueId = issueLinks[0].inwardIssue.id
+
+      nestedIssue = jira.Issue.find(nestedIssueId)
+
+      puts nestedIssue
 
 
       # issue.post_comment <<-BODY
