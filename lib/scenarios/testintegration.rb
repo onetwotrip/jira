@@ -8,13 +8,13 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
 
-      issueLinks = issue.fields['issuelinks']
-
       issues = []
+
+      issueLinks = issue.fields.to_json
 
       puts issueLinks
 
-      issueLinks.each do |i|
+      issueLinks['issuelinks'].each do |i|
         nestedIssueId = issueLinks[i]['inwardIssue']['id']
 
         puts nestedIssueId
