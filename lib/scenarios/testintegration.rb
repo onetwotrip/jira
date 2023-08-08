@@ -10,6 +10,7 @@ module Scenarios
 
       issues = []
 
+      issue = issue.to_json
       issue_links = issue[:fields][:issuelinks]
 
       puts issue_links
@@ -21,6 +22,7 @@ module Scenarios
 
         nestedIssue = jira.Issue.find(id)
 
+        nestedIssue = nestedIssue.to_json
         nested_issue_links = nestedIssue[:fields][:issuelinks]
 
         nested_id = 0
