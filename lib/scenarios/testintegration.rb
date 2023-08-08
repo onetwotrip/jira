@@ -12,7 +12,7 @@ module Scenarios
 
       issueLinks = issue.fields['issuelinks']
 
-      nestedIssueId = issueLinks[0].inwardIssue.id
+      nestedIssueId = issueLinks[0]['inwardIssue'].id
 
       nestedIssue = jira.Issue.find(nestedIssueId)
 
