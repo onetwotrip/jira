@@ -27,9 +27,6 @@ module Scenarios
         nested_keys_relates = []
 
         nested_issue_links.each do |nested_link|
-          # puts nested_link
-          # puts "===================="
-
           nested_inward_issue = nested_link['inwardIssue']
           nested_outward_issue = nested_link['outwardIssue']
           nested_key = nested_inward_issue ? nested_inward_issue['key'] : nested_outward_issue['key']
@@ -48,28 +45,12 @@ module Scenarios
 
       issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
 
-
-      json_str = issues.to_json
-
-      # Parse the JSON data into a Ruby object
-      data = JSON.parse(json_str)
-
-      # Generate HTML using string interpolation
-      html = "<ul>"
-      data.each do |key, value|
-        html += "<li><b>#{key}:</b> #{value}</li>"
-      end
-      html += "</ul>"
-
-      # Output the HTML
-      puts html
-
-      # puts JSON.pretty_generate(issues)
-
       issue.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
         Внимание, зависимость задач (!)
-        #{html}
+        {noformat:title=Зависимость}
+          #{JSON.pretty_generate(issues)}
+        {noformat}
       {panel}
       BODY
     end
