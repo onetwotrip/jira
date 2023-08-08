@@ -4,10 +4,12 @@ module Scenarios
   # TestIntegration scenario
   class TestIntegration
     def run
-      LOGGER.info "Starting for #{SimpleConfig.jira.issue}"
+      jira_issue = SimpleConfig.jira.issue
+
+      LOGGER.info "Starting for #{jira_issue}"
 
       jira = JIRA::Client.new SimpleConfig.jira.to_h
-      issue = jira.Issue.find(SimpleConfig.jira.issue)
+      issue = jira.Issue.find(jira_issue)
 
       fields = issue.fields
       issue_links = fields['issuelinks']
@@ -46,30 +48,27 @@ module Scenarios
 
       issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
 
-      formatted_json = transform_content(issues)
-      puts formatted_json
-
       request_body = {
         "version": 1,
         "type": 'doc',
         "content": [
           {
             "type": 'paragraph',
-            "content": formatted_json,
+            "content": transform_content(issues),
           }],
-      }
+      }.to_json
 
-      LOGGER.info "PUT #{ENV['JIRA_SITE']}/rest/internal/3/issue/#{SimpleConfig.jira.issue}/description"
+      url = "#{ENV['JIRA_SITE']}/rest/internal/3/issue/#{jira_issue}/description"
 
-      puts request_body.to_json
+      LOGGER.info "PUT #{url}"
 
       RestClient::Request.execute(
         method: :put,
-        url: "#{ENV['JIRA_SITE']}/rest/internal/3/issue/#{SimpleConfig.jira.issue}/description",
+        url: url,
+        payload: request_body,
+        headers: { content_type: :json },
         user: SimpleConfig.jira[:username],
-        password: SimpleConfig.jira[:password],
-        payload: request_body.to_json,
-        headers: { content_type: :json }
+        password: SimpleConfig.jira[:password]
       )
 
       issue.post_comment <<-BODY
