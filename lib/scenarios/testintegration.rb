@@ -45,7 +45,10 @@ module Scenarios
       end
 
       issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
+
+      puts issues
       formatted_json = transform_content(issues)
+      puts formatted_json
 
       request_body = {
         "version": 1,
@@ -53,20 +56,20 @@ module Scenarios
         "content": [
           {
             "type": 'paragraph',
-            "content": formatted_json.to_json,
+            "content": formatted_json,
           }],
       }
 
       LOGGER.info "PUT #{ENV['JIRA_SITE']}/rest/internal/3/issue/#{SimpleConfig.jira.issue}/description"
 
-      puts JSON.pretty_generate(request_body)
+      puts request_body.to_json
 
       RestClient::Request.execute(
         method: :put,
         url: "#{ENV['JIRA_SITE']}/rest/internal/3/issue/#{SimpleConfig.jira.issue}/description",
         user: SimpleConfig.jira[:username],
         password: SimpleConfig.jira[:password],
-        payload: JSON.pretty_generate(request_body),
+        payload: request_body.to_json,
         headers: { content_type: :json }
       )
 
