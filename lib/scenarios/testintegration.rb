@@ -7,7 +7,7 @@ module Scenarios
 
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       # issue = jira.Issue.find(SimpleConfig.jira.issue)
-      issue = jira.Issuelink.all
+      issue = jira.Issuelink.find(SimpleConfig.jira.issue)
 
       puts issue
 
