@@ -51,11 +51,9 @@ module Scenarios
         "version": 1,
         "type": 'doc',
         "content": [
-          { "type": 'paragraph',
-            "content": [
-              { "type": 'paragraph',
-                "content": formatted_json,
-              }],
+          {
+            "type": 'paragraph',
+            "content": formatted_json,
           }],
       }
 
@@ -85,34 +83,34 @@ module Scenarios
 
     def transform_content(hash)
       content = []
-      content << { type: "paragraph", content: [{type: "text", text: "============================================="}]}
-      content << { type: "hardBreak" }
+      content << { type: 'text', text: '=============================================' }
+      content << { type: 'hardBreak' }
 
       hash.each do |key, value|
-        content << {type: "inlineCard", attrs: {url: key.to_s}}
-        content << {type: "text", text: "  =>"}
-        content << {type: "hardBreak"}
+        content << { type: 'inlineCard', attrs: { url: key.to_s } }
+        content << { type: 'text', text: '  =>' }
+        content << { type: 'hardBreak' }
 
-        value.each do |k, v|
-          if v.is_a?(Array)
-            v.each do |item|
-              content << {type: "text", text: k.to_s + ":"}
-              content << {type: "hardBreak"}
-              content << {type: "inlineCard", attrs: {url: item}}
-              content << {type: "text", text: " "}
-              content << {type: "hardBreak"}
+        value.each do |key, value|
+          if value.is_a?(Array)
+            value.each do |item|
+              content << { type: 'text', text: key.to_s + ':' }
+              content << { type: 'hardBreak' }
+              content << { type: 'inlineCard', attrs: { url: item } }
+              content << { type: 'text', text: ' ' }
+              content << { type: 'hardBreak' }
             end
           else
-            content << {type: "text", text: k.to_s + ":"}
-            content << {type: "hardBreak"}
-            content << {type: "inlineCard", attrs: {url: v.to_s}}
-            content << {type: "text", text: " "}
-            content << {type: "hardBreak"}
+            content << { type: 'text', text: key.to_s + ':' }
+            content << { type: 'hardBreak' }
+            content << { type: 'inlineCard', attrs: { url: value.to_s } }
+            content << { type: 'text', text: ' ' }
+            content << { type: 'hardBreak' }
           end
         end
       end
 
-      content << {type: "text", text: "============================================="}
+      content << { type: 'text', text: '=============================================' }
       content.to_json
     end
   end
