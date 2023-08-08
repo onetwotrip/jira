@@ -13,12 +13,13 @@ module Scenarios
       fields = issue.fields
       issue_links = fields['issuelinks']
 
-      puts issue_links
-
       issue_links.each do |link|
         inward_issue = link['inwardIssue']
         key = inward_issue['key']
         id = inward_issue['id']
+
+        puts key
+        puts id
 
         nestedIssue = jira.Issue.find(id)
         nested_issue_links = nestedIssue.fields['issuelinks']
