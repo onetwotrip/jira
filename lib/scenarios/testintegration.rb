@@ -12,7 +12,7 @@ module Scenarios
 
       issueLinks = issue.fields.to_json
 
-      [issueLinks.issuelinks].each do |i|
+      [issueLinks['issuelinks']].each do |i|
         nestedIssueId = issueLinks[i]['inwardIssue']['id']
 
         puts nestedIssueId
