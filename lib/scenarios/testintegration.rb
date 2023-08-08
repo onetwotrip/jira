@@ -58,7 +58,7 @@ module Scenarios
           end
         end
 
-        object = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}" => :nested_object }
+        object = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
 
         issues << object
       end
