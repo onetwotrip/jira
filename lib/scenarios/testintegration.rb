@@ -10,10 +10,11 @@ module Scenarios
 
       issues = []
 
-      puts issue.fields['issuelinks']
+      fields = issue.fields.to_json
+      issue_links = fields[:issuelinks]
 
-      issue = issue.to_json
-      issue_links = issue.fields[:issuelinks]
+      puts issue_links
+
 
       puts issue_links
 
