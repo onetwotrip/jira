@@ -22,31 +22,38 @@ module Scenarios
         nestedIssue = jira.Issue.find(id)
         nested_issue_links = nestedIssue.fields['issuelinks']
 
-        nested_keys = []
+        nested_keys_blocks = []
+        nested_keys_relates = []
+
         nested_object = {}
 
         nested_issue_links.each do |nested_link|
-          puts nested_link
-          puts "===================="
+          # puts nested_link
+          # puts "===================="
 
           nested_inward_issue = nested_link['inwardIssue']
           nested_outward_issue = nested_link['outwardIssue']
           type = nested_link['type']['name']
 
           nested_key = nested_inward_issue ? nested_inward_issue['key'] : nested_outward_issue['key']
-          nested_keys.push(nested_key)
 
           if type == 'Blocks'
+            nested_keys_blocks.push(nested_key)
+
             object = {
               type: type,
-              urls: nested_keys
+              urls: nested_keys_blocks
             }
+
             nested_object[:blocks] = object
           elsif type == 'Relates'
+            nested_keys_relates.push(nested_key)
+
             object = {
               type: type,
-              urls: nested_keys
+              urls: nested_keys_relates
             }
+
             nested_object[:relates] = object
           end
         end
