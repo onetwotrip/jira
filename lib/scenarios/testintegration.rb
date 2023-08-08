@@ -18,6 +18,7 @@ module Scenarios
       nested_object = {}
 
       new_issues = []
+      updated_issues = {}
 
       issue_links.each do |link|
         inward_issue = link['inwardIssue']
@@ -45,14 +46,14 @@ module Scenarios
             nested_keys_relates.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
             nested_object[:relates] = nested_keys_relates
           end
-        end
 
-        updated_issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
+          updated_issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
+        end
 
         new_issues.push(updated_issues)
       end
 
-      puts new_issues
+      puts new_issues.to_json
 
       issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
 
