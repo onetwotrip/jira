@@ -10,7 +10,7 @@ module Scenarios
 
       issue = issue.to_json
 
-      puts issue
+      puts issue.fields
 
       issueLinks = issue.fields['issuelinks']
 
