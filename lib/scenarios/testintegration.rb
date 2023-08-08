@@ -59,14 +59,14 @@ module Scenarios
 
       LOGGER.info "PUT #{ENV['JIRA_SITE']}/rest/internal/3/issue/#{SimpleConfig.jira.issue}/description"
 
-      puts request_body
+      puts JSON.pretty_generate(request_body)
 
       RestClient::Request.execute(
         method: :put,
         url: "#{ENV['JIRA_SITE']}/rest/internal/3/issue/#{SimpleConfig.jira.issue}/description",
         user: SimpleConfig.jira[:username],
         password: SimpleConfig.jira[:password],
-        payload: request_body,
+        payload: JSON.pretty_generate(request_body),
         headers: { content_type: :json }
       )
 
