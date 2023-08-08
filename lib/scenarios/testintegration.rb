@@ -11,11 +11,10 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(jira_issue)
 
+      puts issue.to_json
+
       fields = issue.fields
       issue_links = fields['issuelinks']
-
-      issue_name = ''
-      nested_object = {}
 
       new_issues = []
       updated_issues = {}
@@ -76,15 +75,6 @@ module Scenarios
         user: SimpleConfig.jira[:username],
         password: SimpleConfig.jira[:password]
       )
-
-      issue.post_comment <<-BODY
-      {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
-        Внимание, зависимость задач (!)
-        {noformat}
-          #{JSON.pretty_generate(issues)}
-        {noformat}
-      {panel}
-      BODY
     end
 
     def transform_content(array)
