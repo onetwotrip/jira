@@ -34,7 +34,8 @@ module Scenarios
         nested_keys_deployed = []
         nested_keys_duplicated = []
         nested_keys_inheritanced = []
-        
+        nested_keys_issue_type = []
+
         nested_object = {}
 
         nested_issue_links.each do |nested_link|
@@ -63,6 +64,9 @@ module Scenarios
           when 'Inheritance'
             nested_keys_inheritanced.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
             nested_object[:inheritanced] = nested_keys_inheritanced
+          when 'Issue type'
+            nested_keys_issue_type.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+            nested_object[:issue_type] = nested_keys_issue_type
           end
 
           updated_issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
