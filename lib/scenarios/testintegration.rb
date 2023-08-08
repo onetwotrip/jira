@@ -53,7 +53,7 @@ module Scenarios
       issue.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
         Внимание, зависимость задач (!)
-        "#{JSON.pretty_generate(issues)}"
+        #{JSON.parse(issues)}
       {panel}
       BODY
     end
