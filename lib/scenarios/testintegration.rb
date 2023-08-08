@@ -49,16 +49,10 @@ module Scenarios
           end
 
           updated_issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
-          puts "updated_issues: #{updated_issues}"
         end
 
         new_issues.push(updated_issues)
-        puts "new_issues: #{new_issues}"
       end
-
-      puts new_issues.to_json
-
-      issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
 
       request_body = {
         "version": 1,
@@ -66,7 +60,7 @@ module Scenarios
         "content": [
           {
             "type": 'paragraph',
-            "content": transform_content(issues),
+            "content": transform_content(new_issues),
           }],
       }.to_json
 
@@ -93,32 +87,35 @@ module Scenarios
       BODY
     end
 
-    def transform_content(hash)
+    def transform_content(array)
       content = []
-      content << { type: 'text', text: '=============================================' }
-      content << { type: 'hardBreak' }
 
-      hash.each do |key, value|
-        content << { type: 'inlineCard', attrs: { url: key.to_s } }
-        content << { type: 'text', text: '  =>' }
+      array.each do |hash|
+        content << { type: 'text', text: '=============================================' }
         content << { type: 'hardBreak' }
 
-        value.each do |key, value|
-          if value.is_a?(Array)
-            content << { type: 'text', text: key.to_s + ':' }
+        hash.each do |key, value|
+          content << { type: 'inlineCard', attrs: { url: key.to_s } }
+          content << { type: 'text', text: '  =>' }
+          content << { type: 'hardBreak' }
 
-            value.each do |item|
+          value.each do |key, value|
+            if value.is_a?(Array)
+              content << { type: 'text', text: key.to_s + ':' }
+
+              value.each do |item|
+                content << { type: 'hardBreak' }
+                content << { type: 'inlineCard', attrs: { url: item } }
+                content << { type: 'text', text: ' ' }
+                content << { type: 'hardBreak' }
+              end
+            else
+              content << { type: 'text', text: key.to_s + ':' }
               content << { type: 'hardBreak' }
-              content << { type: 'inlineCard', attrs: { url: item } }
+              content << { type: 'inlineCard', attrs: { url: value.to_s } }
               content << { type: 'text', text: ' ' }
               content << { type: 'hardBreak' }
             end
-          else
-            content << { type: 'text', text: key.to_s + ':' }
-            content << { type: 'hardBreak' }
-            content << { type: 'inlineCard', attrs: { url: value.to_s } }
-            content << { type: 'text', text: ' ' }
-            content << { type: 'hardBreak' }
           end
         end
       end
