@@ -8,6 +8,8 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
 
+      puts(issue)
+
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
 
       issue.post_comment <<-BODY
