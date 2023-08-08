@@ -18,15 +18,14 @@ module Scenarios
         key = inward_issue['key']
         id = inward_issue['id']
 
-        puts key
-        puts id
-
         nestedIssue = jira.Issue.find(id)
         nested_issue_links = nestedIssue.fields['issuelinks']
 
         nested_id = 0
 
         nested_issue_links.each do |nested_link|
+          puts nested_link
+
           nested_inward_issue = nested_link['inwardIssue']
           nested_id = nested_inward_issue['id']
         end
