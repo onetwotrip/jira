@@ -53,21 +53,20 @@ module Scenarios
         "content": [
           {
             "type": 'paragraph',
-            "content": formatted_json,
+            "content": formatted_json.to_json,
           }],
       }
 
       LOGGER.info "PUT #{ENV['JIRA_SITE']}/rest/internal/3/issue/#{SimpleConfig.jira.issue}/description"
 
-      payload = request_body.to_json
-      puts payload
+      puts request_body
 
       RestClient::Request.execute(
         method: :put,
         url: "#{ENV['JIRA_SITE']}/rest/internal/3/issue/#{SimpleConfig.jira.issue}/description",
         user: SimpleConfig.jira[:username],
         password: SimpleConfig.jira[:password],
-        payload: request_body.to_json,
+        payload: request_body,
         headers: { content_type: :json }
       )
 
