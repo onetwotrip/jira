@@ -41,13 +41,13 @@ module Scenarios
               type: type,
               urls: nested_keys
             }
-            nested_object[:type] = object
+            nested_object[:blocks] = object
           elsif type == 'Relates'
             object = {
               type: type,
               urls: nested_keys
             }
-            nested_object[:type] = object
+            nested_object[:relates] = object
           end
         end
 
@@ -60,7 +60,7 @@ module Scenarios
 
       issue.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
-        Внимание, зависимость задач(!)
+        Внимание, зависимость задач (!)
         #{issues.to_json}
       {panel}
       BODY
