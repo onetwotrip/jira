@@ -5,12 +5,11 @@ module Scenarios
     def run
       LOGGER.info "Starting for #{SimpleConfig.jira.issue}"
 
-      # jira = JIRA::Client.new SimpleConfig.jira.to_h
+      jira = JIRA::Client.new SimpleConfig.jira.to_h
       # issue = jira.Issue.find(SimpleConfig.jira.issue)
+      issue = jira.Issuelink.all
 
-      link = client.IssueLink.build
-
-      puts link
+      puts issue
 
 
       # issue.post_comment <<-BODY
