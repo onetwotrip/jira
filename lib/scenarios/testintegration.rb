@@ -33,28 +33,16 @@ module Scenarios
 
           nested_inward_issue = nested_link['inwardIssue']
           nested_outward_issue = nested_link['outwardIssue']
-          type = nested_link['type']['name']
-
           nested_key = nested_inward_issue ? nested_inward_issue['key'] : nested_outward_issue['key']
+
+          type = nested_link['type']['name']
 
           if type == 'Blocks'
             nested_keys_blocks.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
-
-            object = {
-              type: type,
-              urls: nested_keys_blocks
-            }
-
-            nested_object[:blocks] = object
+            nested_object[:blocks] = nested_keys_blocks
           elsif type == 'Relates'
             nested_keys_relates.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
-
-            object = {
-              type: type,
-              urls: nested_keys_relates
-            }
-
-            nested_object[:relates] = object
+            nested_object[:relates] = nested_keys_relates
           end
         end
 
@@ -63,12 +51,12 @@ module Scenarios
         issues << object
       end
 
-      puts issues.to_json
+      puts JSON.pretty_generate(issues)
 
       issue.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
         Внимание, зависимость задач (!)
-        #{issues.to_json}
+        #{JSON.pretty_generate(issues)}
       {panel}
       BODY
     end
