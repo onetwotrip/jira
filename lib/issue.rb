@@ -258,15 +258,6 @@ module JIRA
         end
         false
       end
-
-      def inward_issues
-        issues = []
-        linked_issues(/[a-z,A-Z]/).each do
-          client.Issue.jql(%(issue in linkedIssues(#{key},"#{param}")), max_results: 100)
-        end
-
-        issues
-      end
     end
   end
 end

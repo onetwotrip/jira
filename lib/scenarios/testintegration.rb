@@ -9,8 +9,6 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
 
-      puts issue
-
       fields = issue.fields
       issue_links = fields['issuelinks']
 
@@ -48,8 +46,18 @@ module Scenarios
 
       issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
 
-      issue.description = JSON.pretty_generate(issues)
-      issue.save
+      request_body = { "version": 1, "type": 'doc', "content": [{ "type": 'paragraph', "content": [{ "type": 'text', "text": issues.to_s }] }] }
+
+      LOGGER.info "PUT #{url}"
+
+      RestClient::Request.execute(
+        method: :put,
+        url: create_endpoint("rest/api/2/issue/#{key}/description").to_s,
+        user: opts[:username],
+        password: opts[:token],
+        payload: request_body.to_json,
+        headers: { content_type: :json }
+      )
 
       issue.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
