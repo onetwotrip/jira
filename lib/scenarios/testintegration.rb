@@ -46,13 +46,15 @@ module Scenarios
 
       issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
 
-      request_body = { "version": 1, "type": 'doc', "content": [{ "type": 'paragraph', "content": [{ "type": 'text', "text": issues.to_s }] }] }
+      formatted_string = transform_hash(issues)
 
-      LOGGER.info "PUT rest/api/2/issue/#{issue_name}/description"
+      request_body = { "version": 1, "type": 'doc', "content": [{ "type": 'paragraph', "content": [{ "type": 'text', "text": formatted_string.to_s }] }] }
+
+      LOGGER.info "PUT rest/internal/3/issue/#{SimpleConfig.jira.issue}/description"
 
       RestClient::Request.execute(
         method: :put,
-        url: "https://onetwotripdev.atlassian.net/rest/internal/3/issue/#{issue_name}/description",
+        url: "#{ENV['JIRA_SITE']}/rest/internal/3/issue/#{SimpleConfig.jira.issue}/description",
         user: SimpleConfig.jira[:username],
         password: SimpleConfig.jira[:password],
         payload: request_body.to_json,
@@ -67,6 +69,23 @@ module Scenarios
         {noformat}
       {panel}
       BODY
+    end
+
+    def transform_hash(hash)
+      result = ''
+
+      hash.each do |key, value|
+        result += "#{key} =>\n"
+
+        value.each do |k, v|
+          if v.is_a?(Array)
+            result += "#{k} => #{v.join(', ')}\n"
+          else
+            result += "#{k} => #{v}\n"
+          end
+        end
+      end
+      result
     end
   end
 end
