@@ -17,6 +17,8 @@ module Scenarios
       issue_name = ''
       nested_object = {}
 
+      new_issues = []
+
       issue_links.each do |link|
         inward_issue = link['inwardIssue']
         outward_issue = link['outwardIssue']
@@ -44,7 +46,13 @@ module Scenarios
             nested_object[:relates] = nested_keys_relates
           end
         end
+
+        updated_issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
+
+        new_issues.push(updated_issues)
       end
+
+      puts new_issues
 
       issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
 
@@ -93,8 +101,9 @@ module Scenarios
 
         value.each do |key, value|
           if value.is_a?(Array)
+            content << { type: 'text', text: key.to_s + ':' }
+
             value.each do |item|
-              content << { type: 'text', text: key.to_s + ':' }
               content << { type: 'hardBreak' }
               content << { type: 'inlineCard', attrs: { url: item } }
               content << { type: 'text', text: ' ' }
