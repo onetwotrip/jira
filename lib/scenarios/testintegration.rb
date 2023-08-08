@@ -48,11 +48,11 @@ module Scenarios
 
       request_body = { "version": 1, "type": 'doc', "content": [{ "type": 'paragraph', "content": [{ "type": 'text', "text": issues.to_s }] }] }
 
-      LOGGER.info "PUT #{url}"
+      LOGGER.info "PUT rest/api/2/issue/#{issue_name}/description"
 
       RestClient::Request.execute(
         method: :put,
-        url: create_endpoint("rest/api/2/issue/#{key}/description").to_s,
+        url: create_endpoint("rest/api/2/issue/#{issue_name}/description").to_s,
         user: opts[:username],
         password: opts[:token],
         payload: request_body.to_json,
