@@ -8,6 +8,8 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
 
+      puts issue
+
       fields = issue.fields
       issue_links = fields['issuelinks']
 
@@ -48,7 +50,7 @@ module Scenarios
       issue.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
         Внимание, зависимость задач (!)
-        {noformat:title=Зависимость}
+        {noformat}
           #{JSON.pretty_generate(issues)}
         {noformat}
       {panel}
