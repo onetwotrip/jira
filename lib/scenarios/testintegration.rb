@@ -46,7 +46,6 @@ module Scenarios
 
       issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
 
-      puts issues
       formatted_json = transform_content(issues)
       puts formatted_json
 
@@ -113,7 +112,7 @@ module Scenarios
       end
 
       content << { type: 'text', text: '=============================================' }
-      content.to_json
+      content
     end
   end
 end
