@@ -37,11 +37,18 @@ module Scenarios
           nested_keys.push(nested_key)
 
           if type == 'Blocks'
-            nested_object[:type] = type
-
+            object = {
+              type: type,
+              urls: nested_keys
+            }
+            nested_object[:type] = object
+          elsif type == 'Relates'
+            object = {
+              type: type,
+              urls: nested_keys
+            }
+            nested_object[:type] = object
           end
-
-          nested_object[:urls] = nested_keys
         end
 
         object = { issue: "https://onetwotripdev.atlassian.net/browse/#{issue_name}", nested_issues: nested_object }
