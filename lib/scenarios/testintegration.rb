@@ -45,9 +45,7 @@ module Scenarios
       end
 
       issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
-
-      formatted_string = transform_hash(issues)
-      formatted_json = transform_content(formatted_string)
+      formatted_json = transform_content(issues)
 
       request_body = {
         "version": 1,
@@ -80,23 +78,6 @@ module Scenarios
         {noformat}
       {panel}
       BODY
-    end
-
-    def transform_hash(hash)
-      result = ''
-
-      hash.each do |key, value|
-        result += "#{key} =>\n"
-
-        value.each do |k, v|
-          if v.is_a?(Array)
-            result += "#{k} => #{v.join(', ')}\n"
-          else
-            result += "#{k} => #{v}\n"
-          end
-        end
-      end
-      result
     end
 
     def transform_content(hash)
