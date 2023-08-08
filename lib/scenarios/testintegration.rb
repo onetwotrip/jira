@@ -1,4 +1,5 @@
 module Scenarios
+  require 'jira-ruby'
   ##
   # TestIntegration scenario
   class TestIntegration
@@ -46,6 +47,9 @@ module Scenarios
       end
 
       issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
+
+      issue.description = JSON.pretty_generate(issues)
+      issue.save
 
       issue.post_comment <<-BODY
       {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
