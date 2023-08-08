@@ -258,6 +258,10 @@ module JIRA
         end
         false
       end
+
+      def inward_issues
+        client.Issue.jql(%(issue in linkedIssues(#{key},"inward")))
+      end
     end
   end
 end
