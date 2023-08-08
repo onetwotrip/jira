@@ -16,9 +16,11 @@ module Scenarios
 
       puts nestedIssueId
 
+      puts '=============================================='
+
       nestedIssue = jira.Issue.find(nestedIssueId)
 
-      puts nestedIssue
+      puts nestedIssue.to_json
 
 
       # issue.post_comment <<-BODY
