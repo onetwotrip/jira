@@ -38,7 +38,7 @@ module Scenarios
           nested_key = nested_inward_issue ? nested_inward_issue['key'] : nested_outward_issue['key']
 
           if type == 'Blocks'
-            nested_keys_blocks.push(nested_key)
+            nested_keys_blocks.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
 
             object = {
               type: type,
@@ -47,7 +47,7 @@ module Scenarios
 
             nested_object[:blocks] = object
           elsif type == 'Relates'
-            nested_keys_relates.push(nested_key)
+            nested_keys_relates.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
 
             object = {
               type: type,
@@ -58,7 +58,7 @@ module Scenarios
           end
         end
 
-        object = { issue: "https://onetwotripdev.atlassian.net/browse/#{issue_name}", nested_issues: nested_object }
+        object = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": :nested_object }
 
         issues << object
       end
