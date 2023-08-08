@@ -3,9 +3,9 @@ module Scenarios
   ##
   # TestIntegration scenario
   class TestIntegration
-    @jira_issue = SimpleConfig.jira.issue
-
     def run
+      @jira_issue = SimpleConfig.jira.issue
+
       LOGGER.info "Starting integration for #{@jira_issue}"
 
       jira = JIRA::Client.new SimpleConfig.jira.to_h
