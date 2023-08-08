@@ -52,9 +52,9 @@ module Scenarios
 
       RestClient::Request.execute(
         method: :put,
-        url: create_endpoint("rest/api/2/issue/#{issue_name}/description").to_s,
-        user: opts[:username],
-        password: opts[:token],
+        url: create_endpoint("https://onetwotripdev.atlassian.net/rest/internal/3/issue/#{issue_name}/description").to_s,
+        user: SimpleConfig.jira[:username],
+        password: SimpleConfig.jira[:password],
         payload: request_body.to_json,
         headers: { content_type: :json }
       )
@@ -67,15 +67,6 @@ module Scenarios
         {noformat}
       {panel}
       BODY
-    end
-
-    def opts
-      @opts ||= client.options
-    end
-
-    def create_endpoint(path)
-      uri = "#{opts[:site]}#{opts[:context_path]}/#{path}"
-      Addressable::URI.parse(uri)
     end
   end
 end
