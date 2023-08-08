@@ -7,23 +7,25 @@ module Scenarios
 
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(SimpleConfig.jira.issue)
-      ## create loop for all linked issues
-      # issue = jira.Issue.find('RND-123'
 
       issueLinks = issue.fields['issuelinks']
 
-      nestedIssueId = issueLinks[0]['inwardIssue']['id']
+      issues = []
 
-      puts nestedIssueId
+      issueLinks.each do |i|
+        nestedIssueId = issueLinks[i]['inwardIssue']['id']
 
-      puts '=============================================='
+        nestedIssue = jira.Issue.find(nestedIssueId)
+        nestedIssueLinks = nestedIssue.fields['issuelinks']
 
-      nestedIssue = jira.Issue.find(nestedIssueId)
+        updatedIssue = {
+          nestedIssueId: nestedIssueLinks
+        }
 
-      nestedIssueLinks = nestedIssue.fields['issuelinks']
+        issues.push(updatedIssue)
+      end
 
-      puts nestedIssueLinks.to_json
-
+      puts issues
 
       # issue.post_comment <<-BODY
       # {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
