@@ -52,7 +52,7 @@ module Scenarios
 
       RestClient::Request.execute(
         method: :put,
-        url: create_endpoint("https://onetwotripdev.atlassian.net/rest/internal/3/issue/#{issue_name}/description").to_s,
+        url: "https://onetwotripdev.atlassian.net/rest/internal/3/issue/#{issue_name}/description",
         user: SimpleConfig.jira[:username],
         password: SimpleConfig.jira[:password],
         payload: request_body.to_json,
