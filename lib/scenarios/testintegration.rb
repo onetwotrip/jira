@@ -68,5 +68,14 @@ module Scenarios
       {panel}
       BODY
     end
+
+    def opts
+      @opts ||= client.options
+    end
+
+    def create_endpoint(path)
+      uri = "#{opts[:site]}#{opts[:context_path]}/#{path}"
+      Addressable::URI.parse(uri)
+    end
   end
 end
