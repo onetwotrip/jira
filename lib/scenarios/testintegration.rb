@@ -10,26 +10,29 @@ module Scenarios
 
       issues = []
 
-      issueLinks = issue.fields.to_json
+      issue_links = issue[:fields][:issuelinks]
 
-      [issueLinks['issuelinks']].each do |i|
-        nestedIssueId = issueLinks[i]['inwardIssue']['id']
+      issue_links.each do |link|
+        inward_issue = link[:inwardIssue]
+        key = inward_issue[:key]
+        id = inward_issue[:id]
 
-        puts nestedIssueId
+        nestedIssue = jira.Issue.find(id)
 
-        puts "====================="
+        nested_issue_links = nestedIssue[:fields][:issuelinks]
 
-        nestedIssue = jira.Issue.find(nestedIssueId)
-        nestedIssueLinks = nestedIssue.fields['issuelinks']
+        nested_id = 0
 
-        updatedIssue = {
-          nestedIssueId: nestedIssueLinks
-        }
+        nested_issue_links.each do |nested_link|
+          nested_inward_issue = nested_link[:inwardIssue]
+          nested_id = nested_inward_issue[:id]
+        end
 
-        issues.push(updatedIssue)
+        object = { key: key, id: nested_id }
+        issues << object
       end
 
-      puts issues
+      puts issues.to_json
 
       # issue.post_comment <<-BODY
       # {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
