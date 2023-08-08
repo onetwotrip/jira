@@ -59,7 +59,10 @@ module Scenarios
           }],
       }
 
-      LOGGER.info "PUT rest/internal/3/issue/#{SimpleConfig.jira.issue}/description"
+      LOGGER.info "PUT #{ENV['JIRA_SITE']}/rest/internal/3/issue/#{SimpleConfig.jira.issue}/description"
+
+      payload = request_body.to_json
+      puts payload
 
       RestClient::Request.execute(
         method: :put,
