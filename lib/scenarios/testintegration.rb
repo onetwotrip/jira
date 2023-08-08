@@ -15,24 +15,19 @@ module Scenarios
 
       puts issue_links
 
-
-      puts issue_links
-
       issue_links.each do |link|
-        inward_issue = link[:inwardIssue]
-        key = inward_issue[:key]
-        id = inward_issue[:id]
+        inward_issue = link['inwardIssue']
+        key = inward_issue['key']
+        id = inward_issue['id']
 
         nestedIssue = jira.Issue.find(id)
-
-        nestedIssue = nestedIssue.to_json
-        nested_issue_links = nestedIssue[:fields][:issuelinks]
+        nested_issue_links = nestedIssue.fields['issuelinks']
 
         nested_id = 0
 
         nested_issue_links.each do |nested_link|
-          nested_inward_issue = nested_link[:inwardIssue]
-          nested_id = nested_inward_issue[:id]
+          nested_inward_issue = nested_link['inwardIssue']
+          nested_id = nested_inward_issue['id']
         end
 
         object = { key: key, id: nested_id }
