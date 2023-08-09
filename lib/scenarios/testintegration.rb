@@ -26,10 +26,6 @@ module Scenarios
         nestedIssue = jira.Issue.find(id)
         fields = nestedIssue.fields
 
-        if check_issue_links(fields)
-          puts "issue #{issue_name} contain #{@jira_issue}"
-        end
-
         nested_issue_links = fields['issuelinks']
 
         nested_keys_blocks = []
@@ -44,44 +40,50 @@ module Scenarios
 
         nested_object = {}
 
-        nested_issue_links.each do |nested_link|
-          nested_inward_issue = nested_link['inwardIssue']
-          nested_outward_issue = nested_link['outwardIssue']
-          nested_key = nested_inward_issue ? nested_inward_issue['key'] : nested_outward_issue['key']
+        check_issue_in_links = check_issue_links(fields)
 
-          type = nested_link['type']['name']
+        if check_issue_in_links == false
+          puts "issue #{issue_name} not contain #{@jira_issue}"
 
-          case type
-          when 'Blocks'
-            nested_keys_blocks.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
-            nested_object[:blocks] = nested_keys_blocks
-          when 'Relates'
-            nested_keys_relates.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
-            nested_object[:relates] = nested_keys_relates
-          when 'Cloners'
-            nested_keys_cloners.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
-            nested_object[:cloners] = nested_keys_cloners
-          when 'Deployed'
-            nested_keys_deployed.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
-            nested_object[:deployed] = nested_keys_deployed 
-          when 'Duplicate'
-            nested_keys_deployed.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
-            nested_object[:duplicated] = nested_keys_duplicated
-          when 'Inheritance'
-            nested_keys_inheritanced.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
-            nested_object[:inheritanced] = nested_keys_inheritanced
-          when 'Issue type'
-            nested_keys_issue_type.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
-            nested_object[:issue_type] = nested_keys_issue_type
-          when 'Problem/Incident'
-            nested_keys_causes.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
-            nested_object[:causes] = nested_keys_causes
-          when 'Post-Incident Reviews'
-            nested_keys_reviews.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
-            nested_object[:reviews] = nested_keys_reviews
+          nested_issue_links.each do |nested_link|
+            nested_inward_issue = nested_link['inwardIssue']
+            nested_outward_issue = nested_link['outwardIssue']
+            nested_key = nested_inward_issue ? nested_inward_issue['key'] : nested_outward_issue['key']
+
+            type = nested_link['type']['name']
+
+            case type
+            when 'Blocks'
+              nested_keys_blocks.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_object[:blocks] = nested_keys_blocks
+            when 'Relates'
+              nested_keys_relates.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_object[:relates] = nested_keys_relates
+            when 'Cloners'
+              nested_keys_cloners.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_object[:cloners] = nested_keys_cloners
+            when 'Deployed'
+              nested_keys_deployed.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_object[:deployed] = nested_keys_deployed
+            when 'Duplicate'
+              nested_keys_deployed.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_object[:duplicated] = nested_keys_duplicated
+            when 'Inheritance'
+              nested_keys_inheritanced.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_object[:inheritanced] = nested_keys_inheritanced
+            when 'Issue type'
+              nested_keys_issue_type.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_object[:issue_type] = nested_keys_issue_type
+            when 'Problem/Incident'
+              nested_keys_causes.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_object[:causes] = nested_keys_causes
+            when 'Post-Incident Reviews'
+              nested_keys_reviews.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_object[:reviews] = nested_keys_reviews
+            end
+
+            updated_issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
           end
-
-          updated_issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
         end
 
         new_issues.push(updated_issues)
