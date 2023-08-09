@@ -42,7 +42,7 @@ module Scenarios
 
         check_issue_in_links = check_issue_links(fields)
 
-        if check_issue_in_links == false
+        if check_issue_in_links == true
           puts "issue #{issue_name} not contain #{@jira_issue}"
 
           nested_issue_links.each do |nested_link|
