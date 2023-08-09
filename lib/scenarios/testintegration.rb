@@ -111,30 +111,18 @@ module Scenarios
       )
     end
 
-    def check_issue_links(obj)
-      found_key = false
+    def check_issue_links(issue_data)
+      if issue_data['issuelinks']
+        issue_data['issuelinks'].each do |issue_link|
+          outward_issue = issue_link['outwardIssue']
 
-      puts obj
-      puts obj['issueLinks']
-      
-      if obj['issueLinks']
-        obj['issueLinks'].each do |link|
-          if link['outwardIssue']['key']
-            key = link['outwardIssue']['key']
-
-            if key == @jira_issue
-              found_key = true
-            else
-              found_key = false
-              break
-            end
+          if outward_issue && outward_issue['key'] == @jira_issue
+            return true
           end
         end
+
+        false
       end
-
-      puts found_key
-
-      found_key
     end
 
     def transform_content(array)
