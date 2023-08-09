@@ -47,7 +47,7 @@ module Scenarios
 
           type = nested_link['type']['name']
 
-          unless nested_key.includes(@jira_issue)
+          unless nested_key.include? @jira_issue
             puts "issue #{issue_name} not contain #{@jira_issue} add in description"
 
             case type
