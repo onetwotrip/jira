@@ -11,8 +11,6 @@ module Scenarios
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       issue = jira.Issue.find(@jira_issue)
 
-      puts issue.to_json
-
       fields = issue.fields
       issue_links = fields['issuelinks']
 
@@ -114,6 +112,7 @@ module Scenarios
     end
 
     def check_issue_links(obj)
+      puts obj
       found_key = false
       
       if obj[:issueLinks]
