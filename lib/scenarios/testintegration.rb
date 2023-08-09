@@ -112,8 +112,10 @@ module Scenarios
     end
 
     def check_issue_links(obj)
-      puts obj
       found_key = false
+
+      puts obj.issueLinks
+      puts obj[:issueLinks]
       
       if obj[:issueLinks]
         obj[:issueLinks].each do |link|
