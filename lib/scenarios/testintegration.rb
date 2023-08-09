@@ -115,7 +115,7 @@ module Scenarios
       content = []
 
       array.each do |hash|
-        content << { type: 'text', text: '=============================================' }
+        content << { type: 'text', text: '==========================================================================================' }
         content << { type: 'hardBreak' }
 
         hash.each do |key, value|
@@ -144,7 +144,7 @@ module Scenarios
         end
       end
 
-      content << { type: 'text', text: '=============================================' }
+      content << { type: 'text', text: '==========================================================================================' }
       content
     end
   end
