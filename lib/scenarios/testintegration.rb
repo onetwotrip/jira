@@ -28,6 +28,8 @@ module Scenarios
         nestedIssue = jira.Issue.find(id)
         fields = nestedIssue.fields
 
+        puts fields.to_json
+
         if check_issue_links(fields.to_json)
           puts "issue #{issue_name} contain #{@jira_issue}"
         end
