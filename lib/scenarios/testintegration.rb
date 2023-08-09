@@ -26,7 +26,7 @@ module Scenarios
         nestedIssue = jira.Issue.find(id)
         fields = nestedIssue.fields
 
-        if check_issue_links(fields.to_json)
+        if check_issue_links(fields)
           puts "issue #{issue_name} contain #{@jira_issue}"
         end
 
@@ -114,7 +114,6 @@ module Scenarios
     def check_issue_links(obj)
       found_key = false
 
-      puts obj.issueLinks
       puts obj[:issueLinks]
       
       if obj[:issueLinks]
