@@ -49,37 +49,39 @@ module Scenarios
           unless nested_key.include? @jira_issue
             puts "issue #{issue_name} not contain #{@jira_issue} add in description"
 
+            issue_url = "#{ENV['JIRA_SITE']}/browse/#{nested_key}"
+
             case type
             when 'Blocks'
-              nested_keys_blocks.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_keys_blocks.push(issue_url)
               nested_object[:blocks] = nested_keys_blocks
             when 'Relates'
-              nested_keys_relates.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_keys_relates.push(issue_url)
               nested_object[:relates] = nested_keys_relates
             when 'Cloners'
-              nested_keys_cloners.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_keys_cloners.push(issue_url)
               nested_object[:cloners] = nested_keys_cloners
             when 'Deployed'
-              nested_keys_deployed.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_keys_deployed.push(issue_url)
               nested_object[:deployed] = nested_keys_deployed
             when 'Duplicate'
-              nested_keys_deployed.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_keys_deployed.push(issue_url)
               nested_object[:duplicated] = nested_keys_duplicated
             when 'Inheritance'
-              nested_keys_inheritanced.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_keys_inheritanced.push(issue_url)
               nested_object[:inheritanced] = nested_keys_inheritanced
             when 'Issue type'
-              nested_keys_issue_type.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_keys_issue_type.push(issue_url)
               nested_object[:has_back_or_front_end] = nested_keys_issue_type
             when 'Problem/Incident'
-              nested_keys_causes.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_keys_causes.push(issue_url)
               nested_object[:causes] = nested_keys_causes
             when 'Post-Incident Reviews'
-              nested_keys_reviews.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
+              nested_keys_reviews.push(issue_url)
               nested_object[:reviews] = nested_keys_reviews
             end
 
-            updated_issues = { "https://onetwotripdev.atlassian.net/browse/#{issue_name}": nested_object }
+            updated_issues = { "#{ENV['JIRA_SITE']}/browse/#{issue_name}": nested_object }
           end
         end
 
