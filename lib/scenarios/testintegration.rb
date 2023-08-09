@@ -40,17 +40,15 @@ module Scenarios
 
         nested_object = {}
 
-        check_issue_in_links = check_issue_links(fields)
+        nested_issue_links.each do |nested_link|
+          nested_inward_issue = nested_link['inwardIssue']
+          nested_outward_issue = nested_link['outwardIssue']
+          nested_key = nested_inward_issue ? nested_inward_issue['key'] : nested_outward_issue['key']
 
-        if check_issue_in_links == true
-          puts "issue #{issue_name} not contain #{@jira_issue}"
+          type = nested_link['type']['name']
 
-          nested_issue_links.each do |nested_link|
-            nested_inward_issue = nested_link['inwardIssue']
-            nested_outward_issue = nested_link['outwardIssue']
-            nested_key = nested_inward_issue ? nested_inward_issue['key'] : nested_outward_issue['key']
-
-            type = nested_link['type']['name']
+          unless nested_key.includes(@jira_issue)
+            puts "issue #{issue_name} not contain #{@jira_issue} add in description"
 
             case type
             when 'Blocks'
