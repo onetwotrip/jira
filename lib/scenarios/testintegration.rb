@@ -114,6 +114,7 @@ module Scenarios
     def check_issue_links(obj)
       found_key = false
 
+      puts obj
       puts obj['issueLinks']
       
       if obj['issueLinks']
