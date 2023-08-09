@@ -116,10 +116,10 @@ module Scenarios
 
       puts obj['issueLinks']
       
-      if obj[:issueLinks]
-        obj[:issueLinks].each do |link|
-          if link[:outwardIssue][:key]
-            key = link[:outwardIssue][:key]
+      if obj['issueLinks']
+        obj['issueLinks'].each do |link|
+          if link['outwardIssue']['key']
+            key = link['outwardIssue']['key']
 
             if key == @jira_issue
               found_key = true
@@ -130,6 +130,8 @@ module Scenarios
           end
         end
       end
+
+      puts found_key
 
       found_key
     end
