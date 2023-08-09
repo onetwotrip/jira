@@ -68,10 +68,10 @@ module Scenarios
               nested_object[:duplicated] = nested_keys_duplicated
             when 'Inheritance'
               nested_keys_inheritanced.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
-              nested_object[:has_back_or_front] = nested_keys_inheritanced
+              nested_object[:inheritanced] = nested_keys_inheritanced
             when 'Issue type'
               nested_keys_issue_type.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
-              nested_object[:issue_type] = nested_keys_issue_type
+              nested_object[:has_back_or_front_end] = nested_keys_issue_type
             when 'Problem/Incident'
               nested_keys_causes.push("https://onetwotripdev.atlassian.net/browse/#{nested_key}")
               nested_object[:causes] = nested_keys_causes
