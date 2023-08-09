@@ -111,20 +111,6 @@ module Scenarios
       )
     end
 
-    def check_issue_links(issue_data)
-      if issue_data['issuelinks']
-        issue_data['issuelinks'].each do |issue_link|
-          outward_issue = issue_link['outwardIssue']
-
-          if outward_issue && outward_issue['key'] == @jira_issue
-            return true
-          end
-        end
-
-        false
-      end
-    end
-
     def transform_content(array)
       content = []
 
