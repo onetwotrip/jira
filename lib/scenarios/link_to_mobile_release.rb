@@ -24,8 +24,14 @@ module Scenarios
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
 
       issue = client.Issue.find(SimpleConfig.jira.issue)
-      puts issue
-      puts "APPS:", issue.fields['customfield_12166']['value']
+      puts issue.to_json
+      puts issue.fields['customfield_12166']['value'].class
+      apps = issue.fields['customfield_12166']['value']
+      puts apps
+
+      # if apps.length > 1
+      #   # берем следующий элемент
+      # end
 
       # ## 1. Получаем список АППС
       # message = 'Получаем список АППС'
