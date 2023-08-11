@@ -44,6 +44,7 @@ module Scenarios
 
       puts deployes_issues.count
       deployes_issues.each_index { |find_issues_tiket, index|
+        puts find_issues_tiket
         issue = client.Issue.find(find_issues_tiket)
         puts issue.fields['customfield_12207'][index]['value']
         # puts client.Issue.find(find_issues_tiket).fields['customfield_12207']['value']
