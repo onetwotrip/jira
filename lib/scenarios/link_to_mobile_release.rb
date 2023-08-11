@@ -43,7 +43,8 @@ module Scenarios
       arr_tiket_and_apps = []
 
       deployes_issues.each do |find_issues_tiket|
-        arr_tiket_and_apps.append({number: find_issues_tiket, apps: client.Issue.find(find_issues_tiket).fields['customfield_12207']['value']})
+        puts client.Issue.find(find_issues_tiket).fields['customfield_12207']['value']
+        # arr_tiket_and_apps.append({number: find_issues_tiket, apps: client.Issue.find(find_issues_tiket).fields['customfield_12207']['value']})
       end
 
       puts arr_tiket_and_apps
