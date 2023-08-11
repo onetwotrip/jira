@@ -42,7 +42,9 @@ module Scenarios
 
       puts deployes_issues[0]
 
-      puts client.Issue.find(deployes_issues[0])
+      find = client.Issue.find(deployes_issues[0])
+
+      puts find.fields['customfield_12207']
       # deployes_issues.each do |issues_app|
       #   find = client.Issue.find(issues_app)
       #
