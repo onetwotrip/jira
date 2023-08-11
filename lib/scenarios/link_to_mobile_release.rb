@@ -18,7 +18,6 @@ module Scenarios
         exit
       end
 
-      filter_config = JSON.parse(ENV['RELEASE_FILTER'])
       client = JIRA::Client.new SimpleConfig.jira.to_h
       issue = client.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
@@ -31,11 +30,25 @@ module Scenarios
       puts issue_links
       puts apps
 
+      deployes_issues = []
+
       issue_links.each do |item|
         if item['type']['outward'] == 'deployes'
-          puts item['outwardIssue']['key']
+          deployes_issues.append(item['outwardIssue']['key'])
         end
       end
+
+      puts deployes_issues
+
+      puts deployes_issues[0]
+
+      puts client.Issue.find(deployes_issues[0])
+      # deployes_issues.each do |issues_app|
+      #   find = client.Issue.find(issues_app)
+      #
+      #   puts find.to_json
+      # end
+
       # if apps.length > 1
       #   # берем следующий элемент
       # end
