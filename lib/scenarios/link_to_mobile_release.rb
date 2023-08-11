@@ -46,6 +46,7 @@ module Scenarios
       deployes_issues.each_with_index { |find_issues_tiket, index|
         puts find_issues_tiket
         issue = client.Issue.find(find_issues_tiket)
+        puts index
         puts issue.fields['customfield_12207'][index]['value']
         # puts client.Issue.find(find_issues_tiket).fields['customfield_12207']['value']
         # arr_tiket_and_apps.append({number: find_issues_tiket, apps: client.Issue.find(find_issues_tiket).fields['customfield_12207']['value']})
