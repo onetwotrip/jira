@@ -26,15 +26,15 @@ module Scenarios
       issue = client.Issue.find(SimpleConfig.jira.issue)
       puts issue
 
-      ## 1. Получаем список АППС
-      message = 'Получаем список АППС'
-      issue.post_comment <<-BODY
-          {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
-            #{message} (x)
-          {panel}
-      BODY
-      LOGGER.error message
-      raise 'Assemble field is empty'
+      # ## 1. Получаем список АППС
+      # message = 'Получаем список АППС'
+      # issue.post_comment <<-BODY
+      #     {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+      #       #{message} (x)
+      #     {panel}
+      # BODY
+      # LOGGER.error message
+      # raise 'Assemble field is empty'
     end
   end
 end
