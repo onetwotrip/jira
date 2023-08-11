@@ -25,6 +25,7 @@ module Scenarios
 
       issue = client.Issue.find(SimpleConfig.jira.issue)
       puts issue
+      puts issue.fields['customfield_12166']
 
       # ## 1. Получаем список АППС
       # message = 'Получаем список АППС'
