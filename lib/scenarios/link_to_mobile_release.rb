@@ -33,7 +33,7 @@ module Scenarios
 
       issue_links.each do |item|
         if item['type']['outward'] == 'deployes'
-          puts item[:outwardIssue][:key]
+          puts item['outwardIssue']['key']
         end
       end
       # if apps.length > 1
