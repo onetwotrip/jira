@@ -40,11 +40,13 @@ module Scenarios
 
       puts deployes_issues
 
-      puts deployes_issues[0]
+      arr_tiket_and_apps = []
 
-      find = client.Issue.find(deployes_issues[0])
+      deployes_issues.each do |find_issues_tiket|
+        arr_tiket_and_apps.append(find_issues_tiket, client.Issue.find(find_issues_tiket).fields['customfield_12207']['value'])
+      end
 
-      puts find.fields['customfield_12207']
+      puts arr_tiket_and_apps
       # deployes_issues.each do |issues_app|
       #   find = client.Issue.find(issues_app)
       #
