@@ -24,10 +24,10 @@ module Scenarios
 
       issue = client.Issue.find(SimpleConfig.jira.issue)
       # puts issue.to_json
-      puts issue.fields['customfield_12166']['value'].class
+      # puts issue.fields['customfield_12166']['value'].class
       apps = issue.fields['customfield_12166']['value']
       issue_links = issue.fields['issuelinks']
-      puts issue_links
+      # puts issue_links
       puts apps
 
       deployes_issues = []
@@ -43,7 +43,7 @@ module Scenarios
       arr_tiket_and_apps = []
 
       deployes_issues.each do |find_issues_tiket|
-        arr_tiket_and_apps.append(find_issues_tiket, client.Issue.find(find_issues_tiket).fields['customfield_12207']['value'])
+        arr_tiket_and_apps.append({number: find_issues_tiket, apps: client.Issue.find(find_issues_tiket).fields['customfield_12207']['value']})
       end
 
       puts arr_tiket_and_apps
