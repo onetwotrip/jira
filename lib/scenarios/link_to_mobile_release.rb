@@ -24,11 +24,18 @@ module Scenarios
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
 
       issue = client.Issue.find(SimpleConfig.jira.issue)
-      puts issue.to_json
+      # puts issue.to_json
       puts issue.fields['customfield_12166']['value'].class
       apps = issue.fields['customfield_12166']['value']
+      issue_links = issue.fields['issuelinks']
+      puts issue_links
       puts apps
 
+      issue_links.each do |item|
+        if item[:type][:outward] == deployes
+          puts item[:outwardIssue][:key]
+        end
+      end
       # if apps.length > 1
       #   # берем следующий элемент
       # end
