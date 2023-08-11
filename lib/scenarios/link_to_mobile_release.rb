@@ -42,12 +42,13 @@ module Scenarios
 
       arr_tiket_and_apps = []
 
-      deployes_issues.each do |find_issues_tiket|
+      puts deployes_issues.count
+      deployes_issues.each_index { |find_issues_tiket, index|
         issue = client.Issue.find(find_issues_tiket)
-        puts issue.fields['customfield_12207'][0]['value']
+        puts issue.fields['customfield_12207'][index]['value']
         # puts client.Issue.find(find_issues_tiket).fields['customfield_12207']['value']
         # arr_tiket_and_apps.append({number: find_issues_tiket, apps: client.Issue.find(find_issues_tiket).fields['customfield_12207']['value']})
-      end
+      }
 
       puts arr_tiket_and_apps
       # deployes_issues.each do |issues_app|
