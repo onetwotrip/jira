@@ -38,12 +38,12 @@ module Scenarios
         end
       end
 
-      puts deployes_issues
+      # puts deployes_issues
 
       arr_tiket_and_apps = []
 
       puts deployes_issues.count
-      deployes_issues.each_index { |find_issues_tiket, index|
+      deployes_issues.each_with_index { |find_issues_tiket, index|
         puts find_issues_tiket
         issue = client.Issue.find(find_issues_tiket)
         puts issue.fields['customfield_12207'][index]['value']
