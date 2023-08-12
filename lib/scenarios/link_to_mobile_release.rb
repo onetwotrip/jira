@@ -18,60 +18,42 @@ module Scenarios
         exit
       end
 
+      # Получаем данные тикета
       client = JIRA::Client.new SimpleConfig.jira.to_h
       issue = client.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
 
-      issue = client.Issue.find(SimpleConfig.jira.issue)
-      # puts issue.to_json
-      # puts issue.fields['customfield_12166']['value'].class
+      # Получаем значения поля apps из релиза
       apps = issue.fields['customfield_12166']['value']
-      issue_links = issue.fields['issuelinks']
-      # puts issue_links
-      puts apps
 
-      deployes_issues = []
+      # Проверяем есть ли релизы AND/IOS с такими значениями и не закрытые
+      # apps_filter = {
+      #   b2c_ott: ,
+      # b2c_avia: ,
+      # b2c_railways: ,
+      # b2b_ott: ,
+      # b2c_kz: ,
+      # b2c_solar: ,
+      # b2c_ott_huawei: ,
+      # }
 
-      issue_links.each do |item|
-        if item['type']['outward'] == 'deployes'
-          deployes_issues.append(item['outwardIssue']['key'])
-        end
-      end
 
-      # puts deployes_issues
+      created_releases =  issue.jql("issuetype = Release and status != Done and \"App[Dropdown]\" = b2c_ott", max_results: 100)
+      puts created_releases
 
-      arr_tiket_and_apps = []
+      # # собираем список
+      # issue_links.each do |item|
+      #   deployes_issues.append(item['outwardIssue']['key']) if item['type']['outward'] == 'deployes'
+      # end
 
-      puts deployes_issues.count
-      deployes_issues.each_with_index { |find_issues_tiket, index|
-        puts find_issues_tiket
-        issue = client.Issue.find(find_issues_tiket)
-        puts index
-        puts issue.fields['customfield_12207'][0]['value']
-        # puts client.Issue.find(find_issues_tiket).fields['customfield_12207']['value']
-        # arr_tiket_and_apps.append({number: find_issues_tiket, apps: client.Issue.find(find_issues_tiket).fields['customfield_12207']['value']})
-      }
-
-      puts arr_tiket_and_apps
-      # deployes_issues.each do |issues_app|
-      #   find = client.Issue.find(issues_app)
+      # arr_ticket_and_apps = []
+      
+      # deployes_issues.each_with_index { |find_issues_tiket, index|
       #
-      #   puts find.to_json
-      # end
-
-      # if apps.length > 1
-      #   # берем следующий элемент
-      # end
-
-      # ## 1. Получаем список АППС
-      # message = 'Получаем список АППС'
-      # issue.post_comment <<-BODY
-      #     {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
-      #       #{message} (x)
-      #     {panel}
-      # BODY
-      # LOGGER.error message
-      # raise 'Assemble field is empty'
+      #   issue = client.Issue.find(find_issues_tiket)
+      #
+      #   puts issue.fields['customfield_12207'][0]['value']
+      # }
     end
   end
 end
