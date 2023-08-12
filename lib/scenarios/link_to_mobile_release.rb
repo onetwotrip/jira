@@ -35,7 +35,8 @@ module Scenarios
       puts apps
 
       # created_releases = client.Issue.jql(%("App[Dropdown]" = b2c_ott"))
-      created_releases = client.Issue.jql(%(project = ios and issuetype = Release and status != Done and "App[Dropdown]" = #{apps}), max_results: 100)
+      # created_releases = client.Issue.jql(%(project = ios and issuetype = Release and status != Done and "App[Dropdown]" = #{apps}), max_results: 100)
+      created_releases = client.Issue.jql(%(project = android and issuetype = Release and status = Rejected and "App[Dropdown]" = #{apps}), max_results: 100)
       # created_releases = issue.jql("issuetype = Release and status != Done and \"App[Dropdown]\" = b2c_ott", max_results: 100)
       puts created_releases.to_json
 
