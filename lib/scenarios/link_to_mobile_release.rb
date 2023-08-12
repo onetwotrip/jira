@@ -31,20 +31,11 @@ module Scenarios
       apps = issue.fields['customfield_12166']['value']
 
       # Проверяем есть ли релизы AND/IOS с такими значениями и не закрытые
-      apps_filter = {
-        b2c_ott:        'b2c_ott',
-        b2c_avia:       'b2c_avia',
-        b2c_railways:   'b2c_railways',
-        b2b_ott:        'b2b_ott',
-        b2c_kz:         'b2c_kz',
-        b2c_solar:      'b2c_solar',
-        b2c_ott_huawei: 'b2c_ott_huawei',
-      }
 
       puts apps
 
       # created_releases = client.Issue.jql(%("App[Dropdown]" = b2c_ott"))
-      created_releases = client.Issue.jql(%(project = ios and issuetype = Release and status != Done and "App[Dropdown]" = #{apps_filter[apps]}), max_results: 100)
+      created_releases = client.Issue.jql(%(project = ios and issuetype = Release and status != Done and "App[Dropdown]" = #{apps}), max_results: 100)
       # created_releases = issue.jql("issuetype = Release and status != Done and \"App[Dropdown]\" = b2c_ott", max_results: 100)
       puts created_releases.to_json
 
