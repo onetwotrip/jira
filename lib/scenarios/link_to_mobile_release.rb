@@ -46,7 +46,7 @@ module Scenarios
       # }
 
 
-      created_releases = find_by_filter(isss, "issuetype = Release and status != Done and \"App[Dropdown]\" = b2c_ott")
+      created_releases = isss.jql(%(issuetype = Release and status != Done and "App[Dropdown]" = b2c_ott"))
       # created_releases = issue.jql("issuetype = Release and status != Done and \"App[Dropdown]\" = b2c_ott", max_results: 100)
       puts created_releases.to_json
 
