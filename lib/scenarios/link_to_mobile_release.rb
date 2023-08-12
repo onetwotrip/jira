@@ -20,6 +20,7 @@ module Scenarios
 
       # Получаем данные тикета
       client = JIRA::Client.new SimpleConfig.jira.to_h
+      isss = client.Issue
       issue = client.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
 
@@ -38,7 +39,7 @@ module Scenarios
       # }
 
 
-      created_releases = find_by_filter(issue, 30517)
+      created_releases = find_by_filter(isss, 30517)
       # created_releases = issue.jql("issuetype = Release and status != Done and \"App[Dropdown]\" = b2c_ott", max_results: 100)
       puts created_releases
 
