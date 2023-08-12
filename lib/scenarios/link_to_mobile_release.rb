@@ -10,9 +10,6 @@ module Scenarios
       []
     end
 
-    @android_app_filter = {}
-    @ios_app_filter = {}
-
     def run
       params = SimpleConfig.release
 
@@ -23,8 +20,7 @@ module Scenarios
 
       # Получаем данные тикета
       client = JIRA::Client.new SimpleConfig.jira.to_h
-      isss = client.Issue
-      issue = client.Issue.find(SimpleConfig.jira.issue)
+      issue  = client.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
 
       # if issue.key.include('AND')
@@ -35,19 +31,20 @@ module Scenarios
       apps = issue.fields['customfield_12166']['value']
 
       # Проверяем есть ли релизы AND/IOS с такими значениями и не закрытые
-      # apps_filter = {
-      #   b2c_ott: ,
-      # b2c_avia: ,
-      # b2c_railways: ,
-      # b2b_ott: ,
-      # b2c_kz: ,
-      # b2c_solar: ,
-      # b2c_ott_huawei: ,
-      # }
+      apps_filter = {
+        b2c_ott:        'b2c_ott',
+        b2c_avia:       'b2c_avia',
+        b2c_railways:   'b2c_railways',
+        b2b_ott:        'b2b_ott',
+        b2c_kz:         'b2c_kz',
+        b2c_solar:      'b2c_solar',
+        b2c_ott_huawei: 'b2c_ott_huawei',
+      }
 
+      puts apps
 
       # created_releases = client.Issue.jql(%("App[Dropdown]" = b2c_ott"))
-      created_releases = client.Issue.jql(%(project = ios and issuetype = Release and status != Done and "App[Dropdown]" = b2c_ott), max_results: 100)
+      created_releases = client.Issue.jql(%(project = ios and issuetype = Release and status != Done and "App[Dropdown]" = #{apps_filter[apps]}), max_results: 100)
       # created_releases = issue.jql("issuetype = Release and status != Done and \"App[Dropdown]\" = b2c_ott", max_results: 100)
       puts created_releases.to_json
 
@@ -57,7 +54,7 @@ module Scenarios
       # end
 
       # arr_ticket_and_apps = []
-      
+
       # deployes_issues.each_with_index { |find_issues_tiket, index|
       #
       #   issue = client.Issue.find(find_issues_tiket)
