@@ -10,6 +10,9 @@ module Scenarios
       []
     end
 
+    @android_app_filter = {}
+    @ios_app_filter = {}
+
     def run
       params = SimpleConfig.release
 
@@ -23,6 +26,10 @@ module Scenarios
       isss = client.Issue
       issue = client.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
+
+      # if issue.key.include('AND')
+      #   app_filter = android_app_filter
+      # end
 
       # Получаем значения поля apps из релиза
       apps = issue.fields['customfield_12166']['value']
@@ -39,7 +46,7 @@ module Scenarios
       # }
 
 
-      created_releases = find_by_filter(isss, 31159)
+      created_releases = find_by_filter(isss, "issuetype = Release and status != Done and \"App[Dropdown]\" = b2c_ott")
       # created_releases = issue.jql("issuetype = Release and status != Done and \"App[Dropdown]\" = b2c_ott", max_results: 100)
       puts created_releases.to_json
 
