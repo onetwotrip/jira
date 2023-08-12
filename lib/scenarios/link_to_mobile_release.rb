@@ -41,7 +41,7 @@ module Scenarios
 
       created_releases = find_by_filter(isss, 31159)
       # created_releases = issue.jql("issuetype = Release and status != Done and \"App[Dropdown]\" = b2c_ott", max_results: 100)
-      puts created_releases
+      puts created_releases.to_json
 
       # # собираем список
       # issue_links.each do |item|
