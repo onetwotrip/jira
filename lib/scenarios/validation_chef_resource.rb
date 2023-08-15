@@ -23,7 +23,6 @@ module Scenarios
       consul_template = opts[:consul_template]
       raise "Consul template binary not found at #{consul_template}" unless File.exist?(consul_template)
 
-      output = '/tmp/' + File.basename(input, '-validate.tmpl')
       command = "#{consul_template} -template '#{input}' -once #{opts[:consul_template_args]} | tail -n +2"
       LOGGER.info "Template command: #{command}"
 
@@ -42,7 +41,11 @@ module Scenarios
       end
 
       if resource.has_key?('chef_type')
-        errors.push("Resource contains invalid key 'chef_type' - remove it!")
+        errors.push('Resource contains invalid key \'chef_type\' - remove it!')
+      end
+
+      unless resource['name'] == File.basename(input,".json.tmpl")
+        errors.push('File name does not match resource name - fix it!')
       end
 
       unless errors.empty?
