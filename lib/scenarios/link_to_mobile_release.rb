@@ -24,29 +24,31 @@ module Scenarios
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
 
       # Уточняем какой тип проекта будет проверятся Андроид или IOS
-      unless issue.key.include?('IOS') || issue.key.include?('ADR')
-        # Завершаем скрипт и выводим сообщение в логе, что выбран то тот проект, для этого скрипта
-        puts "Необходимо использовать данный скрипт для проверки только проектов Android/IOS! Текущий тип проекта #{issue.key[0..2]}"
-        exit 0
-      else
+      if issue.key[0..2].equal('IOS') || issue.key[0..2].equal('ADR')
         project = issue.key.include?('IOS') ? 'ios' : 'android'
         # Получаем значения поля apps из релиза
         apps = issue.fields['customfield_12166']['value']
 
         # Проверяем есть ли релизы AND/IOS с такими значениями и не закрытые
         # Производим поиск открытых релизов
-        puts "project = #{project} and issuetype = Release and status not in (Rejected, Done) and \"App[Dropdown]\" = #{apps}"
+        puts "project = #{project} and issuetype = Release and status not in (Rejected, Done) and \"App[Dropdown]\" = #{apps} and issue != #{issue.key}"
         created_releases = client.Issue.jql(
-          %(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = #{apps}), max_results: 100)
+          %(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = #{apps} and issue != #{issue.key}), max_results: 100)
 
         if created_releases == []
           # Отправляем сообщение в таску, что нет открытых релизов с App= apps
           puts "Отправляем сообщение в таску, что нет открытых релизов с App=#{apps}"
+
+          # Начинаем
         else
           # есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их
           puts 'есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их'
         end
         puts created_releases.to_json
+      else
+        # Завершаем скрипт и выводим сообщение в логе, что выбран то тот проект, для этого скрипта
+        puts "Необходимо использовать данный скрипт для проверки только проектов Android/IOS! Текущий тип проекта #{issue.key[0..2]}"
+        exit 0
       end
     end
   end
