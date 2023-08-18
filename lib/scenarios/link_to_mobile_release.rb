@@ -24,6 +24,9 @@ module Scenarios
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
 
 
+      puts issue.to_json
+
+
       puts issue.key[0..2].class
       puts issue.key[0..2].length
       puts issue.key[0..2].eql?('IOS')
