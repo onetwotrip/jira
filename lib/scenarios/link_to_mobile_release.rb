@@ -24,7 +24,7 @@ module Scenarios
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
 
       # Уточняем какой тип проекта будет проверятся Андроид или IOS
-      if !issue.key.include?('IOS') || !issue.key.include?('ADR')
+      unless issue.key.include?('IOS') || issue.key.include?('ADR')
         # Завершаем скрипт и выводим сообщение в логе, что выбран то тот проект, для этого скрипта
         puts "Необходимо использовать данный скрипт для проверки только проектов Android/IOS! Текущий тип проекта #{issue.key[0..2]}"
         exit 0
