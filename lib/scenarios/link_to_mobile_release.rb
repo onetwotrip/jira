@@ -34,6 +34,8 @@ module Scenarios
 
       puts apps
 
+      puts issue.key
+
       issue.key.include?('IOS') ? project = 'IOS' : project = 'AND'
 
       # created_releases = client.Issue.jql(%("App[Dropdown]" = b2c_ott"))
