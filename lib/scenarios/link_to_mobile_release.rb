@@ -26,10 +26,11 @@ module Scenarios
 
       puts issue.key[0..2].class
       puts issue.key[0..2].length
-      puts issue.key[0..2].equal?('IOS')
-      puts issue.key[0..2].equal?('ADR')
+      puts issue.key[0..2].eql?('IOS')
+      puts issue.key[0..2].eql?('ADR')
+
       # Уточняем какой тип проекта будет проверятся Андроид или IOS
-      if issue.key[0..2].to_s.eql?('IOS') || issue.key[0..2].to_s.eql?('ADR')
+      if issue.key[0..2].eql?('IOS') || issue.key[0..2].eql?('ADR')
         project = issue.key.include?('IOS') ? 'ios' : 'android'
         # Получаем значения поля apps из релиза
         apps = issue.fields['customfield_12166']['value']
