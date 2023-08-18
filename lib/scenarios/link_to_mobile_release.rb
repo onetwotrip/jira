@@ -24,7 +24,7 @@ module Scenarios
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
 
       # Уточняем какой тип проекта будет проверятся Андроид или IOS
-      if issue.key[0..2].equal('IOS') || issue.key[0..2].equal('ADR')
+      if issue.key[0..2].equal?('IOS') || issue.key[0..2].equal?('ADR')
         project = issue.key.include?('IOS') ? 'ios' : 'android'
         # Получаем значения поля apps из релиза
         apps = issue.fields['customfield_12166']['value']
