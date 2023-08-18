@@ -43,7 +43,7 @@ module Scenarios
 
       puts "project = #{project} and issuetype = Release and status = Rejected and \"App[Dropdown]\" = #{apps}"
       created_releases = client.Issue.jql(
-        %(project = #{project} and issuetype = Release and status = Rejected and "App[Dropdown]" = #{apps}), max_results: 100)
+        %(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = #{apps}), max_results: 100)
       # created_releases = issue.jql("issuetype = Release and status != Done and \"App[Dropdown]\" = b2c_ott", max_results: 100)
       puts created_releases.to_json
 
