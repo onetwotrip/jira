@@ -23,6 +23,10 @@ module Scenarios
       issue  = client.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
 
+
+      puts issue.key[0..2]
+      puts issue.key[0..2].equal?('IOS')
+      puts issue.key[0..2].equal?('ADR')
       # Уточняем какой тип проекта будет проверятся Андроид или IOS
       if issue.key[0..2].equal?('IOS') || issue.key[0..2].equal?('ADR')
         project = issue.key.include?('IOS') ? 'ios' : 'android'
