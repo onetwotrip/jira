@@ -23,43 +23,31 @@ module Scenarios
       issue  = client.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
 
-      # if issue.key.include('AND')
-      #   app_filter = android_app_filter
-      # end
+      # Уточняем какой тип проекта будет проверятся Андроид или IOS
+      if !issue.key.include?('IOS') || !issue.key.include?('AND')
+        # Завершаем скрипт и выводим сообщение в логе, что выбран то тот проект, для этого скрипта
+        puts "Необходимо использовать данный скрипт для проверки только проектов Android/IOS! Текущий тип проекта #{issue.key[0..2]}"
+        exit 0
+      else
+        project = issue.key.include?('IOS') ? 'ios' : 'android'
+        # Получаем значения поля apps из релиза
+        apps = issue.fields['customfield_12166']['value']
 
-      # Получаем значения поля apps из релиза
-      apps = issue.fields['customfield_12166']['value']
+        # Проверяем есть ли релизы AND/IOS с такими значениями и не закрытые
+        # Производим поиск открытых релизов
+        puts "project = #{project} and issuetype = Release and status not in (Rejected, Done) and \"App[Dropdown]\" = #{apps}"
+        created_releases = client.Issue.jql(
+          %(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = #{apps}), max_results: 100)
 
-      # Проверяем есть ли релизы AND/IOS с такими значениями и не закрытые
-
-      puts apps
-
-      puts issue.key
-
-      issue.key.include?('IOS') ? project = 'ios' : project = 'android'
-
-      # created_releases = client.Issue.jql(%("App[Dropdown]" = b2c_ott"))
-      # created_releases = client.Issue.jql(%(project = ios and issuetype = Release and status != Done and "App[Dropdown]" = #{apps}), max_results: 100)
-
-      puts "project = #{project} and issuetype = Release and status not in (Rejected, Done) and \"App[Dropdown]\" = #{apps}"
-      created_releases = client.Issue.jql(
-        %(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = #{apps}), max_results: 100)
-      # created_releases = issue.jql("issuetype = Release and status != Done and \"App[Dropdown]\" = b2c_ott", max_results: 100)
-      puts created_releases.to_json
-
-      # # собираем список
-      # issue_links.each do |item|
-      #   deployes_issues.append(item['outwardIssue']['key']) if item['type']['outward'] == 'deployes'
-      # end
-
-      # arr_ticket_and_apps = []
-
-      # deployes_issues.each_with_index { |find_issues_tiket, index|
-      #
-      #   issue = client.Issue.find(find_issues_tiket)
-      #
-      #   puts issue.fields['customfield_12207'][0]['value']
-      # }
+        if created_releases == []
+          # Отправляем сообщение в таску, что нет открытых релизов с App= apps
+          puts "Отправляем сообщение в таску, что нет открытых релизов с App=#{apps}"
+        else
+          # есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их
+          puts "есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их"
+        end
+        puts created_releases.to_json
+      end
     end
   end
 end
