@@ -24,7 +24,7 @@ module Scenarios
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
 
 
-      puts issue.key[0..2]
+      puts issue.key[0..2].class
       puts issue.key[0..2].length
       puts issue.key[0..2].equal?('IOS')
       puts issue.key[0..2].equal?('ADR')
