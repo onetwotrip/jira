@@ -36,7 +36,7 @@ module Scenarios
 
       puts issue.key
 
-      issue.key.include?('IOS') ? project = 'IOS' : project = 'AND'
+      issue.key.include?('IOS') ? project = 'ios' : project = 'android'
 
       # created_releases = client.Issue.jql(%("App[Dropdown]" = b2c_ott"))
       # created_releases = client.Issue.jql(%(project = ios and issuetype = Release and status != Done and "App[Dropdown]" = #{apps}), max_results: 100)
