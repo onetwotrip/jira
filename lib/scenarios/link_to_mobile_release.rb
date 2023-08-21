@@ -34,7 +34,8 @@ module Scenarios
       if issue.key[0..2].eql?('IOS') || issue.key[0..2].eql?('ADR')
         project = issue.key.include?('IOS') ? 'ios' : 'android'
         # Получаем значения поля apps из релиза
-        apps = issue.fields['customfield_12166']['value']
+        # apps = issue.fields['customfield_12166']['value']
+        apps = issue.fields['customfield_12208']['value']
 
         # Проверяем есть ли релизы AND/IOS с такими значениями и не закрытые
         # Производим поиск открытых релизов
