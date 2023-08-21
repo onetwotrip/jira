@@ -23,9 +23,7 @@ module Scenarios
       issue  = client.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
 
-
       puts issue.to_json
-
 
       puts issue.key[0..2].class
       puts issue.key[0..2].length
@@ -40,20 +38,30 @@ module Scenarios
 
         # Проверяем есть ли релизы AND/IOS с такими значениями и не закрытые
         # Производим поиск открытых релизов
-        puts "project = #{project} and issuetype = Release and status not in (Rejected, Done) and \"App[Dropdown]\" = #{apps} and issue != #{issue.key}"
         created_releases = client.Issue.jql(
           %(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = #{apps} and issue != #{issue.key}), max_results: 100)
 
         if created_releases == []
           # Отправляем сообщение в таску, что нет открытых релизов с App= apps
           puts "Отправляем сообщение в таску, что нет открытых релизов с App=#{apps}"
-
+          issue.post_comment <<-BODY
+            {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
+              Не найдены открытые релизы с App=#{apps}
+              Начинаем проверку задач для создания смежных релизов
+            {panel}
+          BODY
           # Начинаем
         else
           # есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их
           puts 'есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их'
+          issue.post_comment <<-BODY
+            {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
+              Найдены открытые релизы с App=#{apps}
+              Необходимо завершить работу над ними, пережде чем продолжать работу в этом релизе
+              Скрипт был остановлен (!)
+            {panel}
+          BODY
         end
-        puts created_releases.to_json
       else
         # Завершаем скрипт и выводим сообщение в логе, что выбран то тот проект, для этого скрипта
         puts "Необходимо использовать данный скрипт для проверки только проектов Android/IOS! Текущий тип проекта #{issue.key[0..2]}"
