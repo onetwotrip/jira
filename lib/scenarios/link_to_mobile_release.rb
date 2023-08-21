@@ -42,11 +42,12 @@ module Scenarios
         created_releases = client.Issue.jql(
           %(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = #{apps} and issue != #{issue.key}), max_results: 100)
 
-        if created_releases == []
+        # if created_releases == []
+        if created_releases != []
           # Отправляем сообщение в таску, что нет открытых релизов с App= apps
           puts "Отправляем сообщение в таску, что нет открытых релизов с App: #{apps}"
           issue.post_comment <<-BODY
-            {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#f3f1f1}
+            {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
               Не найдены открытые релизы с App: #{apps}
               Начинаем проверку задач для создания смежных релизов
             {panel}
