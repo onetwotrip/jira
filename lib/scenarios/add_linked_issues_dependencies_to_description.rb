@@ -19,7 +19,7 @@ module Scenarios
       client = JIRA::Client.new(options)
       main_issue = jira.Issue.find(@jira_issue)
 
-      def get_all_linked_issues(issue, issues=Set.new)
+      def get_all_linked_issues(issue, issues = nil)
         linked_issues = issue.linked_issues
         linked_issues.each do |linked_issue|
           unless issues.include?(linked_issue.key)
@@ -30,7 +30,7 @@ module Scenarios
         issues
       end
 
-      linked_issues = get_all_linked_issues(main_issue);
+      linked_issues = get_all_linked_issues(main_issue)
 
       def link_issues(client, issue1_key, issue2_key, link_type)
         link = client.IssueLink.build
