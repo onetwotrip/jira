@@ -19,14 +19,16 @@ module Scenarios
       client = JIRA::Client.new(options)
       main_issue = jira.Issue.find(@jira_issue)
 
-      def get_all_linked_issues(issue, issues = nil)
+      def get_all_linked_issues(issue, issues=Set.new)
         linked_issues = issue.linked_issues
+
         linked_issues.each do |linked_issue|
-          unless issues.include?(linked_issue.key)
-            issues << linked_issue.key
-            get_all_linked_issues(linked_issue, issues)
+          unless issues.include?(linked_issue)
+            issues.add(linked_issue)
+            get_all_linked_issues(linked_issue, issues)   # Recursive call with both parameters
           end
         end
+
         issues
       end
 
