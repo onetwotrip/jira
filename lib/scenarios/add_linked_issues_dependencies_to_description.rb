@@ -2,11 +2,19 @@ module Scenarios
   require 'jira-ruby'
 
   class AddLinkedIssuesDependenciesToDescription
+
+    attr_reader :opts
+
+    def initialize(opts)
+      @opts = opts
+    end
+
     def run
       @jira_issue = SimpleConfig.jira.issue
 
       LOGGER.info "Start adding linked issues dependencies for main issue #{@jira_issue}"
 
+      options = { auth_type: :basic }.merge(opts.to_hash)
       jira = JIRA::Client.new SimpleConfig.jira.to_h
       client = JIRA::Client.new(options)
       main_issue = jira.Issue.find(@jira_issue)
