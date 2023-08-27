@@ -23,13 +23,6 @@ module Scenarios
       issue  = client.Issue.find(SimpleConfig.jira.issue)
       LOGGER.info Ott::Helpers.jira_link(issue.key).to_s
 
-      puts issue.to_json
-
-      puts issue.key[0..2].class
-      puts issue.key[0..2].length
-      puts issue.key[0..2].eql?('IOS')
-      puts issue.key[0..2].eql?('ADR')
-
       # Уточняем какой тип проекта будет проверятся Андроид или IOS
       if issue.key[0..2].eql?('IOS') || issue.key[0..2].eql?('ADR')
         project = issue.key.include?('IOS') ? 'ios' : 'android'
@@ -61,7 +54,14 @@ module Scenarios
             deployes_issues.append(linked_issue['outwardIssue']['key']) if linked_issue['type']['outward'] == 'deployes'
           end
 
-          puts deployes_issues
+          issue_deployes_issues  = client.Issue.find(deployes_issues[0])
+          puts issue_deployes_issues.to_json
+
+          # deployes_issues.each do |issue_apps_type|
+          #   issue_deployes_issues  = client.Issue.find(issue_apps_type)
+          #   puts issue_deployes_issues.
+          #
+          # end
         else
           # есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их
           puts 'есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их'
