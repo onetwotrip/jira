@@ -44,7 +44,7 @@ module Scenarios
 
         # if created_releases == []
         if created_releases == []
-          # Отправляем сообщение в таску, что нет открытых релизов с App= apps
+          # Отправляем сообщение в таску, что нет открытых релизов с App=apps
           puts "Отправляем сообщение в таску, что нет открытых релизов с App: #{apps}"
           issue.post_comment <<-BODY
             {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#E5A443|bgColor=#F1F3F1}
@@ -52,7 +52,13 @@ module Scenarios
               Начинаем проверку задач для создания смежных релизов
             {panel}
           BODY
-          # Начинаем
+          # Начинаем процесс сбора данных по задачам
+          # Запускаем сбор Apps в задачах, которые есть в релизе
+          issue_links = issue.fields['issuelinks']
+          issue_links.each do |linked_issue|
+            puts linked_issue['type']['outward']
+            puts linked_issue['outwardIssue']['key']
+          end
         else
           # есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их
           puts 'есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их'
@@ -66,12 +72,12 @@ module Scenarios
         end
       else
         # Завершаем скрипт и выводим сообщение в логе, что выбран то тот проект, для этого скрипта
-        puts "Необходимо использовать данный скрипт для проверки только проектов Android/IOS! Текущий тип проекта #{issue.key[0..2]}"
+        puts "Необходимо использовать данный скрипт для проверки только проектов Android/IOS! Текущий тип проекта #{issue.key[0..2].truncate("-",separator: '')}"
         issue.post_comment <<-BODY
             {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#ff6e6e}
               Необходимо использовать данный скрипт для проверки только проектов Android/IOS! Текущий тип проекта #{issue.key[0..2]}
             {panel}
-          BODY
+        BODY
         exit 0
       end
     end
