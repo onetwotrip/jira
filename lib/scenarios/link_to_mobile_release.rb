@@ -78,7 +78,7 @@ module Scenarios
           end
           # Начинаем проверку существующих релизов для apps из задачи и создаем релизы
           puts issues_apps_type
-          issues_apps_type_uniq = issues_apps_type.select { |i| arr.count(i) <= 2 }.uniq
+          issues_apps_type_uniq = issues_apps_type.select { |i| issues_apps_type.count(i) <= 2 }.uniq
           issues_apps_type_uniq.each do |app_uniq|
             puts app_uniq
             created_releases = client.Issue.jql(
