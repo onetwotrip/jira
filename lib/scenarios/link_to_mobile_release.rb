@@ -55,10 +55,13 @@ module Scenarios
           # Начинаем процесс сбора данных по задачам
           # Запускаем сбор Apps в задачах, которые есть в релизе
           issue_links = issue.fields['issuelinks']
+
+          deployes_issues = []
           issue_links.each do |linked_issue|
-            puts linked_issue['type']['outward']
-            puts linked_issue['outwardIssue']['key']
+            deployes_issues.append(linked_issue['outwardIssue']['key']) if linked_issue['type']['outward'] == 'deployes'
           end
+
+          puts deployes_issues
         else
           # есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их
           puts 'есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их'
