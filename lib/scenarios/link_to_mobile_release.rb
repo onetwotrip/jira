@@ -61,9 +61,21 @@ module Scenarios
             issue_deployes_issues = client.Issue.find(issue_apps_type)
             puts issue_apps_type
             # тут может быть несколько полей
-            issues_apps_type.append(issue_deployes_issues.fields['customfield_12207'][0]['value'])
-            puts issue_deployes_issues.key
-            puts issue_deployes_issues.fields['customfield_12207'].length
+            # проверяем длинну данного массива
+            if (issue_deployes_issues.fields['customfield_12207'] != nil)
+              if (issue_deployes_issues.fields['customfield_12207'].length > 1)
+                issue_deployes_issues.fields['customfield_12207'].each_index do |index|
+                  issues_apps_type.append(issue_deployes_issues.fields['customfield_12207'][index]['value'])
+                end
+              end
+            else
+              puts "У задачи #{issue_apps_type} неуказан Apps, необходимо его добавить и перезапустить скрипт"
+              issue.post_comment <<-BODY
+              {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
+                У задачи #{issue_apps_type} неуказан Apps, необходимо его добавить и перезапустить скрипт
+              {panel}
+              BODY
+            end
           end
           puts issues_apps_type
         else
@@ -79,7 +91,7 @@ module Scenarios
         end
       else
         # Завершаем скрипт и выводим сообщение в логе, что выбран то тот проект, для этого скрипта
-        puts "Необходимо использовать данный скрипт для проверки только проектов Android/IOS! Текущий тип проекта #{issue.key[0..2].truncate("-",separator: '')}"
+        puts "Необходимо использовать данный скрипт для проверки только проектов Android/IOS! Текущий тип проекта #{issue.key[0..2].truncate("-", separator: '')}"
         issue.post_comment <<-BODY
             {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#ff6e6e}
               Необходимо использовать данный скрипт для проверки только проектов Android/IOS! Текущий тип проекта #{issue.key[0..2]}
