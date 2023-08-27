@@ -56,9 +56,6 @@ module Scenarios
 
           puts deployes_issues
 
-          issue_deployes_issues  = client.Issue.find(deployes_issues[0])
-          puts issue_deployes_issues.to_json
-
           issues_apps_type = []
           deployes_issues.each do |issue_apps_type|
             issue_deployes_issues = client.Issue.find(issue_apps_type)
