@@ -59,11 +59,14 @@ module Scenarios
           issue_deployes_issues  = client.Issue.find(deployes_issues[0])
           puts issue_deployes_issues.to_json
 
-          # deployes_issues.each do |issue_apps_type|
-          #   issue_deployes_issues  = client.Issue.find(issue_apps_type)
-          #   puts issue_deployes_issues.
-          #
-          # end
+          issues_apps_type = []
+          deployes_issues.each do |issue_apps_type|
+            issue_deployes_issues = client.Issue.find(issue_apps_type)
+            # тут может быть несколько полей
+            issues_apps_type.append(issue_deployes_issues.fields['customfield_12207'][0]['value'])
+            puts issue_deployes_issues.fields['customfield_12207'].length
+          end
+          puts issues_apps_type
         else
           # есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их
           puts 'есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их'
