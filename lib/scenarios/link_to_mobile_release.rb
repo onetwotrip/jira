@@ -10,6 +10,19 @@ module Scenarios
       []
     end
 
+    def create_release_issue(project, issue, project_key = 'OTT', release_name = 'Release')
+      project = project.find(project_key)
+      release = issue.build
+      release.save(fields: { summary: release_name, project: { id: project.id },
+                             issuetype: { name: 'Release' } })
+      release.fetch
+      release
+    rescue JIRA::HTTPError => jira_error
+      error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
+      LOGGER.error "Creation of release was failed with error #{error_message}"
+      raise error_message
+    end
+
     def run
       params = SimpleConfig.release
 
@@ -86,6 +99,26 @@ module Scenarios
               %(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = #{app_uniq} and issue != #{issue.key}), max_results: 100)
             puts created_releases
             puts "created_releases, #{created_releases}"
+            # Создаем релизы
+            begin
+              release = create_release_issue(client.Project, client.Issue, params[:project], params[:name])
+              puts release.key
+            rescue RuntimeError => e
+              puts e.message
+              puts e.backtrace.inspect
+              raise
+            end
+
+            LOGGER.info "Created new release #{release.key} from App label #{app_uniq}"
+            LOGGER.info Ott::Helpers.jira_link(release.key).to_s
+
+            LOGGER.info "Add labels: #{release_labels} to release #{release.key}"
+            release_issue = client.Issue.find(release.key)
+            release_issue.save(fields: { labels: release_labels })
+            release_issue.fetch
+
+            # Ott::Helpers.export_to_file("SLACK_URL=#{SimpleConfig.jira.site}/browse/#{release.key}\n\r
+            #                             ISSUE=#{release.key}", 'release_properties')
           end
         else
           # есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их
