@@ -59,6 +59,7 @@ module Scenarios
           issues_apps_type = []
           deployes_issues.each do |issue_apps_type|
             issue_deployes_issues = client.Issue.find(issue_apps_type)
+            puts issue_apps_type
             # тут может быть несколько полей
             issues_apps_type.append(issue_deployes_issues.fields['customfield_12207'][0]['value'])
             puts issue_deployes_issues.key
