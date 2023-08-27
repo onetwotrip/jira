@@ -85,6 +85,7 @@ module Scenarios
             created_releases = client.Issue.jql(
               %(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = #{app_uniq} and issue != #{issue.key}), max_results: 100)
             puts created_releases
+            puts "created_releases, #{created_releases}"
           end
         else
           # есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их
