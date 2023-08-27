@@ -59,7 +59,6 @@ module Scenarios
           issues_apps_type = []
           deployes_issues.each do |issue_apps_type|
             issue_deployes_issues = client.Issue.find(issue_apps_type)
-            puts issue_apps_type
             # тут может быть несколько полей
             # проверяем длинну данного массива
             if (issue_deployes_issues.fields['customfield_12207'] != nil)
@@ -70,14 +69,21 @@ module Scenarios
               end
             else
               puts "У задачи #{issue_apps_type} неуказан Apps, необходимо его добавить и перезапустить скрипт"
-              issue.post_comment <<-BODY
-              {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
-                У задачи #{issue_apps_type} неуказан Apps, необходимо его добавить и перезапустить скрипт
-              {panel}
-              BODY
+              # issue.post_comment <<-BODY
+              # {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
+              #   У задачи #{issue_apps_type} неуказан Apps, необходимо его добавить и перезапустить скрипт
+              # {panel}
+              # BODY
             end
           end
-          puts issues_apps_type
+          # Начинаем проверку существующих релизов для apps из задачи и создаем релизы
+          issues_apps_type_uniq = issues_apps_type.select { |i| arr.count(i) < 2 }.uniq
+          issues_apps_type_uniq.each do |app_uniq|
+            puts app_uniq
+            created_releases = client.Issue.jql(
+              %(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = #{app_uniq} and issue != #{issue.key}), max_results: 100)
+            puts created_releases
+          end
         else
           # есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их
           puts 'есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их'
