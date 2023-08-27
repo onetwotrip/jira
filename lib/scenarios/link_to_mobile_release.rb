@@ -54,6 +54,8 @@ module Scenarios
             deployes_issues.append(linked_issue['outwardIssue']['key']) if linked_issue['type']['outward'] == 'deployes'
           end
 
+          puts deployes_issues
+
           issue_deployes_issues  = client.Issue.find(deployes_issues[0])
           puts issue_deployes_issues.to_json
 
