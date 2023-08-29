@@ -110,12 +110,12 @@ module Scenarios
             end
 
             LOGGER.info "Created new release #{release.key} from App label #{app_uniq}"
-            LOGGER.info Ott::Helpers.jira_link(release.key).to_s
+            # LOGGER.info Ott::Helpers.jira_link(release.key).to_s
 
-            LOGGER.info "Add labels: #{release_labels} to release #{release.key}"
+            LOGGER.info "Add labels: #{app_uniq} to release #{release.key}"
             release_issue = client.Issue.find(release.key)
-            release_issue.save(fields: { labels: release_labels })
-            release_issue.fetch
+            # release_issue.save(fields: { labels: release_labels })
+            # release_issue.fetch
 
             # Ott::Helpers.export_to_file("SLACK_URL=#{SimpleConfig.jira.site}/browse/#{release.key}\n\r
             #                             ISSUE=#{release.key}", 'release_properties')
