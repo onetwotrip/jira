@@ -45,8 +45,8 @@ module Scenarios
 
         # Проверяем есть ли релизы AND/IOS с такими значениями и не закрытые
         # Производим поиск открытых релизов
-        created_releases = client.Issue.jql(
-          %(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = #{apps} and issue != #{issue.key}), max_results: 100)
+        # created_releases = client.Issue.jql(%(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = #{apps} and issue != #{issue.key}), max_results: 100)
+        created_releases = client.Issue.jql(%(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = 133 and issue != #{issue.key}), max_results: 100)
 
         # if created_releases == []
         if created_releases == []
