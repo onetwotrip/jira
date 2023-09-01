@@ -51,13 +51,13 @@ module Scenarios
       LOGGER.info "Syncing roles"
       roles_list.each do |role|
         input = "#{git_repo.dir}/#{role}"
+        LOGGER.info "Syncing #{role}"
         if (File.exist?(input))
-          LOGGER.info "Syncing #{role}"
           opts[:input] = input
           Scenarios::SyncChefResource.new(opts).run
           LOGGER.info "Syncing #{role} - done"
         else
-          LOGGER.info "Deleted role '#{input}'"
+          LOGGER.warn "Syncing #{role} - failed: deleted role"
         end
       end
 
