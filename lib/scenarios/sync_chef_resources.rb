@@ -50,10 +50,15 @@ module Scenarios
 
       LOGGER.info "Syncing roles"
       roles_list.each do |role|
-        LOGGER.info "Syncing #{role}"
-        opts[:input] = "#{git_repo.dir}/#{role}"
-        Scenarios::SyncChefResource.new(opts).run
-        LOGGER.info "Syncing #{role} - done"
+        input = "#{git_repo.dir}/#{role}"
+        if (File.exist?(input))
+          LOGGER.info "Syncing #{role}"
+          opts[:input] = input
+          Scenarios::SyncChefResource.new(opts).run
+          LOGGER.info "Syncing #{role} - done"
+        else
+          LOGGER.info "Deleted role '#{input}'"
+        end
       end
 
       stage_table = {
