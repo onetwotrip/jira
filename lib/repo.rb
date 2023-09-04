@@ -220,6 +220,8 @@ end
 def git_repo(url, opts = {})
   LOGGER.info "Get repo for #{url}"
   git_repo = Git.get_branch(url)
+
+  puts git_repo
   # Removal of existing branches
   opts[:delete_branches].to_a.each do |branch|
     next unless git_repo.find_branch? branch

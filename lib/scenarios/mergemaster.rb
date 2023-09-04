@@ -24,6 +24,8 @@ module Scenarios
       issue.related['branches'].each do |branch|
         LOGGER.info "Start work with branch: #{branch['name']}"
         repo_path = git_repo(branch['repository']['url'])
+
+        puts repo_path
         # Prepare repo
         repo_path.checkout('master')
         repo_path.pull
