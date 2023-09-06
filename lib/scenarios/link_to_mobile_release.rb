@@ -12,10 +12,10 @@ module Scenarios
 
     def create_release_issue(project, issue, project_key = 'OTT', release_name = 'Release')
       project = project.find(project_key)
-      puts project
+      puts "project #{project}"
       release = issue.build
-      puts release
-      puts project.id
+      puts "release #{release}"
+      puts "project.id #{project.id}"
       release.save(fields: { summary: release_name, project: { id: project.id },
                              issuetype: { name: 'Release' } })
       release.fetch
