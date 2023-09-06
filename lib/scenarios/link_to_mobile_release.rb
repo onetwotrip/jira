@@ -123,7 +123,7 @@ module Scenarios
               # Создаем релизы
               begin
                 release = client.Issue.build
-                release.save(fields: { summary:   release_name, project: { id: project.id },
+                release.save(fields: { summary: "[#{app_uniq}] Release " , project: { id: project.id },
                                      issuetype: { name: 'Release' } })
                 release.fetch
                 puts release
