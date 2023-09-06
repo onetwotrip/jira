@@ -42,8 +42,8 @@ module Scenarios
 
       # Уточняем какой тип проекта будет проверятся Андроид или IOS
       if issue_number[0..2].eql?('IOS') || issue_number[0..2].eql?('ADR')
-        puts issue_number.fields['project']['key']
-        puts issue_number.fields['project']['id']
+        puts issue.fields['project']['key']
+        puts issue.fields['project']['id']
         project = issue_number.include?('IOS') ? 'ios' : 'android'
         # Получаем значения поля apps из релиза
         # apps = issue.fields['customfield_12166']['value']
