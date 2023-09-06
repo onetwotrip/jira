@@ -126,6 +126,7 @@ module Scenarios
                 puts "client.Issue #{client.Issue}"
                 puts "params[:project] #{params[:project]}"
                 puts "params[:name] #{params[:name]}"
+                puts params
                 release = create_release_issue(client.Project, client.Issue, params[:project], params[:name])
                 puts release.key
               rescue RuntimeError => e
