@@ -46,10 +46,10 @@ module Scenarios
         # Проверяем есть ли релизы AND/IOS с такими значениями и не закрытые
         # Производим поиск открытых релизов
         created_releases = client.Issue.jql(%(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = #{apps} and issue != #{issue.key}), max_results: 100)
-        # created_releases = client.Issue.jql(%(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = "133" and issue != #{issue.key}), max_results: 100)
 
         # if created_releases == []
-        if created_releases == []
+        # TODO: для проверки создания тикета
+        if created_releases != []
           # Отправляем сообщение в таску, что нет открытых релизов с App=apps
           puts "Отправляем сообщение в таску, что нет открытых релизов с App: #{apps}"
           # issue.post_comment <<-BODY
@@ -122,7 +122,7 @@ module Scenarios
           end
         else
           # есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их
-          puts 'есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их'
+          puts "есть открытые релизы с таким типом апп #{apps}, Отправляем сообщение, что нужно сначала закрыть их"
           issue.post_comment <<-BODY
             {panel:title=Release notify!|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
               Найдены открытые релизы с App=#{apps}
