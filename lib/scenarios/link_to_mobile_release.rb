@@ -10,8 +10,8 @@ module Scenarios
       []
     end
 
-    def create_release_issue(project, issue, project_id, release_name)
-      release = issue.build
+    def create_release_issue(issue, project_id, release_name)
+      release = client.Issue.build
       puts "release #{release}"
       release.save(fields: { summary: release_name, project: { id: project_id },
                              issuetype: { name: 'Release' } })
@@ -120,7 +120,7 @@ module Scenarios
               puts "Создаем релизы"
               # Создаем релизы
               begin
-                create_release_issue(project, issue, "[#{app_uniq}] Release" , project_id)
+                create_release_issue(issue, "[#{app_uniq}] Release" , project_id)
               rescue RuntimeError => e
                 puts e.message
                 puts e.backtrace.inspect
