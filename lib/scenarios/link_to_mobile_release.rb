@@ -104,6 +104,10 @@ module Scenarios
           puts "##############"
           puts issues_apps_type_uniq.length
           issues_apps_type_uniq.each do |app_uniq|
+            puts "app_uniq - #{app_uniq}"
+          end
+
+          issues_apps_type_uniq.each do |app_uniq|
             puts "Проверяем #{app_uniq}"
             created_releases = client.Issue.jql(
               %(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = #{app_uniq} and issue != #{issue.key}), max_results: 100)
