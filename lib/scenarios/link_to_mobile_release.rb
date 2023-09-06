@@ -79,7 +79,7 @@ module Scenarios
             # тут может быть несколько полей
             # проверяем длинну данного массива
             if (issue_deployes_issues.fields['customfield_12207'] != nil)
-              if (issue_deployes_issues.fields['customfield_12207'].length > 1)
+              if issue_deployes_issues.fields['customfield_12207'].length > 1
                 issue_deployes_issues.fields['customfield_12207'].each_index do |index|
                   issues_apps_type.append(issue_deployes_issues.fields['customfield_12207'][index]['value'])
                 end
@@ -122,15 +122,11 @@ module Scenarios
               puts "Создаем релизы"
               # Создаем релизы
               begin
-                puts "client.Project #{client.Project}"
-                puts "client.Issue #{client.Issue}"
-                puts "params[:project] #{params[:project]}"
-                puts "params[:name] #{params[:name]}"
-                puts params
-                client  = JIRA::Client.new SimpleConfig.jira.to_h
-                puts client
-                release = create_release_issue(client.Project, client.Issue, params[:project], params[:name])
-                puts release.key
+                release = client.Issue.build
+                release.save(fields: { summary:   release_name, project: { id: project.id },
+                                     issuetype: { name: 'Release' } })
+                release.fetch
+                puts release
               rescue RuntimeError => e
                 puts e.message
                 puts e.backtrace.inspect
