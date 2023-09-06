@@ -99,7 +99,9 @@ module Scenarios
           puts issues_apps_type_uniq
 
           puts issues_apps_type_uniq.class
+          puts "##############"
           puts issues_apps_type_uniq[0]
+          puts "##############"
           puts issues_apps_type_uniq.length
           issues_apps_type_uniq.each do |app_uniq|
             puts "Проверяем #{app_uniq}"
