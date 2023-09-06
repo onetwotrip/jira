@@ -108,7 +108,7 @@ module Scenarios
               # Создаем релизы
               begin
                 # create_release_issue(issue, "[#{app_uniq}] Release" , project_id)
-                client = client.Project
+                client = JIRA::Client.new SimpleConfig.jira.to_h
                 issue  = client.Issue
                 release = issue.build
                 puts "release #{release}"
