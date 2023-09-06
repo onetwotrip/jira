@@ -16,7 +16,7 @@ module Scenarios
       release = issue.build
       puts "release #{release}"
       puts "project.id #{project.id}"
-      release.save(fields: { summary: release_name, project: { id: project.id },
+      release.save(fields: { summary:   release_name, project: { id: project.id },
                              issuetype: { name: 'Release' } })
       release.fetch
       release
@@ -35,8 +35,8 @@ module Scenarios
       end
 
       # Получаем данные тикета
-      client = JIRA::Client.new SimpleConfig.jira.to_h
-      issue  = client.Issue.find(SimpleConfig.jira.issue)
+      client       = JIRA::Client.new SimpleConfig.jira.to_h
+      issue        = client.Issue.find(SimpleConfig.jira.issue)
       issue_number = issue.key
       LOGGER.info Ott::Helpers.jira_link(issue_number).to_s
 
@@ -127,7 +127,8 @@ module Scenarios
                 puts "params[:project] #{params[:project]}"
                 puts "params[:name] #{params[:name]}"
                 puts params
-                client = JIRA::Client.new SimpleConfig.jira.to_h
+                client  = JIRA::Client.new SimpleConfig.jira.to_h
+                puts client
                 release = create_release_issue(client.Project, client.Issue, params[:project], params[:name])
                 puts release.key
               rescue RuntimeError => e
@@ -137,15 +138,7 @@ module Scenarios
               end
 
               LOGGER.info "Created new release #{release.key} from App label #{app_uniq}"
-              # LOGGER.info Ott::Helpers.jira_link(release.key).to_s
-
               LOGGER.info "Add labels: #{app_uniq} to release #{release.key}"
-              release_issue = client.Issue.find(release.key)
-              # release_issue.save(fields: { labels: release_labels })
-              # release_issue.fetch
-
-              # Ott::Helpers.export_to_file("SLACK_URL=#{SimpleConfig.jira.site}/browse/#{release.key}\n\r
-              #                             ISSUE=#{release.key}", 'release_properties')
             else
               puts "По APPS=#{app_uniq} есть созданные релизы #{created_releases.to_json[0]}"
             end
