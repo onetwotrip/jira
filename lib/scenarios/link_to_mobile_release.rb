@@ -137,7 +137,7 @@ module Scenarios
               # Ott::Helpers.export_to_file("SLACK_URL=#{SimpleConfig.jira.site}/browse/#{release.key}\n\r
               #                             ISSUE=#{release.key}", 'release_properties')
             else
-              puts "По APPS=#{app_uniq} есть созданные релизы #{created_releases.to_json[0].keys}"
+              puts "По APPS=#{app_uniq} есть созданные релизы #{created_releases.to_json[0]}"
             end
           end
         else
