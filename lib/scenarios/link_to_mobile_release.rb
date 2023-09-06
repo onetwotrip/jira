@@ -108,6 +108,8 @@ module Scenarios
               # Создаем релизы
               begin
                 # create_release_issue(issue, "[#{app_uniq}] Release" , project_id)
+                client = JIRA::Client.new SimpleConfig.jira.to_h
+                issue  = client.Issue.find(SimpleConfig.jira.issue)
                 release = issue.build
                 puts "release #{release}"
                 release.save(fields: { summary: "[#{app_uniq}] Release", project: { id: project_id },
