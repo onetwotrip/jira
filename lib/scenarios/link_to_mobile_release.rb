@@ -90,6 +90,7 @@ module Scenarios
             end
           end
           # Начинаем проверку существующих релизов для apps из задачи и создаем релизы
+          puts "Начинаем проверку существующих релизов для apps из задачи и создаем релизы"
           puts issues_apps_type
           puts "##############"
           issues_apps_type_uniq = issues_apps_type.select { |i| issues_apps_type.count(i) <= 2 }.uniq
