@@ -97,6 +97,10 @@ module Scenarios
 
           puts "Список уникальных Apps"
           puts issues_apps_type_uniq
+
+          puts issues_apps_type_uniq.class
+          puts issues_apps_type_uniq[0]
+          puts issues_apps_type_uniq.length
           issues_apps_type_uniq.each do |app_uniq|
             puts "Проверяем #{app_uniq}"
             created_releases = client.Issue.jql(
