@@ -42,8 +42,7 @@ module Scenarios
 
       # Уточняем какой тип проекта будет проверятся Андроид или IOS
       if issue_number[0..2].eql?('IOS') || issue_number[0..2].eql?('ADR')
-        puts issue.fields['project']['key']
-        puts issue.fields['project']['id']
+        project_id = issue.fields['project']['id']
         project = issue_number.include?('IOS') ? 'ios' : 'android'
         # Получаем значения поля apps из релиза
         # apps = issue.fields['customfield_12166']['value']
@@ -126,7 +125,7 @@ module Scenarios
               begin
                 release = client.Issue.build
                 puts project
-                release.save(fields: { summary: "[#{app_uniq}] Release" , project: { id: project },
+                release.save(fields: { summary: "[#{app_uniq}] Release" , project: { id: project_id },
                                      issuetype: { name: 'Release' } })
                 release.fetch
                 puts release
