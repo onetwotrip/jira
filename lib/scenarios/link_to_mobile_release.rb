@@ -104,7 +104,7 @@ module Scenarios
             puts "created_releases, #{created_releases}"
             puts created_releases.class
 
-            if created_releases.nil?
+            if created_releases.length.zero?
               # Создаем релизы
               begin
                 release = create_release_issue(client.Project, client.Issue, params[:project], params[:name])
