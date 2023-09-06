@@ -10,21 +10,18 @@ module Scenarios
       []
     end
 
-    # def create_release_issue(project, issue, project_key = 'OTT', release_name = 'Release')
-    #   project = project.find(project_key)
-    #   puts "project #{project}"
-    #   release = issue.build
-    #   puts "release #{release}"
-    #   puts "project.id #{project.id}"
-    #   release.save(fields: { summary:   release_name, project: { id: project.id },
-    #                          issuetype: { name: 'Release' } })
-    #   release.fetch
-    #   release
-    # rescue JIRA::HTTPError => jira_error
-    #   error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
-    #   LOGGER.error "Creation of release was failed with error #{error_message}"
-    #   raise error_message
-    # end
+    def create_release_issue(project, issue, project_id, release_name)
+      release = issue.build
+      puts "release #{release}"
+      release.save(fields: { summary: release_name, project: { id: project_id },
+                             issuetype: { name: 'Release' } })
+      release.fetch
+      release
+    rescue JIRA::HTTPError => jira_error
+      error_message = jira_error.response['body_exists'] ? jira_error.message : jira_error.response.body
+      LOGGER.error "Creation of release was failed with error #{error_message}"
+      raise error_message
+    end
 
     def run
       params = SimpleConfig.release
@@ -123,12 +120,7 @@ module Scenarios
               puts "Создаем релизы"
               # Создаем релизы
               begin
-                release = client.Issue.build
-                puts project
-                release.save(fields: { summary: "[#{app_uniq}] Release" , project: { id: project_id },
-                                     issuetype: { name: 'Release' } })
-                release.fetch
-                puts release
+                create_release_issue(project, issue, "[#{app_uniq}] Release" , project_id)
               rescue RuntimeError => e
                 puts e.message
                 puts e.backtrace.inspect
