@@ -94,6 +94,9 @@ module Scenarios
           puts issues_apps_type
           puts "##############"
           issues_apps_type_uniq = issues_apps_type.select { |i| issues_apps_type.count(i) <= 2 }.uniq
+
+          puts "Список уникальных Apps"
+          puts issues_apps_type_uniq
           issues_apps_type_uniq.each do |app_uniq|
             puts app_uniq
             created_releases = client.Issue.jql(
