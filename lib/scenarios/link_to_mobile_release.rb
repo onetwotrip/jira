@@ -98,31 +98,35 @@ module Scenarios
           puts "Список уникальных Apps"
           puts issues_apps_type_uniq
           issues_apps_type_uniq.each do |app_uniq|
-            puts app_uniq
+            puts "Проверяем #{app_uniq}"
             created_releases = client.Issue.jql(
               %(project = #{project} and issuetype = Release and status not in (Rejected, Done) and "App[Dropdown]" = #{app_uniq} and issue != #{issue.key}), max_results: 100)
-            puts created_releases
             puts "created_releases, #{created_releases}"
-            # Создаем релизы
-            begin
-              release = create_release_issue(client.Project, client.Issue, params[:project], params[:name])
-              puts release.key
-            rescue RuntimeError => e
-              puts e.message
-              puts e.backtrace.inspect
-              raise
+
+            if created_releases.nil?
+              # Создаем релизы
+              begin
+                release = create_release_issue(client.Project, client.Issue, params[:project], params[:name])
+                puts release.key
+              rescue RuntimeError => e
+                puts e.message
+                puts e.backtrace.inspect
+                raise
+              end
+
+              LOGGER.info "Created new release #{release.key} from App label #{app_uniq}"
+              # LOGGER.info Ott::Helpers.jira_link(release.key).to_s
+
+              LOGGER.info "Add labels: #{app_uniq} to release #{release.key}"
+              release_issue = client.Issue.find(release.key)
+              # release_issue.save(fields: { labels: release_labels })
+              # release_issue.fetch
+
+              # Ott::Helpers.export_to_file("SLACK_URL=#{SimpleConfig.jira.site}/browse/#{release.key}\n\r
+              #                             ISSUE=#{release.key}", 'release_properties')
+            else
+              puts "По APPS=#{app_uniq} есть созданные релизы #{created_releases.to_json[0].keys}"
             end
-
-            LOGGER.info "Created new release #{release.key} from App label #{app_uniq}"
-            # LOGGER.info Ott::Helpers.jira_link(release.key).to_s
-
-            LOGGER.info "Add labels: #{app_uniq} to release #{release.key}"
-            release_issue = client.Issue.find(release.key)
-            # release_issue.save(fields: { labels: release_labels })
-            # release_issue.fetch
-
-            # Ott::Helpers.export_to_file("SLACK_URL=#{SimpleConfig.jira.site}/browse/#{release.key}\n\r
-            #                             ISSUE=#{release.key}", 'release_properties')
           end
         else
           # есть открытые релизы с таким типом апп, Отправляем сообщение, что нужно сначала закрыть их
