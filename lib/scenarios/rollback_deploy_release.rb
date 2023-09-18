@@ -10,6 +10,7 @@ module Scenarios
         'PROJECTS' => {},
         'ROLES' => JSON.parse(ENV['USER_ROLES']),
         'STAGE' => ENV['STAGE'],
+        'DEPLOY_K8S' => ENV.fetch('DEPLOY_K8S', false),
       }
       additional_values = {}
 
