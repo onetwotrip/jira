@@ -49,9 +49,9 @@ module Scenarios
           end
 
           LOGGER.info "Found #{pullrequests.prs.size} PR in status OPEN"
-          pullrequests.each do |pr|
-            src_branch = pr.pr['source']['branch']
-            pr_dst_url = pr.pr['destination']['url']
+          # pullrequests.each do |pr|
+            # src_branch = pr.pr['source']['branch']
+            # pr_dst_url = pr.pr['destination']['url']
             # if pr_dst_url.include? 'android_b2b'
             #   LOGGER.info "Branch #{src_branch} has correct PR to android_b2b project"
             #   next
@@ -66,7 +66,7 @@ module Scenarios
             #   issue.transition 'Reopened'
             #   raise msg
             # end
-          end
+          # end
         else
           LOGGER.info "For assemble=#{assemble} no need any specific checks"
           exit 0
