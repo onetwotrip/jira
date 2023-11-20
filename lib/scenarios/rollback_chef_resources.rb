@@ -7,7 +7,7 @@ module Scenarios
 
       # by SRV-9666
       predefined_stages = {
-        'production' => %w(production-a infra misc extranet marketing),
+        'production' => %w(production-a staging infra misc extranet marketing),
         'staging' => %w(staging),
       }
       stage = ENV['STAGE'] || nil
