@@ -7,12 +7,18 @@ module Scenarios
 
       # by SRV-9666
       predefined_stages = {
+        'all' => %w(production-a staging infra misc extranet marketing),
         'production' => %w(production-a staging infra misc extranet marketing),
         'staging' => %w(staging),
       }
       stage = ENV['STAGE'] || nil
       unless stage
-        LOGGER.warn 'No STAGE selected for rollback'
+        LOGGER.error 'No STAGE selected for rollback'
+        exit 1
+      end
+
+      unless predefined_stages.key?(stage)
+        LOGGER.error 'Unknown STAGE for rollback'
         exit 1
       end
 
@@ -45,21 +51,18 @@ module Scenarios
       LOGGER.info diff_filelist
       LOGGER.info "Checking changed files for: #{branch_name} - done"
 
-      roles_list = diff_filelist.select { |e| e.start_with?('roles/') }
+      # by SRV-9666
+      roles_list = if %w(staging all).include?(stage)
+        diff_filelist.select { |e| e.start_with?('roles/') }
+      else
+        []
+      end
+
       env_list = diff_filelist.select { |e| e.start_with?('environments/') }
 
       # by SRV-9666
-      if predefined_stages.key?(stage)
-        rollback_envs = predefined_stages[stage].collect{ |e| "environments/#{e}.json.tmpl" }
-      else
-        rollback_envs = []
-        predefined_stages.each do | _, v |
-          rollback_envs.concat(v.collect{ |e| "environments/#{e}.json.tmpl" })
-        end
-      end
-
-      rollback_envs.each do |e|
-        env_list.push(e) unless env_list.include?(e)
+      predefined_stages[stage].each do |e|
+        env_list.push("environments/#{e}.json.tmpl") unless env_list.include?(e)
       end
 
       branch_name = 'master'
