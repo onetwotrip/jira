@@ -5,6 +5,17 @@ module Scenarios
     def run
       repo_name = 'devops-chef-resources'
 
+      # by SRV-9666
+      predefined_stages = {
+        'production' => %w(production-a infra misc extranet marketing),
+        'staging' => %w(staging),
+      }
+      stage = ENV['STAGE'] || nil
+      unless stage
+        LOGGER.warn 'No STAGE selected for rollback'
+        exit 1
+      end
+
       jira_client = JIRA::Client.new SimpleConfig.jira.to_h
       issue_key = SimpleConfig.issue
       release_issue = jira_client.Issue.find(issue_key)
@@ -37,6 +48,20 @@ module Scenarios
       roles_list = diff_filelist.select { |e| e.start_with?('roles/') }
       env_list = diff_filelist.select { |e| e.start_with?('environments/') }
 
+      # by SRV-9666
+      if predefined_stages.key?(stage)
+        rollback_envs = predefined_stages[stage].collect{ |e| "environments/#{e}.json.tmpl" }
+      else
+        rollback_envs = []
+        predefined_stages.each do | _, v |
+          rollback_envs.concat(v.collect{ |e| "environments/#{e}.json.tmpl" })
+        end
+      end
+
+      rollback_envs.each do |e|
+        env_list.push(e) unless env_list.include?(e)
+      end
+
       branch_name = 'master'
       LOGGER.info "Checking out: #{branch_name}"
       git_repo.checkout("origin/#{branch_name}")
@@ -68,7 +93,7 @@ module Scenarios
       end
 
       unless env_list.empty?
-        LOGGER.info 'Changed environments:'
+        LOGGER.info 'Changed environments and environments rolled back to default by STAGE:'
         LOGGER.info env_list
 
         LOGGER.info 'Syncing environments'
