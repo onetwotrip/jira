@@ -51,13 +51,7 @@ module Scenarios
       LOGGER.info diff_filelist
       LOGGER.info "Checking changed files for: #{branch_name} - done"
 
-      # by SRV-9666
-      roles_list = if %w(staging all).include?(stage)
-        diff_filelist.select { |e| e.start_with?('roles/') }
-      else
-        []
-      end
-
+      roles_list = diff_filelist.select { |e| e.start_with?('roles/') }
       env_list = diff_filelist.select { |e| e.start_with?('environments/') }
 
       # by SRV-9666
