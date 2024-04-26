@@ -3,8 +3,6 @@ module Scenarios
   # Add code owners to PR
   class CheckCodeOwners
     DEFAULT_REVIEWERS_COUNT = 2
-    MAX_REVIEWERS_COUNT = 3
-    LEAD_ID = '5c45a45554e1e6466b11c557'
 
     def run
       jira = JIRA::Client.new SimpleConfig.jira.to_h
