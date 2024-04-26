@@ -155,7 +155,7 @@ module Scenarios
           next if product[0] == 'reviewers'
           if product[1]['files'].include? item
               owners = product[1]['owners'].reject { |owner| owner == author_id }
-              result[product[0]] = owners.first unless owners.empty?
+              result[product[0]] = [owners.first] unless owners.empty?
           end
         end
       end
