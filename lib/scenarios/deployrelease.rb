@@ -36,6 +36,13 @@ module Scenarios
         prs.each do |pr|
           prname = pr['name'].dup
           puts "[#{prname}] - WRONG! Stripped. Bad guy: #{pr['author']['name']}" unless pr['name'].strip!.nil?
+
+          #fix: jira bug??
+          if pr['url'].split('/').uniq.size != pr['url'].split('/').size
+            pr['cleaned_up_url'] =  pr['url'].split('/').uniq.join('/')
+          else
+            pr['cleaned_up_url'] =  pr['url']
+          end
         end
 
         git_style_release = SimpleConfig.jira.issue.tr('-', ' ').downcase.capitalize
@@ -48,7 +55,7 @@ module Scenarios
           elsif pr['status'] == 'DECLINED'
             LOGGER.warn "[#{pr['name']}] - DECLINED! Bad guy: #{pr['author']['name']}"
             pr['reject'] = 'DECLINED'.yellow
-          elsif !projects_conf[Git::Utils.url_to_ssh(pr['url']).to_s.split('/')[0..1].join('/') + '.git']
+          elsif !projects_conf[Git::Utils.url_to_ssh(pr['cleaned_up_url']).to_s.split('/')[0..1].join('/') + '.git']
             LOGGER.warn "[#{pr['name']}] - No project settings"
             pr['reject'] = 'NOCONFIG'.yellow
           elsif !pr['destination']['branch'].include? 'master'
@@ -65,11 +72,11 @@ module Scenarios
         puts Terminal::Table.new(
           title: 'Pullrequests status',
           headings: %w[status author url],
-          rows: prs.map { |v| [v['reject'] || v['status'].green, v['author']['name'], v['url']] }
+          rows: prs.map { |v| [v['reject'] || v['status'].green, v['author']['name'], v['cleaned_up_url']] }
         )
 
         prs.reject { |pr| pr['reject'] }.each do |pr|
-          repo_name = Git::Utils.url_to_ssh(pr['url']).to_s.split('/')[0..1].join('/') + '.git'
+          repo_name = Git::Utils.url_to_ssh(pr['cleaned_up_url']).to_s.split('/')[0..1].join('/') + '.git'
           projects_conf[repo_name]['projects'].each do |proj|
             prop_values['PROJECTS'][proj] = {}
             prop_values['PROJECTS'][proj]['ENABLE'] = true
