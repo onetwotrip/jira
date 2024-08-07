@@ -38,11 +38,7 @@ module Scenarios
           puts "[#{prname}] - WRONG! Stripped. Bad guy: #{pr['author']['name']}" unless pr['name'].strip!.nil?
 
           #fix: jira bug??
-          if pr['url'].split('/').uniq.size != pr['url'].split('/').size
-            pr['cleaned_up_url'] =  pr['url'].split('/').uniq.join('/')
-          else
-            pr['cleaned_up_url'] =  pr['url']
-          end
+          pr['cleaned_up_url'] =  pr['url'].split('/').uniq.join('/')
         end
 
         git_style_release = SimpleConfig.jira.issue.tr('-', ' ').downcase.capitalize
