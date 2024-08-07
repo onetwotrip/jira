@@ -9,12 +9,20 @@ module Git
   class Base
     # :nocov:
     def create_pullrequest(src = current_branch, destination = 'master')
-      request = { title: "#{src} #{remote.url.repo}",
+      repo_name = remote.url.repo
+      # removing duplicate project name
+      sanitized_repo_name = if repo_name.split('/').uniq.size != repo_name.split('/').size
+                              repo_name.split('/').uniq.join('/')
+                            else
+                              repo_name
+                            end
+      LOGGER.info "Repository name: #{sanitized_repo_name}"
+      request = { title: "#{src} #{sanitized_repo_name}",
                   source: { branch: { name: src },
-                            repository: { full_name: remote.url.repo } },
+                            repository: { full_name: sanitized_repo_name } },
                   destination: { branch: { name: destination } } }
       begin
-        url = "https://api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests"
+        url = "https://api.bitbucket.org/2.0/repositories/#{sanitized_repo_name}/pullrequests"
         LOGGER.info "POST #{url}"
         RestClient::Request.execute(
           method: :post,
@@ -79,7 +87,14 @@ module Git
     end
 
     def merge_pullrequest(pull_request_id = '')
-      url = "https://api.bitbucket.org/2.0/repositories/#{remote.url.repo}/pullrequests/#{pull_request_id}/merge" # rubocop:disable Metrics/LineLength
+      repo_name = remote.url.repo
+      # removing duplicate project name
+      sanitized_repo_name = if repo_name.split('/').uniq.size != repo_name.split('/').size
+                              repo_name.split('/').uniq.join('/')
+                            else
+                              repo_name
+                            end
+      url = "https://api.bitbucket.org/2.0/repositories/#{sanitized_repo_name}/pullrequests/#{pull_request_id}/merge"
       request = {
         merge_strategy: 'merge_commit',
         close_source_branch: true,
