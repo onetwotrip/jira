@@ -150,8 +150,9 @@ module JIRA
             url = branch['repository']['url']
             next unless url.include?('{')
             repo_id = url[url.rindex('{') + 1..url.size - 2].to_sym
-            repos_id_list[repo_id] = branch['repository']['name'] if repos_id_list[repo_id].nil?
-            url = "https://bitbucket.org/#{repos_id_list[repo_id]}"
+            repository_name = branch['repository']['name'].split('/').last
+            repos_id_list[repo_id] = repository_name if repos_id_list[repo_id].nil?
+            url = "https://bitbucket.org/OneTwoTrip/#{repos_id_list[repo_id]}"
             branch['url'] = "#{url}/branch/#{branch['name']}"
             branch['createPullRequestUrl'] = "#{url}/pull-requests/new?source=#{branch['name']}"
             branch['repository']['url'] = url
@@ -166,9 +167,9 @@ module JIRA
             next unless url.include?('{')
             repo_id = url[url.rindex('{') + 1..url.rindex('}') - 1].to_sym
             repos_name = repos_id_list[repo_id]
-            pr['url'] = "https://bitbucket.org/#{repos_name}#{pr['url'][pr['url'].index('/pull-requests')..pr['url'].size]}"
-            pr['source']['url'] = "https://bitbucket.org/#{repos_name}/branch/#{pr['source']['branch']}"
-            pr['destination']['url'] = "https://bitbucket.org/#{repos_name}/branch/#{pr['destination']['branch']}"
+            pr['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}#{pr['url'][pr['url'].index('/pull-requests')..pr['url'].size]}"
+            pr['source']['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}/branch/#{pr['source']['branch']}"
+            pr['destination']['url'] = "https://bitbucket.org/OneTwoTrip/#{repos_name}/branch/#{pr['destination']['branch']}"
           end
         end
         LOGGER.info "Related info: #{@related}"
