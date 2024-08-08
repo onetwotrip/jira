@@ -32,7 +32,7 @@ module Scenarios
             issue_task.post_comment <<-BODY
               {panel:title=Find conflict with master|borderStyle=dashed|borderColor=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}
                   [#{issue_task.assignee.displayName}|~accountid:#{issue_task.assignee.accountId}]
-                  Repo: #{pr.source['repository']['name']}
+                  Repo: #{pr.source['repository']['name'].split('/').last}
                   Author: #{pr.author['display_name']}
                   Branch: https://bitbucket.org/OneTwoTrip/#{pr.repo_slug}/branch/#{pr.source['branch']['name']}
                   PR: https://bitbucket.org/OneTwoTrip/#{pr.repo_slug}/pull-requests/#{pr.id}

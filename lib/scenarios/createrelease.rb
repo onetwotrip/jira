@@ -94,7 +94,7 @@ module Scenarios
       release_issues.each do |issue|
         issue.link(release.key)
         issue.related['branches'].each do |branch|
-          release_labels << branch['repository']['name'].to_s
+          release_labels << branch['repository']['name'].split('/').last.to_s
         end
       end
 

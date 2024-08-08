@@ -120,7 +120,7 @@ module Scenarios
                 issue.related['branches'].each do |branch| # rubocop:disable Metrics/BlockLength
                   next unless branch['url'] == pullrequest['source']['url']
 
-                  repo_name = branch['repository']['name']
+                  repo_name = branch['repository']['name'].split('/').last
                   repo_url = branch['repository']['url']
 
                   repos[repo_name] ||= { url: repo_url, branches: [] }

@@ -122,7 +122,7 @@ module Scenarios
         release_labels = []
         issues.each do |i|
           i.related['branches'].each do |branch|
-            release_labels << branch['repository']['name'].to_s
+            release_labels << branch['repository']['name'].split('/').last.to_s
           end
         end
 
