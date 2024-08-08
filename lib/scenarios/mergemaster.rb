@@ -44,7 +44,7 @@ module Scenarios
           end
         rescue StandardError => e
           LOGGER.error "Не подтянуть мастера, ошибка: #{e.message}, трейс:\n\t#{e.backtrace.join("\n\t")}"
-          fail_merge[branch['repository']['name'].to_sym] = branch['name']
+          fail_merge[branch['repository']['name'].split('/').last.to_sym] = branch['name']
         end
       end
       if fail_merge.empty?

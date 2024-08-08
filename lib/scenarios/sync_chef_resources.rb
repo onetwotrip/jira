@@ -10,7 +10,7 @@ module Scenarios
       release_issue = jira_client.Issue.find(issue_key)
 
       LOGGER.info 'Fetching related branches'
-      repo_branch_info = release_issue.related['branches'].find { |b| b['repository']['name'] == repo_name }
+      repo_branch_info = release_issue.related['branches'].find { |b| b['repository']['name'].split('/').last == repo_name }
       LOGGER.info 'Fetching related branches - done'
 
       unless repo_branch_info

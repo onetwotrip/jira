@@ -15,7 +15,7 @@ module Scenarios
 
       payload = JSON.parse ENV['payload']
 
-      repo_name = payload['repository']['name']
+      repo_name = payload['repository']['name'].split('/').last
       print "Working with #{repo_name}\n"
 
       workdir = SimpleConfig.git.workdir

@@ -150,7 +150,8 @@ module JIRA
             url = branch['repository']['url']
             next unless url.include?('{')
             repo_id = url[url.rindex('{') + 1..url.size - 2].to_sym
-            repos_id_list[repo_id] = branch['repository']['name'] if repos_id_list[repo_id].nil?
+            repository_name = branch['repository']['name'].split('/').last
+            repos_id_list[repo_id] = repository_name if repos_id_list[repo_id].nil?
             url = "https://bitbucket.org/OneTwoTrip/#{repos_id_list[repo_id]}"
             branch['url'] = "#{url}/branch/#{branch['name']}"
             branch['createPullRequestUrl'] = "#{url}/pull-requests/new?source=#{branch['name']}"
@@ -243,7 +244,7 @@ module JIRA
         release_labels = []
         linked_issues('deployes').each do |i|
           i.related['branches'].each do |branch|
-            release_labels << branch['repository']['name'].to_s
+            release_labels << branch['repository']['name'].split('/').last.to_s
           end
         end
 
