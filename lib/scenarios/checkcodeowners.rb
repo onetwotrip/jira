@@ -154,15 +154,20 @@ module Scenarios
         owners_config.each do |product|
           next if product[0] == 'reviewers'
           if product[1]['files'].include? item
-              owners = product[1]['owners'].reject { |owner| owner == author_id }
-              result[product[0]] = [owners.first] unless owners.empty?
+            qa_owners = product[1].key?('qa') ? product[1]['qa'].reject { |qa_owner| qa_owner == author_id } : []
+            owners = product[1]['owners'].reject { |owner| owner == author_id }
+            
+            selected_owners = []
+            selected_owners << qa_owners.sample unless qa_owners.empty?
+            selected_owners << owners.sample unless owners.empty?
+            result[product[0]] = selected_owners unless selected_owners.empty?
           end
         end
       end
       LOGGER.info "Success! Result: #{result}"
       result
     end
-
+    
     def prepare_reviewers_list(reviewers_list, author_id)
       LOGGER.info 'Try to prepare reviewers list for add to PR'
       result = []
