@@ -29,6 +29,7 @@ module Scenarios
         pr_repo = git_repo(pr.pr['destination']['url'])
         pr_name = pr.pr['name']
         pr_id = pr.pr['id']
+        LOGGER.info "PR Source Data: #{pr.pr['source']}"
         branch_name = pr.pr['source']['branch']['name']
         LOGGER.info "Branch Name: #{branch_name}" 
         reviewers = []
