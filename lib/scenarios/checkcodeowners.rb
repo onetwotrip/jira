@@ -29,6 +29,8 @@ module Scenarios
         pr_repo = git_repo(pr.pr['destination']['url'])
         pr_name = pr.pr['name']
         pr_id = pr.pr['id']
+        branch_name = pr.pr['source']['branch']['name']
+        LOGGER.info "Branch Name: #{branch_name}" 
         reviewers = []
         pr_author = []
         diff_stats = {}
@@ -57,7 +59,7 @@ module Scenarios
 
         modified_files = get_modified_links(diff_stats)
         # Get codeOwners
-        new_reviewers = get_owners(owners_config, modified_files, author_id)
+        new_reviewers = get_owners(owners_config, modified_files, author_id, branch_name)
 
         if old_reviewers.empty?
           if new_reviewers.empty?
@@ -147,15 +149,20 @@ module Scenarios
       result
     end
 
-    def get_owners(owners_config, diff, author_id)
+    def get_owners(owners_config, diff, author_id, branch_name)
       LOGGER.info 'Try to get owners ids'
       result = {}
       diff.each do |item|
         owners_config.each do |product|
           next if product[0] == 'reviewers'
           if product[1]['files'].include? item
-            qa_owners = product[1].key?('qa') ? product[1]['qa'].reject { |qa_owner| qa_owner == author_id } : []
             owners = product[1]['owners'].reject { |owner| owner == author_id }
+            
+            qa_owners = if branch_name.start_with?('uitests')
+              product[1].key?('qa') ? product[1]['qa'].reject { |qa_owner| qa_owner == author_id } : []
+            else
+              []
+            end
             
             selected_owners = []
             selected_owners << qa_owners.sample unless qa_owners.empty?
@@ -167,7 +174,7 @@ module Scenarios
       LOGGER.info "Success! Result: #{result}"
       result
     end
-    
+
     def prepare_reviewers_list(reviewers_list, author_id)
       LOGGER.info 'Try to prepare reviewers list for add to PR'
       result = []
