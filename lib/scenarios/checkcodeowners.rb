@@ -161,7 +161,7 @@ module Scenarios
             selected_owners = []
             selected_owners << owners.sample unless owners.empty?
             result[product_name] = selected_owners unless selected_owners.empty?
-          elsif product_data['files'].include?(item)
+          elsif product_data.is_a?(Hash) && product_data.key?('files') && product_data['files'].is_a?(Array) && product_data['files'].include?(item)  
             owners = product_data['owners'].reject { |owner| owner == author_id }
             selected_owners = []
             selected_owners << owners.sample unless owners.empty?
