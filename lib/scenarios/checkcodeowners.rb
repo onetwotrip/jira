@@ -153,28 +153,25 @@ module Scenarios
       LOGGER.info 'Try to get owners ids'
       result = {}
       diff.each do |item|
-        owners_config.each do |product|
-          next if product[0] == 'reviewers'
-          if product[1]['files'].include? item
-            owners = product[1]['owners'].reject { |owner| owner == author_id }
-            
-            qa_owners = if branch_name.start_with?('uitests')
-              product[1].key?('qa') ? product[1]['qa'].reject { |qa_owner| qa_owner == author_id } : []
-            else
-              []
-            end
-            
+        owners_config.each do |product_name, product_data|
+          next if product_name == 'reviewers'
+          if product_name == 'qa' && branch_name.start_with?('uitests')
+            owners = product_data.reject { |owner| owner == author_id }
             selected_owners = []
-            selected_owners << qa_owners.sample unless qa_owners.empty?
             selected_owners << owners.sample unless owners.empty?
-            result[product[0]] = selected_owners unless selected_owners.empty?
+            result[product_name] = selected_owners unless selected_owners.empty?
+          elsif product_data['files'].include?(item)
+            owners = product_data['owners'].reject { |owner| owner == author_id }
+            selected_owners = []
+            selected_owners << owners.sample unless owners.empty?
+            result[product_name] = selected_owners unless selected_owners.empty?
           end
         end
       end
       LOGGER.info "Success! Result: #{result}"
       result
     end
-
+  
     def prepare_reviewers_list(reviewers_list, author_id)
       LOGGER.info 'Try to prepare reviewers list for add to PR'
       result = []
