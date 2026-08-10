@@ -2,7 +2,8 @@ module Scenarios
   ##
   # Add code owners to PR
   class CheckCodeOwners
-    DEFAULT_REVIEWERS_COUNT = 2
+    DEFAULT_REVIEWERS_COUNT = 1
+    AUTOTEST_REVIEWERS_COUNT = 2
 
     def run
       jira = JIRA::Client.new SimpleConfig.jira.to_h
@@ -61,11 +62,12 @@ module Scenarios
         modified_files = get_modified_links(diff_stats)
         # Get codeOwners
         new_reviewers = get_owners(owners_config, modified_files, author_id, branch_name)
+        reviewers_count = required_reviewers_count(branch_name)
 
         if old_reviewers.empty?
           if new_reviewers.empty?
             LOGGER.warn 'Need to add random code reviewers in PR'
-            new_reviewers_id = random_reviewers_from_config(owners_config, author_id, DEFAULT_REVIEWERS_COUNT)
+            new_reviewers_id = random_reviewers_from_config(owners_config, author_id, reviewers_count)
             new_reviewers_list = prepare_reviewers_list(new_reviewers_id, author_id)
             message = 'Add random reviewers'
           else
@@ -74,20 +76,21 @@ module Scenarios
             new_reviewers_list = new_reviewers_list.uniq # for case when owner already add in reviewer, but not enough reviewers
             message = "Add code owners next projects #{new_reviewers.keys} in reviewers"
             if new_reviewers_list.empty?
-              LOGGER.warn('PR change files where code owner == PR author. I will add two random users in review')
-              new_reviewers_id = random_reviewers_from_config(owners_config, author_id, DEFAULT_REVIEWERS_COUNT)
+              LOGGER.warn("PR change files where code owner == PR author. I will add #{reviewers_count} random users in review")
+              new_reviewers_id = random_reviewers_from_config(owners_config, author_id, reviewers_count)
               new_reviewers_list = prepare_reviewers_list(new_reviewers_id, author_id)
-              message = 'Found case when Code owner and PR author the same person. I will add two random users in review'
-            elsif new_reviewers_list.count < DEFAULT_REVIEWERS_COUNT
-              LOGGER.warn('New reviewer list has less than 2 people. Need add one more random reviewer')
+              message = 'Found case when Code owner and PR author the same person. '
+              message += "I will add #{reviewers_count} random users in review"
+            elsif new_reviewers_list.count < reviewers_count
+              LOGGER.warn("New reviewer list has less than #{reviewers_count} people. Need to add random reviewers")
               new_reviewers_id_list = get_new_reviewers_id_list(new_reviewers_list)
               new_reviewers_id = random_reviewers_from_config(owners_config, [author_id, old_reviewers, new_reviewers_id_list].flatten,
-                                                              (DEFAULT_REVIEWERS_COUNT - new_reviewers_list.size))
+                                                              (reviewers_count - new_reviewers_list.size))
               new_reviewers_list += prepare_reviewers_list(new_reviewers_id, author_id)
-              message = 'Not enough owners for review(should be at least 2). I will add random reviewer '
-            elsif new_reviewers_list.count > DEFAULT_REVIEWERS_COUNT
-              LOGGER.warn('More than 2 reviewers. Selecting randomly 2 reviewers.')
-              new_reviewers_list = new_reviewers_list.sample(DEFAULT_REVIEWERS_COUNT)
+              message = "Not enough owners for review (should be at least #{reviewers_count}). I will add random reviewer"
+            elsif new_reviewers_list.count > reviewers_count
+              LOGGER.warn("More than #{reviewers_count} reviewers. Selecting randomly #{reviewers_count} reviewers.")
+              new_reviewers_list = new_reviewers_list.sample(reviewers_count)
             end
           end
         end
@@ -118,6 +121,10 @@ module Scenarios
       else
         "#{description} \n\n **System:** #{message}"
       end
+    end
+
+    def required_reviewers_count(branch_name)
+      branch_name.start_with?('uitests') ? AUTOTEST_REVIEWERS_COUNT : DEFAULT_REVIEWERS_COUNT
     end
 
     def with(instance, &block)
@@ -161,7 +168,8 @@ module Scenarios
             selected_owners = []
             selected_owners << owners.sample unless owners.empty?
             result[product_name] = selected_owners unless selected_owners.empty?
-          elsif product_data.is_a?(Hash) && product_data.key?('files') && product_data['files'].is_a?(Array) && product_data['files'].include?(item)  
+          elsif product_data.is_a?(Hash) && product_data.key?('files') &&
+                product_data['files'].is_a?(Array) && product_data['files'].include?(item)
             owners = product_data['owners'].reject { |owner| owner == author_id }
             selected_owners = []
             selected_owners << owners.sample unless owners.empty?
@@ -172,7 +180,7 @@ module Scenarios
       LOGGER.info "Success! Result: #{result}"
       result
     end
-  
+
     def prepare_reviewers_list(reviewers_list, author_id)
       LOGGER.info 'Try to prepare reviewers list for add to PR'
       result = []
